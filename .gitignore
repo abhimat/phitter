@@ -1,0 +1,21 @@
+# Ignore any svn-related files
+**/.svn*
+
+# Ignore all *.pyc files
+*.pyc
+**/*.pyc
+
+# Ignore all files ending with ~
+*~
+**/*~
+
+
+# Ignore plots
+**/*ps
+**/*png
+**/*jpg
+**/*pdf
+
+# Ignore OS generated files
+.DS_Store
+._*
