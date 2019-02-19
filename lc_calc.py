@@ -74,7 +74,14 @@ def single_star_lc(stellar_params, use_blackbody_atm=False):
     
     return (sing_star_mags_Kp, sing_star_mags_H)
 
-def binary_star_lc(star1_params, star2_params, binary_params, observation_times, use_blackbody_atm=False, make_mesh_plots=False, plot_name=None, print_diagnostics=False):
+def binary_star_lc(star1_params, star2_params, binary_params, observation_times, use_blackbody_atm=False, make_mesh_plots=False, plot_name=None, print_diagnostics=False, par_compute=False, num_par_processes=8):
+    
+    if par_compute:
+        # TODO: Need to implement parallelization correctly
+        phoebe.mpi_on(nprocs=num_par_processes)
+    else:
+        phoebe.mpi_off()
+    
     # Read in the stellar parameters of the binary components
     (star1_mass, star1_rad, star1_teff, star1_mag_Kp, star1_mag_H) = star1_params
     (star2_mass, star2_rad, star2_teff, star2_mag_Kp, star2_mag_H) = star2_params
