@@ -1,3 +1,7 @@
+# Ignore OS generated files
+.DS_Store
+._*
+
 # Ignore any svn-related files
 **/.svn*
 
@@ -11,11 +15,10 @@
 
 
 # Ignore plots
-**/*ps
-**/*png
-**/*jpg
-**/*pdf
+**/*.ps
+**/*.png
+**/*.jpg
+**/*.pdf
 
-# Ignore OS generated files
-.DS_Store
-._*
+# Ignore FITS files (e.g. isochrones generated)
+**/*.fits
