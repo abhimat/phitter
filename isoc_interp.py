@@ -25,21 +25,27 @@ mist_phase_dict['postAGB'] = 6
 mist_phase_dict['WR'] = 9
 
 
-class isochrone_mist:
-    # Evolution/Atmosphere Models and Extinction Law
-    evo_model = evolution.MISTv1()
-    atm_func = atmospheres.get_merged_atmosphere
-    red_law = reddening.RedLawNoguerasLara18()
-    
+class isochrone_mist(object):
     filt_list = ['nirc2,Kp', 'nirc2,H']
     
-    def __init__(self, age=3.9*(10.**6.), ext=2.63, dist=7.971e3):
-        logAge = np.log10(3.9 * (10.**6.), phase=None)
+    def __init__(self, age=3.9e6, ext=2.63, dist=7.971e3, phase=None):
+        log_age = np.log10(age)
         
-        # Create an isochhrone with the given parameters
-        self.iso_curAge = synthetic.IsochronePhot(logAge, ext, dist,
-                                                  evo_model=evo_model, atm_func=atm_func,
-                                                  red_law=red_law, filters=filt_list)
+        self.log_age = log_age
+        self.A_Ks = ext
+        self.dist = dist
+        
+        # Evolution/Atmosphere Models and Extinction Law
+        evo_model = evolution.MISTv1()
+        atm_func = atmospheres.get_merged_atmosphere
+        red_law = reddening.RedLawNoguerasLara18()
+        
+        # Create an isochhrone with the given parameters        
+        self.iso_curAge = synthetic.IsochronePhot(self.log_age, self.A_Ks, self.dist,
+                                                  evo_model=evo_model,
+                                                  atm_func=atm_func,
+                                                  red_law=red_law,
+                                                  filters=self.filt_list)
         
         # Save out specific stellar parameter columns needed
         ## If needing specific phase, draw it out before saving
@@ -61,7 +67,7 @@ class isochrone_mist:
         self.iso_rad_max = np.max(self.iso_rad).value
         
         
-    def rad_interp(star_rad_interp):
+    def rad_interp(self, star_rad_interp):
         # Reverse isochrones, if radius not increasing, for numpy interpolation to work
         if self.iso_rad[-1] < self.iso_rad[0]:
             self.iso_mass_init = self.iso_mass_init[::-1]
@@ -88,7 +94,7 @@ class isochrone_mist:
         
         return stellar_params_all, stellar_params_lcfit
     
-    def mass_init_interp(star_mass_init_interp):
+    def mass_init_interp(self, star_mass_init_interp):
         star_mass_init = star_mass_init_interp * u.solMass
         
         star_mass = np.interp(star_mass_init_interp, self.iso_mass_init, self.iso_mass) * u.solMass
