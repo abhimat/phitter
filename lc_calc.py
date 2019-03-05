@@ -75,6 +75,21 @@ def single_star_lc(stellar_params, use_blackbody_atm=False):
     return (sing_star_mags_Kp, sing_star_mags_H)
 
 def binary_star_lc(star1_params, star2_params, binary_params, observation_times, use_blackbody_atm=False, make_mesh_plots=False, plot_name=None, print_diagnostics=False, par_compute=False, num_par_processes=8):
+    """Compute the light curve for a binary system
+    
+    Keyword arguments:
+    star1_params -- Tuple of parameters for the primary star
+    star2_params -- Tuple of parameters for the secondary star
+    binary_params -- Tuple of parameters for the binary system configuration
+    observation_times -- Array of observation times
+    use_blackbody_atm -- Use blackbody atmosphere instead of default Castelli & Kurucz (default False)
+    make_mesh_plots -- Make a mesh plot of the binary system (default False)
+    plot_name
+    print_diagnostics
+    par_compute
+    num_par_processes
+    """
+    
     
     if par_compute:
         # TODO: Need to implement parallelization correctly
@@ -284,8 +299,7 @@ def dist_ext_mag_calc(input_mags, target_dist, Kp_ext, H_ext):
     
 
 def flux_adj(mags_pri, mags_ref_pri, mags_sec, mags_ref_sec, mags_bin):
-    """
-    Perform flux adjustment for binary magnitudes
+    """Perform flux adjustment for binary magnitudes
     * Uses calculated and reference single star magnitudes for binary components
     * Derives adjustment to binary magnitude based on the discrepancy
     * Applies correction to the calculated binary magnitudes
