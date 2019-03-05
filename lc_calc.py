@@ -282,6 +282,30 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     
     return (model_mags_Kp, model_mags_H)
     
+def phased_obs(observation_times, binary_period, t0):
+    # Phase the observation times
+    ## Read in observation times
+    (kp_MJDs, h_MJDs) = observation_times
+    
+    ## Phase the observation times
+    kp_phased_days = ((kp_MJDs - t0) % binary_period.to(u.d).value) / binary_period.to(u.d).value
+    h_phased_days = ((h_MJDs - t0) % binary_period.to(u.d).value) / binary_period.to(u.d).value
+    
+    ## Kp
+    kp_phases_sorted_inds = np.argsort(kp_phased_days)
+    
+    kp_model_times = (kp_phased_days) * binary_period.to(u.d).value
+    kp_model_times = kp_model_times[kp_phases_sorted_inds]
+    
+    ## H
+    h_phases_sorted_inds = np.argsort(h_phased_days)
+    
+    h_model_times = (h_phased_days) * binary_period.to(u.d).value
+    h_model_times = h_model_times[h_phases_sorted_inds]
+    
+    return ((kp_phased_days, kp_phases_sorted_inds, kp_model_times),
+            (h_phased_days, h_phases_sorted_inds, h_model_times))
+
 
 def dist_ext_mag_calc(input_mags, target_dist, Kp_ext, H_ext):
     (mags_Kp, mags_H) = input_mags
