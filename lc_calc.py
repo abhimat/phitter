@@ -104,7 +104,7 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     # Read in the parameters of the binary system
     (binary_period, binary_ecc, binary_inc, t0) = binary_params
     
-    err_out = (np.array([-1.]), np.array([-1.]))
+    err_out = np.array([-1.]), np.array([-1.])
     
     
     # Set up binary model
@@ -245,7 +245,7 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
         b.run_compute(compute='detailed', model='run')
     except:
         # print('Failure during compute')
-        return err_out
+        return (err_out, err_out)
     
     
     # Save out mesh plot
