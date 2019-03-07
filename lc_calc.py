@@ -241,13 +241,11 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
         b.add_dataset('mesh', times=[binary_period/4.], dataset='mod_mesh')
     
     # Run compute
-    ## At this stage, checks should have passed, but still catch errors
-    b.run_compute(compute='detailed', model='run')
-    # try:
-    #     b.run_compute(compute='detailed', model='run')
-    # except:
-    #     print('Failure during compute')
-    #     return err_out
+    try:
+        b.run_compute(compute='detailed', model='run')
+    except:
+        # print('Failure during compute')
+        return err_out
     
     
     # Save out mesh plot

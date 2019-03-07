@@ -126,6 +126,8 @@ class mcmc_fitter_rad_interp(object):
          binary_inc_t, binary_period_t,
          binary_ecc_t, t0_t) = theta
         
+        err_out = np.array([-1.])
+        
         # Add units to input parameters if necessary
         binary_inc = binary_inc_t * u.deg
         binary_period = binary_period_t * u.d
@@ -168,12 +170,16 @@ class mcmc_fitter_rad_interp(object):
                                                     star1_sing_mag_H),
                                                     self.dist,
                                                     self.Kp_ext, self.H_ext)
+        if (star1_sing_mag_Kp == err_out) or (star1_sing_mag_H == err_out):
+            return -np.inf
+        
         (star2_sing_mag_Kp, star2_sing_mag_H) = lc_calc.dist_ext_mag_calc(
                                                     (star2_sing_mag_Kp,
                                                     star2_sing_mag_H),
                                                     self.dist,
                                                     self.Kp_ext, self.H_ext)
-        
+        if (star2_sing_mag_Kp == err_out) or (star2_sing_mag_H == err_out):
+            return -np.inf
         
         
         # Run binary star model to get binary mags
@@ -182,6 +188,8 @@ class mcmc_fitter_rad_interp(object):
                                               star2_params_lcfit,
                                               binary_params,
                                               self.observation_times)
+        if (binary_mags_Kp == err_out) or (binary_mags_H == err_out):
+            return -np.inf
         
         ## Apply distance modulus and isoc. extinction to binary magnitudes
         (binary_mags_Kp, binary_mags_H) = lc_calc.dist_ext_mag_calc(
