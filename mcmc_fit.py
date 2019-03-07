@@ -54,6 +54,8 @@ class mcmc_fitter_rad_interp(object):
     # Extinction law (using Nogueras-Lara+ 2018)
     ext_alpha = 2.30
     
+    def __init__(self):
+        return
     
     # Function to make and store isochrone
     def make_isochrone(self, age, Ks_ext, dist, phase):
@@ -65,8 +67,8 @@ class mcmc_fitter_rad_interp(object):
                              ext=Ks_ext, dist=dist, phase=phase)
         
         ## Convert from specified extinction in Ks to Kp and H
-        self.Kp_ext = Ks_ext * (lambda_Ks / lambda_Kp)**ext_alpha
-        self.H_ext = Ks_ext * (lambda_Ks / lambda_H)**ext_alpha
+        self.Kp_ext = Ks_ext * (self.lambda_Ks / self.lambda_Kp)**self.ext_alpha
+        self.H_ext = Ks_ext * (self.lambda_Ks / self.lambda_H)**self.ext_alpha
     
     # Function to set observation times
     def set_observation_times(self, Kp_observation_times, H_observation_times):
@@ -87,16 +89,17 @@ class mcmc_fitter_rad_interp(object):
     # Priors
     ## Using uniform priors, with radius interpolation for stellar parameters
     def lnprior(self, theta):
-        (Kp_ext_t, H_ext_mod_t, bin_inc_t,
-         star1_rad_t, star2_rad_t,
-         binary_period_t, binary_ecc_t, t0_t) = theta
+        (Kp_ext, H_ext_mod,
+         star1_rad, star2_rad,
+         binary_inc, binary_period,
+         binary_ecc, t0) = theta
         
         ## Extinction checks
         Kp_ext_check = (2.0 <= Kp_ext <= 3.6)
         H_ext_mod_check = (-1.0 <= H_ext_mod <= 1.0)
     
         ## Binary system configuration checks
-        inc_check = (0. <= bin_inc <= 180.)
+        inc_check = (0. <= binary_inc <= 180.)
         period_check = (77.5 <= binary_period <= 80.5)
         ecc_check = (-0.1 <= binary_ecc <= 0.1)
         t0_check = (53720.0 <= t0 <= 53840.0)
@@ -118,30 +121,37 @@ class mcmc_fitter_rad_interp(object):
 
     # Log Likelihood function
     def lnlike(self, theta):
-        (Kp_ext_t, H_ext_mod_t, bin_inc_t,
+        (Kp_ext_t, H_ext_mod_t,
          star1_rad_t, star2_rad_t,
-         binary_period_t, binary_ecc_t, t0_t) = theta
+         binary_inc_t, binary_period_t,
+         binary_ecc_t, t0_t) = theta
+        
+        # Add units to input parameters if necessary
+        binary_inc = binary_inc_t * u.deg
+        binary_period = binary_period_t * u.d
+        binary_ecc = binary_ecc_t
+        t0 = t0_t
         
         ## Construct tuple with binary parameters
-        binary_params = (binary_period * u.d, binary_ecc, t0)
+        binary_params = (binary_period, binary_ecc, binary_inc, t0)
         
         ### Phase the observations
         (kp_phase_out, h_phase_out) = lc_calc.phased_obs(
                                           self.observation_times,
-                                          binary_period*u.d, t0)
+                                          binary_period, t0)
         
         (kp_phased_days, kp_phases_sorted_inds, kp_model_times) = kp_phase_out
         (h_phased_days, h_phases_sorted_inds, h_model_times) = h_phase_out
         
         # Calculate extinction adjustments
-        Kp_ext_adj = (Kp_ext_t - Kp_ext)
-        H_ext_adj = (((Kp_ext_t * (lambda_Kp / lambda_H)**ext_alpha)
-                      - H_ext) + H_ext_mod_t)
+        Kp_ext_adj = (Kp_ext_t - self.Kp_ext)
+        H_ext_adj = (((Kp_ext_t * (self.lambda_Kp / self.lambda_H)**self.ext_alpha)
+                      - self.H_ext) + H_ext_mod_t)
         
         
         # Perform interpolation
-        (star1_params_all, star1_params_lcfit) = isochrone.rad_interp(star1_rad_t)
-        (star2_params_all, star2_params_lcfit) = isochrone.rad_interp(star2_rad_t)
+        (star1_params_all, star1_params_lcfit) = self.isochrone.rad_interp(star1_rad_t)
+        (star2_params_all, star2_params_lcfit) = self.isochrone.rad_interp(star2_rad_t)
         
         (star1_mass_init, star1_mass, star1_rad, star1_lum,
             star1_teff, star1_mag_Kp, star1_mag_H) = star1_params_all
