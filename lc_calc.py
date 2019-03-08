@@ -74,7 +74,10 @@ def single_star_lc(stellar_params, use_blackbody_atm=False):
     
     return (sing_star_mags_Kp, sing_star_mags_H)
 
-def binary_star_lc(star1_params, star2_params, binary_params, observation_times, use_blackbody_atm=False, make_mesh_plots=False, plot_name=None, print_diagnostics=False, par_compute=False, num_par_processes=8):
+def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
+        use_blackbody_atm=False, make_mesh_plots=False, plot_name=None,
+        print_diagnostics=False, par_compute=False, num_par_processes=8,
+        num_triangles=1500):
     """Compute the light curve for a binary system
     
     Keyword arguments:
@@ -204,6 +207,10 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     if (not star2_semidetached) and (not star1_overflow):
         b.set_value('requiv@secondary@component', star2_rad)
     
+    
+    # Set the number of triangles in the mesh
+    b.set_value('ntriangles@primary@detailed@compute', num_triangles)
+    b.set_value('ntriangles@secondary@detailed@compute', num_triangles)
     
     # Phase the observation times
     ## Read in observation times
