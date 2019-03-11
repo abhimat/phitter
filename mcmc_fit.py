@@ -118,9 +118,9 @@ class mcmc_fitter_rad_interp(object):
             and rad_check):
             return 0.0
         return -np.inf
-
-    # Log Likelihood function
-    def lnlike(self, theta):
+    
+    # Calculate model light curve
+    def calculate_model_lc(self, theta):
         (Kp_ext_t, H_ext_mod_t,
          star1_rad_t, star2_rad_t,
          binary_inc_t, binary_period_t,
@@ -134,14 +134,6 @@ class mcmc_fitter_rad_interp(object):
         
         ## Construct tuple with binary parameters
         binary_params = (binary_period, binary_ecc, binary_inc, t0)
-        
-        ### Phase the observations
-        (kp_phase_out, h_phase_out) = lc_calc.phased_obs(
-                                          self.observation_times,
-                                          binary_period, t0)
-        
-        (kp_phased_days, kp_phases_sorted_inds, kp_model_times) = kp_phase_out
-        (h_phased_days, h_phases_sorted_inds, h_model_times) = h_phase_out
         
         # Calculate extinction adjustments
         Kp_ext_adj = (Kp_ext_t - self.Kp_ext)
@@ -210,12 +202,32 @@ class mcmc_fitter_rad_interp(object):
         binary_mags_Kp += Kp_ext_adj
         binary_mags_H += H_ext_adj
         
+        # Return final light curve
+        return (binary_mags_Kp, binary_mags_H)
+    
+    # Log Likelihood function
+    def lnlike(self, theta):        
+        (Kp_ext_t, H_ext_mod_t,
+         star1_rad_t, star2_rad_t,
+         binary_inc_t, binary_period_t,
+         binary_ecc_t, t0_t) = theta
+        
+        (binary_model_mags_Kp, binary_model_mags_H) = calculate_model_lc(theta)
+        
+        # Phase the observation times
+        (kp_phase_out, h_phase_out) = lc_calc.phased_obs(
+                                          self.observation_times,
+                                          binary_period_t * u.d, t0_t)
+        
+        (kp_phased_days, kp_phases_sorted_inds, kp_model_times) = kp_phase_out
+        (h_phased_days, h_phases_sorted_inds, h_model_times) = h_phase_out
+        
         # Calculate log likelihood and return
         log_likelihood = np.sum((self.kp_obs_mags[kp_phases_sorted_inds] -
-                             binary_mags_Kp)**2. /
+                             binary_model_mags_Kp)**2. /
                              (self.kp_obs_mag_errors[kp_phases_sorted_inds])**2.)
         log_likelihood += np.sum((self.h_obs_mags[h_phases_sorted_inds] -
-                              binary_mags_H)**2. /
+                              binary_model_mags_H)**2. /
                               (self.h_obs_mag_errors[h_phases_sorted_inds])**2.)
     
         log_likelihood = -0.5 * log_likelihood
