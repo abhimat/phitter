@@ -17,6 +17,16 @@ import matplotlib.pyplot as plt
 import matplotlib.font_manager as font_manager
 from matplotlib.ticker import MultipleLocator
 
+# Filter properties
+lambda_Ks = 2.18e-6 * u.m
+dlambda_Ks = 0.35e-6 * u.m
+
+lambda_Kp = 2.124e-6 * u.m
+dlambda_Kp = 0.351e-6 * u.m
+
+lambda_H = 1.633e-6 * u.m
+dlambda_H = 0.296e-6 * u.m
+
 # Reference fluxes, calculated with PopStar
 ## Vega magnitudes (m_Vega = 0.03)
 ks_filt_info = synthetic.get_filter_info('naco,Ks')
@@ -30,7 +40,8 @@ flux_ref_H = h_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
 # Stellar Parameters
 # stellar_params = (mass, rad, teff, mag_Kp, mag_H)
 
-def single_star_lc(stellar_params, use_blackbody_atm=False):
+def single_star_lc(stellar_params, use_blackbody_atm=False,
+                   num_triangles=1500):
     # Read in the stellar parameters of the current star
     (star_mass, star_rad, star_teff, star_mag_Kp, star_mag_H) = stellar_params
     
@@ -58,6 +69,9 @@ def single_star_lc(stellar_params, use_blackbody_atm=False):
     sing_star.set_value('teff@component', star_teff)
     sing_star.set_value('requiv@component', star_rad)
     
+    # Set the number of triangles in the mesh
+    sing_star.set_value('ntriangles@detailed@compute', num_triangles)
+    
     # Run compute
     try:
         sing_star.run_compute(compute='detailed', model='run')
@@ -84,8 +98,11 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     star1_params -- Tuple of parameters for the primary star
     star2_params -- Tuple of parameters for the secondary star
     binary_params -- Tuple of parameters for the binary system configuration
-    observation_times -- Array of observation times
-    use_blackbody_atm -- Use blackbody atmosphere instead of default Castelli & Kurucz (default False)
+    observation_times -- Tuple of observation times,
+        with numpy array of MJDs in each band
+        (kp_MJDs, h_MJDs) = observation_times
+    use_blackbody_atm -- Use blackbody atmosphere
+        instead of default Castelli & Kurucz (default False)
     make_mesh_plots -- Make a mesh plot of the binary system (default False)
     plot_name
     print_diagnostics
@@ -376,3 +393,87 @@ def flux_adj(mags_pri, mags_ref_pri, mags_sec, mags_ref_sec, mags_bin):
     adj_mags_bin_H = -2.5 * np.log10(fluxes_bin_H / flux_ref_H) + 0.03
     
     return (adj_mags_bin_Kp, adj_mags_bin_H)
+
+
+def binary_mags_calc(star1_params_lcfit, star2_params_lcfit,
+                     binary_params,
+                     observation_times,
+                     isoc_Ks_ext, Kp_ext, H_ext, ext_alpha,
+                     bin_dist,
+                     make_mesh_plots=False, plot_name=None,
+                     num_triangles=1500):
+    
+    # Extinction law (using Nogueras-Lara+ 2018)
+    ext_alpha = 2.30
+    
+    # Calculate extinctions implied by isochrone extinction
+    isoc_Kp_ext = isoc_Ks_ext * (lambda_Ks / lambda_Kp)**ext_alpha
+    isoc_H_ext = isoc_Ks_ext * (lambda_Ks / lambda_H)**ext_alpha
+    
+    # Calculate extinction adjustments
+    Kp_ext_adj = (Kp_ext - isoc_Kp_ext)
+    H_ext_adj = (H_ext - isoc_H_ext)
+    
+    # Extract stellar parameters from input
+    (star1_mass, star1_rad, star1_teff, star1_mag_Kp, star1_mag_H) = star1_params_lcfit
+    (star2_mass, star2_rad, star2_teff, star2_mag_Kp, star2_mag_H) = star2_params_lcfit
+    
+    # Run single star model for reference flux calculations
+    (star1_sing_mag_Kp, star1_sing_mag_H) = single_star_lc(star1_params_lcfit,
+                                                num_triangles=num_triangles)
+    
+    if (star1_sing_mag_Kp[0] == -1.) or (star1_sing_mag_H[0] == -1.):
+        return -np.inf
+    
+    (star2_sing_mag_Kp, star2_sing_mag_H) = single_star_lc(star2_params_lcfit,
+                                                num_triangles=num_triangles)
+    
+    if (star2_sing_mag_Kp[0] == -1.) or (star2_sing_mag_H[0] == -1.):
+        return -np.inf
+    
+    ## Apply distance modulus and isoc. extinction to single star magnitudes
+    (star1_sing_mag_Kp, star1_sing_mag_H) = dist_ext_mag_calc(
+                                                (star1_sing_mag_Kp,
+                                                star1_sing_mag_H),
+                                                bin_dist,
+                                                isoc_Kp_ext, isoc_H_ext)
+    
+    (star2_sing_mag_Kp, star2_sing_mag_H) = dist_ext_mag_calc(
+                                                (star2_sing_mag_Kp,
+                                                star2_sing_mag_H),
+                                                bin_dist,
+                                                isoc_Kp_ext, isoc_H_ext)
+    
+    
+    # Run binary star model to get binary mags
+    (binary_mags_Kp, binary_mags_H) = binary_star_lc(
+                                          star1_params_lcfit,
+                                          star2_params_lcfit,
+                                          binary_params,
+                                          observation_times,
+                                          make_mesh_plots=make_mesh_plots,
+                                          plot_name=plot_name,
+                                          num_triangles=num_triangles)
+    if (binary_mags_Kp[0] == -1.) or (binary_mags_H[0] == -1.):
+        return -np.inf
+    
+    ## Apply distance modulus and isoc. extinction to binary magnitudes
+    (binary_mags_Kp, binary_mags_H) = dist_ext_mag_calc(
+                                          (binary_mags_Kp, binary_mags_H),
+                                          bin_dist,
+                                          isoc_Kp_ext, isoc_H_ext)
+    
+    # Apply flux correction to the binary magnitudes
+    (binary_mags_Kp, binary_mags_H) = flux_adj(
+                                          (star1_sing_mag_Kp, star1_sing_mag_H),
+                                          (star1_mag_Kp, star1_mag_H),
+                                          (star2_sing_mag_Kp, star2_sing_mag_H),
+                                          (star2_mag_Kp, star2_mag_H),
+                                          (binary_mags_Kp, binary_mags_H))
+    
+    # Apply the extinction difference between model and the isochrone values
+    binary_mags_Kp += Kp_ext_adj
+    binary_mags_H += H_ext_adj
+    
+    # Return final light curve
+    return (binary_mags_Kp, binary_mags_H)
