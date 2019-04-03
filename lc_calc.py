@@ -13,6 +13,8 @@ import numpy as np
 
 from popstar import synthetic
 
+import sys
+
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as font_manager
 from matplotlib.ticker import MultipleLocator
@@ -124,7 +126,7 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     # Read in the parameters of the binary system
     (binary_period, binary_ecc, binary_inc, t0) = binary_params
     
-    err_out = np.array([-1.]), np.array([-1.])
+    err_out = (np.array([-1.]), np.array([-1.]))
     
     
     # Set up binary model
@@ -155,10 +157,17 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     star2_rad_max = b.get_value('requiv_max@secondary@component') * u.solRad
     
     ## Check for semidetached cases
-    ## (within 0.1% of max radii)
-    if np.abs((star1_rad - star1_rad_max) / star1_rad_max) < 0.001:
+    if print_diagnostics:
+        print('\nSemidetached checks')
+        print(np.abs((star1_rad - star1_rad_max) / star1_rad_max))
+        print(np.abs((star2_rad - star2_rad_max) / star2_rad_max))
+    
+    semidet_cut = 0.001   # (within 0.1% of max radii)
+    semidet_cut = 0.015   # (within 1.5% of max radii)
+    
+    if np.abs((star1_rad - star1_rad_max) / star1_rad_max) < semidet_cut:
         star1_semidetached = True
-    if np.abs((star2_rad - star2_rad_max) / star2_rad_max) < 0.001:
+    if np.abs((star2_rad - star2_rad_max) / star2_rad_max) < semidet_cut:
         star2_semidetached = True
     
     ## Check for overflow
@@ -171,14 +180,14 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     ### Check for if both stars are overflowing; which star overflows more?
     ### Choose that star to be overflowing more
     if star1_overflow and star2_overflow:
-        if (star1_rad - star1_rad_max) > (star2_rad - star2_rad_max):
+        if (star1_rad - star1_rad_max) >= (star2_rad - star2_rad_max):
             star2_overflow = False
         else:
             star1_overflow = False
     
     
     if print_diagnostics:
-        print('Overflow Checks')
+        print('\nOverflow Checks')
         print(star1_semidetached)
         print(star2_semidetached)
         print(star1_overflow)
@@ -265,11 +274,13 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
         b.add_dataset('mesh', times=[binary_period/4.], dataset='mod_mesh')
     
     # Run compute
+    # b.run_compute(compute='detailed', model='run')
     try:
         b.run_compute(compute='detailed', model='run')
     except:
-        # print('Failure during compute')
-        return (err_out, err_out)
+        if print_diagnostics:
+            print("Error during primary binary compute: {0}".format(sys.exc_info()[0]))
+        return err_out
     
     
     # Save out mesh plot
