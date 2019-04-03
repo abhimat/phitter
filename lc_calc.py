@@ -400,6 +400,7 @@ def binary_mags_calc(star1_params_lcfit, star2_params_lcfit,
                      observation_times,
                      isoc_Ks_ext, Kp_ext, H_ext, ext_alpha,
                      bin_dist,
+                     use_blackbody_atm=False,
                      make_mesh_plots=False, plot_name=None,
                      num_triangles=1500):
     
@@ -420,12 +421,14 @@ def binary_mags_calc(star1_params_lcfit, star2_params_lcfit,
     
     # Run single star model for reference flux calculations
     (star1_sing_mag_Kp, star1_sing_mag_H) = single_star_lc(star1_params_lcfit,
+                                                use_blackbody_atm=use_blackbody_atm,
                                                 num_triangles=num_triangles)
     
     if (star1_sing_mag_Kp[0] == -1.) or (star1_sing_mag_H[0] == -1.):
         return -np.inf
     
     (star2_sing_mag_Kp, star2_sing_mag_H) = single_star_lc(star2_params_lcfit,
+                                                use_blackbody_atm=use_blackbody_atm,
                                                 num_triangles=num_triangles)
     
     if (star2_sing_mag_Kp[0] == -1.) or (star2_sing_mag_H[0] == -1.):
@@ -451,6 +454,7 @@ def binary_mags_calc(star1_params_lcfit, star2_params_lcfit,
                                           star2_params_lcfit,
                                           binary_params,
                                           observation_times,
+                                          use_blackbody_atm=use_blackbody_atm,
                                           make_mesh_plots=make_mesh_plots,
                                           plot_name=plot_name,
                                           num_triangles=num_triangles)

@@ -54,6 +54,10 @@ class mcmc_fitter_rad_interp(object):
     # Extinction law (using Nogueras-Lara+ 2018)
     ext_alpha = 2.30
     
+    # Number of triangles to use for binary model
+    use_blackbody_atm = False
+    model_numTriangles = 1500
+    
     def __init__(self):
         return
     
@@ -86,6 +90,19 @@ class mcmc_fitter_rad_interp(object):
         self.kp_obs_mag_errors = kp_obs_mag_errors
         self.h_obs_mag_errors = h_obs_mag_errors
     
+    # Function to set model mesh number of triangles
+    def set_model_numTriangles(self, model_numTriangles):
+        self.model_numTriangles = model_numTriangles
+    
+    # Function to set model mesh number of triangles
+    def set_model_use_blackbody_atm(self, use_blackbody_atm):
+        self.use_blackbody_atm = use_blackbody_atm
+    
+    # Functions to define prior bounds
+    def set_period_prior_bounds(self, lo_bound, hi_bound):
+        self.lo_period_prior_bound = lo_bound
+        self.hi_period_prior_bound = hi_bound
+    
     # Priors
     ## Using uniform priors, with radius interpolation for stellar parameters
     def lnprior(self, theta):
@@ -95,22 +112,23 @@ class mcmc_fitter_rad_interp(object):
          binary_ecc, t0) = theta
         
         ## Extinction checks
-        Kp_ext_check = (2.0 <= Kp_ext <= 3.6)
+        Kp_ext_check = (2.0 <= Kp_ext <= 4.0)
         H_ext_mod_check = (-1.0 <= H_ext_mod <= 1.0)
     
         ## Binary system configuration checks
         inc_check = (0. <= binary_inc <= 180.)
-        period_check = (77.5 <= binary_period <= 80.5)
+        period_check = (self.lo_period_prior_bound <= binary_period <= self.hi_period_prior_bound)
         ecc_check = (-0.1 <= binary_ecc <= 0.1)
         t0_check = (53720.0 <= t0 <= 53840.0)
-    
+        
         ## Stellar parameters check
         iso_rad_min = self.isochrone.iso_rad_min
         iso_rad_max = self.isochrone.iso_rad_max
     
-        rad_check = ((iso_rad_min <= star1_rad <= iso_rad_max) and
+        rad_check = ((star1_rad >= star2_rad) and
+                     (iso_rad_min <= star1_rad <= iso_rad_max) and
                      (iso_rad_min <= star2_rad <= iso_rad_max))
-    
+        
         ## Final check and return prior
         if ((Kp_ext_check and H_ext_mod_check) and
             inc_check and period_check
@@ -125,6 +143,8 @@ class mcmc_fitter_rad_interp(object):
          star1_rad_t, star2_rad_t,
          binary_inc_t, binary_period_t,
          binary_ecc_t, t0_t) = theta
+        
+        err_out = (np.array([-1.]), np.array([-1.]))
         
         # Add units to input parameters if necessary
         binary_inc = binary_inc_t * u.deg
@@ -151,15 +171,21 @@ class mcmc_fitter_rad_interp(object):
             star2_teff, star2_mag_Kp, star2_mag_H) = star2_params_all
         
         # Run single star model for reference flux calculations
-        (star1_sing_mag_Kp, star1_sing_mag_H) = lc_calc.single_star_lc(star1_params_lcfit)
+        (star1_sing_mag_Kp, star1_sing_mag_H) = lc_calc.single_star_lc(
+                                                    star1_params_lcfit,
+                                                    use_blackbody_atm=self.use_blackbody_atm,
+                                                    num_triangles=self.model_numTriangles)
         
         if (star1_sing_mag_Kp[0] == -1.) or (star1_sing_mag_H[0] == -1.):
-            return -np.inf
+            return err_out
         
-        (star2_sing_mag_Kp, star2_sing_mag_H) = lc_calc.single_star_lc(star2_params_lcfit)
+        (star2_sing_mag_Kp, star2_sing_mag_H) = lc_calc.single_star_lc(
+                                                    star2_params_lcfit,
+                                                    use_blackbody_atm=self.use_blackbody_atm,
+                                                    num_triangles=self.model_numTriangles)
         
         if (star2_sing_mag_Kp[0] == -1.) or (star2_sing_mag_H[0] == -1.):
-            return -np.inf
+            return err_out
         
         ## Apply distance modulus and isoc. extinction to single star magnitudes
         (star1_sing_mag_Kp, star1_sing_mag_H) = lc_calc.dist_ext_mag_calc(
@@ -180,9 +206,11 @@ class mcmc_fitter_rad_interp(object):
                                               star1_params_lcfit,
                                               star2_params_lcfit,
                                               binary_params,
-                                              self.observation_times)
+                                              self.observation_times,
+                                              use_blackbody_atm=self.use_blackbody_atm,
+                                              num_triangles=self.model_numTriangles)
         if (binary_mags_Kp[0] == -1.) or (binary_mags_H[0] == -1.):
-            return -np.inf
+            return err_out
         
         ## Apply distance modulus and isoc. extinction to binary magnitudes
         (binary_mags_Kp, binary_mags_H) = lc_calc.dist_ext_mag_calc(
@@ -212,7 +240,9 @@ class mcmc_fitter_rad_interp(object):
          binary_inc_t, binary_period_t,
          binary_ecc_t, t0_t) = theta
         
-        (binary_model_mags_Kp, binary_model_mags_H) = calculate_model_lc(theta)
+        (binary_model_mags_Kp, binary_model_mags_H) = self.calculate_model_lc(theta)
+        if (binary_model_mags_Kp[0] == -1.) or (binary_model_mags_H[0] == -1.):
+            return -np.inf
         
         # Phase the observation times
         (kp_phase_out, h_phase_out) = lc_calc.phased_obs(
