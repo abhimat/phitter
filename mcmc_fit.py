@@ -103,6 +103,10 @@ class mcmc_fitter_rad_interp(object):
         self.lo_period_prior_bound = lo_bound
         self.hi_period_prior_bound = hi_bound
     
+    def set_t0_prior_bounds(self, lo_bound, hi_bound):
+        self.lo_t0_prior_bound = lo_bound
+        self.hi_t0_prior_bound = hi_bound
+    
     # Priors
     ## Using uniform priors, with radius interpolation for stellar parameters
     def lnprior(self, theta):
@@ -119,7 +123,7 @@ class mcmc_fitter_rad_interp(object):
         inc_check = (0. <= binary_inc <= 180.)
         period_check = (self.lo_period_prior_bound <= binary_period <= self.hi_period_prior_bound)
         ecc_check = (-0.1 <= binary_ecc <= 0.1)
-        t0_check = (53720.0 <= t0 <= 53840.0)
+        t0_check = (self.lo_t0_prior_bound <= t0 <= self.hi_t0_prior_bound)
         
         ## Stellar parameters check
         iso_rad_min = self.isochrone.iso_rad_min
