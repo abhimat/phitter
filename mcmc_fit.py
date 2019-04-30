@@ -121,7 +121,7 @@ class mcmc_fitter_rad_interp(object):
          star1_rad, star2_rad,
          binary_inc, binary_period,
          binary_ecc, t0) = (0., 0., 0., 0., 0., 0., 0., 0.)
-        if model_eccentricity:
+        if self.model_eccentricity:
             (Kp_ext, H_ext_mod,
              star1_rad, star2_rad,
              binary_inc, binary_period,
@@ -164,7 +164,7 @@ class mcmc_fitter_rad_interp(object):
          star1_rad_t, star2_rad_t,
          binary_inc_t, binary_period_t,
          binary_ecc_t, t0_t) = (0., 0., 0., 0., 0., 0., 0., 0.)
-        if model_eccentricity:
+        if self.model_eccentricity:
             (Kp_ext_t, H_ext_mod_t,
              star1_rad_t, star2_rad_t,
              binary_inc_t, binary_period_t,
@@ -266,20 +266,20 @@ class mcmc_fitter_rad_interp(object):
     
     # Log Likelihood function
     def lnlike(self, theta):        
-        (Kp_ext, H_ext_mod,
-         star1_rad, star2_rad,
-         binary_inc, binary_period,
-         binary_ecc, t0) = (0., 0., 0., 0., 0., 0., 0., 0.)
-        if model_eccentricity:
-            (Kp_ext, H_ext_mod,
-             star1_rad, star2_rad,
-             binary_inc, binary_period,
-             binary_ecc, t0) = theta
+        (Kp_ext_t, H_ext_mod_t,
+         star1_rad_t, star2_rad_t,
+         binary_inc_t, binary_period_t,
+         binary_ecc_t, t0_t) = (0., 0., 0., 0., 0., 0., 0., 0.)
+        if self.model_eccentricity:
+            (Kp_ext_t, H_ext_mod_t,
+             star1_rad_t, star2_rad_t,
+             binary_inc_t, binary_period_t,
+             binary_ecc_t, t0_t) = theta
         else:
-            (Kp_ext, H_ext_mod,
-             star1_rad, star2_rad,
-             binary_inc, binary_period,
-             t0) = theta
+            (Kp_ext_t, H_ext_mod_t,
+             star1_rad_t, star2_rad_t,
+             binary_inc_t, binary_period_t,
+             t0_t) = theta
         
         (binary_model_mags_Kp, binary_model_mags_H) = self.calculate_model_lc(theta)
         if (binary_model_mags_Kp[0] == -1.) or (binary_model_mags_H[0] == -1.):
