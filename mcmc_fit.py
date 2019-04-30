@@ -54,9 +54,12 @@ class mcmc_fitter_rad_interp(object):
     # Extinction law (using Nogueras-Lara+ 2018)
     ext_alpha = 2.30
     
-    # Number of triangles to use for binary model
+    # Number of triangles and atmosphere to use for binary model
     use_blackbody_atm = False
     model_numTriangles = 1500
+    
+    # Model eccentricity
+    model_eccentricity = True
     
     def __init__(self):
         return
@@ -94,9 +97,13 @@ class mcmc_fitter_rad_interp(object):
     def set_model_numTriangles(self, model_numTriangles):
         self.model_numTriangles = model_numTriangles
     
-    # Function to set model mesh number of triangles
+    # Function to set if using blackbody atmosphere
     def set_model_use_blackbody_atm(self, use_blackbody_atm):
         self.use_blackbody_atm = use_blackbody_atm
+    
+    # Function to set for modelling eccentricity
+    def set_model_eccentricity(self, model_eccentricity):
+        self.model_eccentricity = model_eccentricity
     
     # Functions to define prior bounds
     def set_period_prior_bounds(self, lo_bound, hi_bound):
@@ -113,7 +120,17 @@ class mcmc_fitter_rad_interp(object):
         (Kp_ext, H_ext_mod,
          star1_rad, star2_rad,
          binary_inc, binary_period,
-         binary_ecc, t0) = theta
+         binary_ecc, t0) = (0., 0., 0., 0., 0., 0., 0., 0.)
+        if model_eccentricity:
+            (Kp_ext, H_ext_mod,
+             star1_rad, star2_rad,
+             binary_inc, binary_period,
+             binary_ecc, t0) = theta
+        else:
+            (Kp_ext, H_ext_mod,
+             star1_rad, star2_rad,
+             binary_inc, binary_period,
+             t0) = theta
         
         ## Extinction checks
         Kp_ext_check = (2.0 <= Kp_ext <= 4.0)
@@ -146,7 +163,17 @@ class mcmc_fitter_rad_interp(object):
         (Kp_ext_t, H_ext_mod_t,
          star1_rad_t, star2_rad_t,
          binary_inc_t, binary_period_t,
-         binary_ecc_t, t0_t) = theta
+         binary_ecc_t, t0_t) = (0., 0., 0., 0., 0., 0., 0., 0.)
+        if model_eccentricity:
+            (Kp_ext_t, H_ext_mod_t,
+             star1_rad_t, star2_rad_t,
+             binary_inc_t, binary_period_t,
+             binary_ecc_t, t0_t) = theta
+        else:
+            (Kp_ext_t, H_ext_mod_t,
+             star1_rad_t, star2_rad_t,
+             binary_inc_t, binary_period_t,
+             t0_t) = theta
         
         err_out = (np.array([-1.]), np.array([-1.]))
         
@@ -239,10 +266,20 @@ class mcmc_fitter_rad_interp(object):
     
     # Log Likelihood function
     def lnlike(self, theta):        
-        (Kp_ext_t, H_ext_mod_t,
-         star1_rad_t, star2_rad_t,
-         binary_inc_t, binary_period_t,
-         binary_ecc_t, t0_t) = theta
+        (Kp_ext, H_ext_mod,
+         star1_rad, star2_rad,
+         binary_inc, binary_period,
+         binary_ecc, t0) = (0., 0., 0., 0., 0., 0., 0., 0.)
+        if model_eccentricity:
+            (Kp_ext, H_ext_mod,
+             star1_rad, star2_rad,
+             binary_inc, binary_period,
+             binary_ecc, t0) = theta
+        else:
+            (Kp_ext, H_ext_mod,
+             star1_rad, star2_rad,
+             binary_inc, binary_period,
+             t0) = theta
         
         (binary_model_mags_Kp, binary_model_mags_H) = self.calculate_model_lc(theta)
         if (binary_model_mags_Kp[0] == -1.) or (binary_model_mags_H[0] == -1.):
