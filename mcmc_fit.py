@@ -61,6 +61,25 @@ class mcmc_fitter_rad_interp(object):
     # Model eccentricity
     model_eccentricity = True
     
+    # Default prior bounds
+    lo_Kp_ext_prior_bound = 2.0
+    hi_Kp_ext_prior_bound = 4.0
+    
+    lo_H_ext_mod_prior_bound = -2.0
+    hi_H_ext_mod_prior_bound = 2.0
+    
+    lo_inc_prior_bound = 0.
+    hi_inc_prior_bound = 180.
+    
+    lo_period_prior_bound = 79.
+    hi_period_prior_bound = 81.
+    
+    lo_ecc_prior_bound = -0.1
+    hi_ecc_prior_bound = 0.1
+    
+    lo_t0_prior_bound = 51773.0
+    hi_t0_prior_bound = 51774.0
+    
     def __init__(self):
         return
     
@@ -106,9 +125,25 @@ class mcmc_fitter_rad_interp(object):
         self.model_eccentricity = model_eccentricity
     
     # Functions to define prior bounds
+    def set_Kp_ext_prior_bounds(self, lo_bound, hi_bound):
+        self.lo_Kp_ext_prior_bound = lo_bound
+        self.hi_Kp_ext_prior_bound = hi_bound
+    
+    def set_H_ext_mod_prior_bounds(self, lo_bound, hi_bound):
+        self.lo_H_ext_mod_prior_bound = lo_bound
+        self.hi_H_ext_mod_prior_bound = hi_bound
+    
+    def set_inc_prior_bounds(self, lo_bound, hi_bound):
+        self.lo_inc_prior_bound = lo_bound
+        self.hi_inc_prior_bound = hi_bound
+    
     def set_period_prior_bounds(self, lo_bound, hi_bound):
         self.lo_period_prior_bound = lo_bound
         self.hi_period_prior_bound = hi_bound
+    
+    def set_ecc_prior_bounds(self, lo_bound, hi_bound):
+        self.lo_ecc_prior_bound = lo_bound
+        self.hi_ecc_prior_bound = hi_bound
     
     def set_t0_prior_bounds(self, lo_bound, hi_bound):
         self.lo_t0_prior_bound = lo_bound
@@ -133,13 +168,13 @@ class mcmc_fitter_rad_interp(object):
              t0) = theta
         
         ## Extinction checks
-        Kp_ext_check = (2.0 <= Kp_ext <= 4.0)
-        H_ext_mod_check = (-1.0 <= H_ext_mod <= 1.0)
+        Kp_ext_check = (self.lo_Kp_ext_prior_bound <= Kp_ext <= self.hi_Kp_ext_prior_bound)
+        H_ext_mod_check = (self.lo_H_ext_mod_prior_bound <= H_ext_mod <= self.hi_H_ext_mod_prior_bound)
     
         ## Binary system configuration checks
-        inc_check = (0. <= binary_inc <= 180.)
+        inc_check = (self.lo_inc_prior_bound <= binary_inc <= self.hi_inc_prior_bound)
         period_check = (self.lo_period_prior_bound <= binary_period <= self.hi_period_prior_bound)
-        ecc_check = (-0.1 <= binary_ecc <= 0.1)
+        ecc_check = (self.lo_ecc_prior_bound <= binary_ecc <= self.hi_ecc_prior_bound)
         t0_check = (self.lo_t0_prior_bound <= t0 <= self.hi_t0_prior_bound)
         
         ## Stellar parameters check
