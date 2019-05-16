@@ -28,16 +28,23 @@ mist_phase_dict['WR'] = 9
 class isochrone_mist(object):
     filt_list = ['nirc2,Kp', 'nirc2,H']
     
-    def __init__(self, age=3.9e6, ext=2.63, dist=7.971e3, phase=None):
+    def __init__(self, age=3.9e6, ext=2.63, dist=7.971e3, met=0.0, phase=None,
+                 use_atm_func='merged'):
         log_age = np.log10(age)
         
         self.log_age = log_age
         self.A_Ks = ext
         self.dist = dist
+        self.met = met
         
         # Evolution/Atmosphere Models and Extinction Law
         evo_model = evolution.MISTv1()
-        atm_func = atmospheres.get_merged_atmosphere
+        
+        if use_atm_func == 'merged':
+            atm_func = atmospheres.get_merged_atmosphere
+        elif use_atm_func == 'phoenix':
+            atm_func = atmospheres.get_phoenixv16_atmosphere
+            
         red_law = reddening.RedLawNoguerasLara18()
         
         # Create an isochhrone with the given parameters        
@@ -45,6 +52,7 @@ class isochrone_mist(object):
                                                   evo_model=evo_model,
                                                   atm_func=atm_func,
                                                   red_law=red_law,
+                                                  metallicity=self.met,
                                                   filters=self.filt_list)
         
         # Save out specific stellar parameter columns needed
@@ -65,8 +73,7 @@ class isochrone_mist(object):
         
         self.iso_rad_min = np.min(self.iso_rad).value
         self.iso_rad_max = np.max(self.iso_rad).value
-        
-        
+    
     def rad_interp(self, star_rad_interp):
         # Reverse isochrones, if radius not increasing, for numpy interpolation to work
         if self.iso_rad[-1] < self.iso_rad[0]:
