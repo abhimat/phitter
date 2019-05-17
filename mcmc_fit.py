@@ -84,13 +84,15 @@ class mcmc_fitter_rad_interp(object):
         return
     
     # Function to make and store isochrone
-    def make_isochrone(self, age, Ks_ext, dist, phase):
+    def make_isochrone(self, age, Ks_ext, dist, phase, met, use_atm_func='merged'):
         self.Ks_ext = Ks_ext
         self.dist = dist*u.pc
         self.age = age
+        self.met = met
         
         self.isochrone = isoc_interp.isochrone_mist(age=age,
-                             ext=Ks_ext, dist=dist, phase=phase)
+                             ext=Ks_ext, dist=dist, phase=phase, met=met,
+                             use_atm_func=use_atm_func)
         
         ## Convert from specified extinction in Ks to Kp and H
         self.Kp_ext = Ks_ext * (self.lambda_Ks / self.lambda_Kp)**self.ext_alpha
