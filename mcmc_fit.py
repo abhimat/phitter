@@ -59,7 +59,12 @@ class mcmc_fitter_rad_interp(object):
     model_numTriangles = 1500
     
     # Model eccentricity
+    default_ecc = 0.0
     model_eccentricity = True
+    
+    # Model distance
+    default_dist = 7.971e3
+    model_distance = True
     
     # Default prior bounds
     lo_Kp_ext_prior_bound = 2.0
@@ -77,6 +82,9 @@ class mcmc_fitter_rad_interp(object):
     lo_ecc_prior_bound = -0.1
     hi_ecc_prior_bound = 0.1
     
+    lo_dist_prior_bound = 7600.
+    hi_dist_prior_bound = 8200.
+    
     lo_t0_prior_bound = 51773.0
     hi_t0_prior_bound = 51774.0
     
@@ -86,7 +94,13 @@ class mcmc_fitter_rad_interp(object):
     # Function to make and store isochrone
     def make_isochrone(self, age, Ks_ext, dist, phase, met, use_atm_func='merged'):
         self.Ks_ext = Ks_ext
+        
         self.dist = dist*u.pc
+        self.default_dist = dist
+        ## Revise prior bounds for distance
+        self.lo_dist_prior_bound = 0.8 * dist
+        self.hi_dist_prior_bound = 1.2 * dist
+        
         self.age = age
         self.met = met
         
@@ -126,6 +140,10 @@ class mcmc_fitter_rad_interp(object):
     def set_model_eccentricity(self, model_eccentricity):
         self.model_eccentricity = model_eccentricity
     
+    # Function to set for modelling distance
+    def set_model_distance(self, model_distance):
+        self.model_distance = model_distance
+    
     # Functions to define prior bounds
     def set_Kp_ext_prior_bounds(self, lo_bound, hi_bound):
         self.lo_Kp_ext_prior_bound = lo_bound
@@ -147,6 +165,10 @@ class mcmc_fitter_rad_interp(object):
         self.lo_ecc_prior_bound = lo_bound
         self.hi_ecc_prior_bound = hi_bound
     
+    def set_dist_prior_bounds(self, lo_bound, hi_bound):
+        self.lo_dist_prior_bound = lo_bound
+        self.hi_dist_prior_bound = hi_bound
+    
     def set_t0_prior_bounds(self, lo_bound, hi_bound):
         self.lo_t0_prior_bound = lo_bound
         self.hi_t0_prior_bound = hi_bound
@@ -157,12 +179,23 @@ class mcmc_fitter_rad_interp(object):
         (Kp_ext, H_ext_mod,
          star1_rad, star2_rad,
          binary_inc, binary_period,
-         binary_ecc, t0) = (0., 0., 0., 0., 0., 0., 0., 0.)
-        if self.model_eccentricity:
+         binary_ecc, binary_dist, t0) = (0., 0., 0., 0., 0., 0.,
+                                               self.default_ecc, self.default_dist, 0.)
+        if self.model_eccentricity and self.model_distance:
+            (Kp_ext, H_ext_mod,
+             star1_rad, star2_rad,
+             binary_inc, binary_period,
+             binary_ecc, binary_dist, t0) = theta
+        elif self.model_eccentricity:
             (Kp_ext, H_ext_mod,
              star1_rad, star2_rad,
              binary_inc, binary_period,
              binary_ecc, t0) = theta
+        elif self.model_distance:
+            (Kp_ext, H_ext_mod,
+             star1_rad, star2_rad,
+             binary_inc, binary_period,
+             binary_dist, t0) = theta
         else:
             (Kp_ext, H_ext_mod,
              star1_rad, star2_rad,
@@ -177,6 +210,7 @@ class mcmc_fitter_rad_interp(object):
         inc_check = (self.lo_inc_prior_bound <= binary_inc <= self.hi_inc_prior_bound)
         period_check = (self.lo_period_prior_bound <= binary_period <= self.hi_period_prior_bound)
         ecc_check = (self.lo_ecc_prior_bound <= binary_ecc <= self.hi_ecc_prior_bound)
+        dist_check = (self.lo_dist_prior_bound <= binary_dist <= self.hi_dist_prior_bound)
         t0_check = (self.lo_t0_prior_bound <= t0 <= self.hi_t0_prior_bound)
         
         ## Stellar parameters check
@@ -190,7 +224,7 @@ class mcmc_fitter_rad_interp(object):
         ## Final check and return prior
         if ((Kp_ext_check and H_ext_mod_check) and
             inc_check and period_check
-            and ecc_check and t0_check
+            and ecc_check and dist_check and t0_check
             and rad_check):
             return 0.0
         return -np.inf
@@ -200,12 +234,23 @@ class mcmc_fitter_rad_interp(object):
         (Kp_ext_t, H_ext_mod_t,
          star1_rad_t, star2_rad_t,
          binary_inc_t, binary_period_t,
-         binary_ecc_t, t0_t) = (0., 0., 0., 0., 0., 0., 0., 0.)
-        if self.model_eccentricity:
+         binary_ecc_t, binary_dist_t, t0_t) = (0., 0., 0., 0., 0., 0.,
+                                               self.default_ecc, self.default_dist, 0.)
+        if self.model_eccentricity and self.model_distance:
+            (Kp_ext_t, H_ext_mod_t,
+             star1_rad_t, star2_rad_t,
+             binary_inc_t, binary_period_t,
+             binary_ecc_t, binary_dist_t, t0_t) = theta
+        elif self.model_eccentricity:
             (Kp_ext_t, H_ext_mod_t,
              star1_rad_t, star2_rad_t,
              binary_inc_t, binary_period_t,
              binary_ecc_t, t0_t) = theta
+        elif self.model_distance:
+            (Kp_ext_t, H_ext_mod_t,
+             star1_rad_t, star2_rad_t,
+             binary_inc_t, binary_period_t,
+             binary_dist_t, t0_t) = theta
         else:
             (Kp_ext_t, H_ext_mod_t,
              star1_rad_t, star2_rad_t,
@@ -228,6 +273,8 @@ class mcmc_fitter_rad_interp(object):
         H_ext_adj = (((Kp_ext_t * (self.lambda_Kp / self.lambda_H)**self.ext_alpha)
                       - self.H_ext) + H_ext_mod_t)
         
+        # Calculate distance modulus adjustments
+        dist_mod_mag_adj = 5. * np.log10(binary_dist_t / ((self.dist).to(u.pc)).value)
         
         # Perform interpolation
         (star1_params_all, star1_params_lcfit) = self.isochrone.rad_interp(star1_rad_t)
@@ -255,7 +302,7 @@ class mcmc_fitter_rad_interp(object):
         if (star2_sing_mag_Kp[0] == -1.) or (star2_sing_mag_H[0] == -1.):
             return err_out
         
-        ## Apply distance modulus and isoc. extinction to single star magnitudes
+        ## Apply isoc. distance modulus and isoc. extinction to single star magnitudes
         (star1_sing_mag_Kp, star1_sing_mag_H) = lc_calc.dist_ext_mag_calc(
                                                     (star1_sing_mag_Kp,
                                                     star1_sing_mag_H),
@@ -280,7 +327,7 @@ class mcmc_fitter_rad_interp(object):
         if (binary_mags_Kp[0] == -1.) or (binary_mags_H[0] == -1.):
             return err_out
         
-        ## Apply distance modulus and isoc. extinction to binary magnitudes
+        ## Apply isoc. distance modulus and isoc. extinction to binary magnitudes
         (binary_mags_Kp, binary_mags_H) = lc_calc.dist_ext_mag_calc(
                                               (binary_mags_Kp, binary_mags_H),
                                               self.dist,
@@ -298,6 +345,11 @@ class mcmc_fitter_rad_interp(object):
         binary_mags_Kp += Kp_ext_adj
         binary_mags_H += H_ext_adj
         
+        # Apply the distance modulus for difference between isoc. distance and bin. distance
+        # (Same for each filter)
+        binary_mags_Kp += dist_mod_mag_adj
+        binary_mags_H += dist_mod_mag_adj
+        
         # Return final light curve
         return (binary_mags_Kp, binary_mags_H)
     
@@ -306,12 +358,23 @@ class mcmc_fitter_rad_interp(object):
         (Kp_ext_t, H_ext_mod_t,
          star1_rad_t, star2_rad_t,
          binary_inc_t, binary_period_t,
-         binary_ecc_t, t0_t) = (0., 0., 0., 0., 0., 0., 0., 0.)
-        if self.model_eccentricity:
+         binary_ecc_t, binary_dist_t, t0_t) = (0., 0., 0., 0., 0., 0.,
+                                               self.default_ecc, self.default_dist, 0.)
+        if self.model_eccentricity and self.model_distance:
+            (Kp_ext_t, H_ext_mod_t,
+             star1_rad_t, star2_rad_t,
+             binary_inc_t, binary_period_t,
+             binary_ecc_t, binary_dist_t, t0_t) = theta
+        elif self.model_eccentricity:
             (Kp_ext_t, H_ext_mod_t,
              star1_rad_t, star2_rad_t,
              binary_inc_t, binary_period_t,
              binary_ecc_t, t0_t) = theta
+        elif self.model_distance:
+            (Kp_ext_t, H_ext_mod_t,
+             star1_rad_t, star2_rad_t,
+             binary_inc_t, binary_period_t,
+             binary_dist_t, t0_t) = theta
         else:
             (Kp_ext_t, H_ext_mod_t,
              star1_rad_t, star2_rad_t,
