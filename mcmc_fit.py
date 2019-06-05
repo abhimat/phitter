@@ -58,6 +58,10 @@ class mcmc_fitter_rad_interp(object):
     use_blackbody_atm = False
     model_numTriangles = 1500
     
+    # Model H Extinction Modifier
+    default_H_ext_mod = 0.0
+    model_H_ext_mod = True
+    
     # Model eccentricity
     default_ecc = 0.0
     model_eccentricity = True
@@ -136,6 +140,10 @@ class mcmc_fitter_rad_interp(object):
     def set_model_use_blackbody_atm(self, use_blackbody_atm):
         self.use_blackbody_atm = use_blackbody_atm
     
+    # Function to set for modelling H extinction modifier
+    def set_model_H_ext_mod(self, model_H_ext_mod):
+        self.model_H_ext_mod = model_H_ext_mod
+    
     # Function to set for modelling eccentricity
     def set_model_eccentricity(self, model_eccentricity):
         self.model_eccentricity = model_eccentricity
@@ -176,31 +184,43 @@ class mcmc_fitter_rad_interp(object):
     # Priors
     ## Using uniform priors, with radius interpolation for stellar parameters
     def lnprior(self, theta):
-        (Kp_ext, H_ext_mod,
-         star1_rad, star2_rad,
-         binary_inc, binary_period,
-         binary_ecc, binary_dist, t0) = (0., 0., 0., 0., 0., 0.,
-                                               self.default_ecc, self.default_dist, 0.)
-        if self.model_eccentricity and self.model_distance:
-            (Kp_ext, H_ext_mod,
-             star1_rad, star2_rad,
-             binary_inc, binary_period,
-             binary_ecc, binary_dist, t0) = theta
-        elif self.model_eccentricity:
-            (Kp_ext, H_ext_mod,
-             star1_rad, star2_rad,
-             binary_inc, binary_period,
-             binary_ecc, t0) = theta
-        elif self.model_distance:
-            (Kp_ext, H_ext_mod,
-             star1_rad, star2_rad,
-             binary_inc, binary_period,
-             binary_dist, t0) = theta
+        # Extract model parameters from theta
+        theta_index = 0
+        
+        Kp_ext = theta[theta_index]
+        theta_index += 1
+        
+        if self.model_H_ext_mod:
+            H_ext_mod = theta[theta_index]
+            theta_index += 1
         else:
-            (Kp_ext, H_ext_mod,
-             star1_rad, star2_rad,
-             binary_inc, binary_period,
-             t0) = theta
+            H_ext_mod = self.default_H_ext_mod
+        
+        star1_rad = theta[theta_index]
+        theta_index += 1
+        
+        star2_rad = theta[theta_index]
+        theta_index += 1
+        
+        binary_inc = theta[theta_index]
+        theta_index += 1
+        
+        binary_period = theta[theta_index]
+        theta_index += 1
+        
+        if self.model_eccentricity:
+            binary_ecc = theta[theta_index]
+            theta_index += 1
+        else:
+            binary_ecc = self.default_ecc
+        
+        if self.model_distance:
+            binary_dist = theta[theta_index]
+            theta_index += 1
+        else:
+            binary_dist = self.default_dist
+        
+        t0 = theta[theta_index]
         
         ## Extinction checks
         Kp_ext_check = (self.lo_Kp_ext_prior_bound <= Kp_ext <= self.hi_Kp_ext_prior_bound)
@@ -231,31 +251,43 @@ class mcmc_fitter_rad_interp(object):
     
     # Calculate model light curve
     def calculate_model_lc(self, theta):
-        (Kp_ext_t, H_ext_mod_t,
-         star1_rad_t, star2_rad_t,
-         binary_inc_t, binary_period_t,
-         binary_ecc_t, binary_dist_t, t0_t) = (0., 0., 0., 0., 0., 0.,
-                                               self.default_ecc, self.default_dist, 0.)
-        if self.model_eccentricity and self.model_distance:
-            (Kp_ext_t, H_ext_mod_t,
-             star1_rad_t, star2_rad_t,
-             binary_inc_t, binary_period_t,
-             binary_ecc_t, binary_dist_t, t0_t) = theta
-        elif self.model_eccentricity:
-            (Kp_ext_t, H_ext_mod_t,
-             star1_rad_t, star2_rad_t,
-             binary_inc_t, binary_period_t,
-             binary_ecc_t, t0_t) = theta
-        elif self.model_distance:
-            (Kp_ext_t, H_ext_mod_t,
-             star1_rad_t, star2_rad_t,
-             binary_inc_t, binary_period_t,
-             binary_dist_t, t0_t) = theta
+        # Extract model parameters from theta
+        theta_index = 0
+        
+        Kp_ext_t = theta[theta_index]
+        theta_index += 1
+        
+        if self.model_H_ext_mod:
+            H_ext_mod_t = theta[theta_index]
+            theta_index += 1
         else:
-            (Kp_ext_t, H_ext_mod_t,
-             star1_rad_t, star2_rad_t,
-             binary_inc_t, binary_period_t,
-             t0_t) = theta
+            H_ext_mod_t = self.default_H_ext_mod
+        
+        star1_rad_t = theta[theta_index]
+        theta_index += 1
+        
+        star2_rad_t = theta[theta_index]
+        theta_index += 1
+        
+        binary_inc_t = theta[theta_index]
+        theta_index += 1
+        
+        binary_period_t = theta[theta_index]
+        theta_index += 1
+        
+        if self.model_eccentricity:
+            binary_ecc_t = theta[theta_index]
+            theta_index += 1
+        else:
+            binary_ecc_t = self.default_ecc
+        
+        if self.model_distance:
+            binary_dist_t = theta[theta_index]
+            theta_index += 1
+        else:
+            binary_dist_t = self.default_dist
+        
+        t0_t = theta[theta_index]
         
         err_out = (np.array([-1.]), np.array([-1.]))
         
@@ -354,32 +386,44 @@ class mcmc_fitter_rad_interp(object):
         return (binary_mags_Kp, binary_mags_H)
     
     # Log Likelihood function
-    def lnlike(self, theta):        
-        (Kp_ext_t, H_ext_mod_t,
-         star1_rad_t, star2_rad_t,
-         binary_inc_t, binary_period_t,
-         binary_ecc_t, binary_dist_t, t0_t) = (0., 0., 0., 0., 0., 0.,
-                                               self.default_ecc, self.default_dist, 0.)
-        if self.model_eccentricity and self.model_distance:
-            (Kp_ext_t, H_ext_mod_t,
-             star1_rad_t, star2_rad_t,
-             binary_inc_t, binary_period_t,
-             binary_ecc_t, binary_dist_t, t0_t) = theta
-        elif self.model_eccentricity:
-            (Kp_ext_t, H_ext_mod_t,
-             star1_rad_t, star2_rad_t,
-             binary_inc_t, binary_period_t,
-             binary_ecc_t, t0_t) = theta
-        elif self.model_distance:
-            (Kp_ext_t, H_ext_mod_t,
-             star1_rad_t, star2_rad_t,
-             binary_inc_t, binary_period_t,
-             binary_dist_t, t0_t) = theta
+    def lnlike(self, theta):    
+        # Extract model parameters from theta
+        theta_index = 0
+        
+        Kp_ext_t = theta[theta_index]
+        theta_index += 1
+        
+        if self.model_H_ext_mod:
+            H_ext_mod_t = theta[theta_index]
+            theta_index += 1
         else:
-            (Kp_ext_t, H_ext_mod_t,
-             star1_rad_t, star2_rad_t,
-             binary_inc_t, binary_period_t,
-             t0_t) = theta
+            H_ext_mod_t = self.default_H_ext_mod
+        
+        star1_rad_t = theta[theta_index]
+        theta_index += 1
+        
+        star2_rad_t = theta[theta_index]
+        theta_index += 1
+        
+        binary_inc_t = theta[theta_index]
+        theta_index += 1
+        
+        binary_period_t = theta[theta_index]
+        theta_index += 1
+        
+        if self.model_eccentricity:
+            binary_ecc_t = theta[theta_index]
+            theta_index += 1
+        else:
+            binary_ecc_t = self.default_ecc
+        
+        if self.model_distance:
+            binary_dist_t = theta[theta_index]
+            theta_index += 1
+        else:
+            binary_dist_t = self.default_dist
+        
+        t0_t = theta[theta_index]
         
         (binary_model_mags_Kp, binary_model_mags_H) = self.calculate_model_lc(theta)
         if (binary_model_mags_Kp[0] == -1.) or (binary_model_mags_H[0] == -1.):
