@@ -95,7 +95,7 @@ class mcmc_fitter_rad_interp(object):
     def __init__(self):
         return
     
-    # Function to make and store isochrone
+    # Functions to make and store isochrones
     def make_isochrone(self, age, Ks_ext, dist, phase, met, use_atm_func='merged'):
         self.Ks_ext = Ks_ext
         
@@ -108,9 +108,50 @@ class mcmc_fitter_rad_interp(object):
         self.age = age
         self.met = met
         
-        self.isochrone = isoc_interp.isochrone_mist(age=age,
-                             ext=Ks_ext, dist=dist, phase=phase, met=met,
-                             use_atm_func=use_atm_func)
+        self.star1_isochrone = isoc_interp.isochrone_mist(age=age,
+                                   ext=Ks_ext, dist=dist, phase=phase, met=met,
+                                   use_atm_func=use_atm_func)
+        self.star2_isochrone = self.star1_isochrone
+        
+        ## Convert from specified extinction in Ks to Kp and H
+        self.Kp_ext = Ks_ext * (self.lambda_Ks / self.lambda_Kp)**self.ext_alpha
+        self.H_ext = Ks_ext * (self.lambda_Ks / self.lambda_H)**self.ext_alpha
+    
+    def make_star1_isochrone(self, age, Ks_ext, dist, phase, met, use_atm_func='merged'):
+        self.Ks_ext = Ks_ext
+        
+        self.dist = dist*u.pc
+        self.default_dist = dist
+        ## Revise prior bounds for distance
+        self.lo_dist_prior_bound = 0.8 * dist
+        self.hi_dist_prior_bound = 1.2 * dist
+        
+        self.age = age
+        self.met = met
+        
+        self.star1_isochrone = isoc_interp.isochrone_mist(age=age,
+                                   ext=Ks_ext, dist=dist, phase=phase, met=met,
+                                   use_atm_func=use_atm_func)
+        
+        ## Convert from specified extinction in Ks to Kp and H
+        self.Kp_ext = Ks_ext * (self.lambda_Ks / self.lambda_Kp)**self.ext_alpha
+        self.H_ext = Ks_ext * (self.lambda_Ks / self.lambda_H)**self.ext_alpha
+    
+    def make_star2_isochrone(self, age, Ks_ext, dist, phase, met, use_atm_func='merged'):
+        self.Ks_ext = Ks_ext
+        
+        self.dist = dist*u.pc
+        self.default_dist = dist
+        ## Revise prior bounds for distance
+        self.lo_dist_prior_bound = 0.8 * dist
+        self.hi_dist_prior_bound = 1.2 * dist
+        
+        self.age = age
+        self.met = met
+        
+        self.star2_isochrone = isoc_interp.isochrone_mist(age=age,
+                                   ext=Ks_ext, dist=dist, phase=phase, met=met,
+                                   use_atm_func=use_atm_func)
         
         ## Convert from specified extinction in Ks to Kp and H
         self.Kp_ext = Ks_ext * (self.lambda_Ks / self.lambda_Kp)**self.ext_alpha
@@ -234,12 +275,14 @@ class mcmc_fitter_rad_interp(object):
         t0_check = (self.lo_t0_prior_bound <= t0 <= self.hi_t0_prior_bound)
         
         ## Stellar parameters check
-        iso_rad_min = self.isochrone.iso_rad_min
-        iso_rad_max = self.isochrone.iso_rad_max
+        star1_iso_rad_min = self.star1_isochrone.iso_rad_min
+        star1_iso_rad_max = self.star1_isochrone.iso_rad_max
+        star2_iso_rad_min = self.star2_isochrone.iso_rad_min
+        star2_iso_rad_max = self.star2_isochrone.iso_rad_max
     
         rad_check = ((star1_rad >= star2_rad) and
-                     (iso_rad_min <= star1_rad <= iso_rad_max) and
-                     (iso_rad_min <= star2_rad <= iso_rad_max))
+                     (star1_iso_rad_min <= star1_rad <= star1_iso_rad_max) and
+                     (star2_iso_rad_min <= star2_rad <= star2_iso_rad_max))
         
         ## Final check and return prior
         if ((Kp_ext_check and H_ext_mod_check) and
@@ -309,8 +352,8 @@ class mcmc_fitter_rad_interp(object):
         dist_mod_mag_adj = 5. * np.log10(binary_dist_t / ((self.dist).to(u.pc)).value)
         
         # Perform interpolation
-        (star1_params_all, star1_params_lcfit) = self.isochrone.rad_interp(star1_rad_t)
-        (star2_params_all, star2_params_lcfit) = self.isochrone.rad_interp(star2_rad_t)
+        (star1_params_all, star1_params_lcfit) = self.star1_isochrone.rad_interp(star1_rad_t)
+        (star2_params_all, star2_params_lcfit) = self.star2_isochrone.rad_interp(star2_rad_t)
         
         (star1_mass_init, star1_mass, star1_rad, star1_lum,
             star1_teff, star1_mag_Kp, star1_mag_H) = star1_params_all
