@@ -410,7 +410,7 @@ def binary_mags_calc(star1_params_lcfit, star2_params_lcfit,
                      binary_params,
                      observation_times,
                      isoc_Ks_ext, Kp_ext, H_ext, ext_alpha,
-                     bin_dist,
+                     isoc_dist, bin_dist,
                      use_blackbody_atm=False,
                      make_mesh_plots=False, plot_name=None,
                      num_triangles=1500):
@@ -425,6 +425,9 @@ def binary_mags_calc(star1_params_lcfit, star2_params_lcfit,
     # Calculate extinction adjustments
     Kp_ext_adj = (Kp_ext - isoc_Kp_ext)
     H_ext_adj = (H_ext - isoc_H_ext)
+    
+    # Calculate distance modulus adjustments
+    dist_mod_mag_adj = 5. * np.log10(bin_dist / (isoc_dist.to(u.pc)).value)
     
     # Extract stellar parameters from input
     (star1_mass, star1_rad, star1_teff, star1_mag_Kp, star1_mag_H) = star1_params_lcfit
@@ -449,13 +452,13 @@ def binary_mags_calc(star1_params_lcfit, star2_params_lcfit,
     (star1_sing_mag_Kp, star1_sing_mag_H) = dist_ext_mag_calc(
                                                 (star1_sing_mag_Kp,
                                                 star1_sing_mag_H),
-                                                bin_dist,
+                                                isoc_dist,
                                                 isoc_Kp_ext, isoc_H_ext)
     
     (star2_sing_mag_Kp, star2_sing_mag_H) = dist_ext_mag_calc(
                                                 (star2_sing_mag_Kp,
                                                 star2_sing_mag_H),
-                                                bin_dist,
+                                                isoc_dist,
                                                 isoc_Kp_ext, isoc_H_ext)
     
     
@@ -475,7 +478,7 @@ def binary_mags_calc(star1_params_lcfit, star2_params_lcfit,
     ## Apply distance modulus and isoc. extinction to binary magnitudes
     (binary_mags_Kp, binary_mags_H) = dist_ext_mag_calc(
                                           (binary_mags_Kp, binary_mags_H),
-                                          bin_dist,
+                                          isoc_dist,
                                           isoc_Kp_ext, isoc_H_ext)
     
     # Apply flux correction to the binary magnitudes
@@ -489,6 +492,11 @@ def binary_mags_calc(star1_params_lcfit, star2_params_lcfit,
     # Apply the extinction difference between model and the isochrone values
     binary_mags_Kp += Kp_ext_adj
     binary_mags_H += H_ext_adj
+    
+    # Apply the distance modulus for difference between isoc. distance and bin. distance
+    # (Same for each filter)
+    binary_mags_Kp += dist_mod_mag_adj
+    binary_mags_H += dist_mod_mag_adj
     
     # Return final light curve
     return (binary_mags_Kp, binary_mags_H)
