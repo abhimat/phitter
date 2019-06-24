@@ -117,4 +117,20 @@ class isochrone_mist(object):
         
         return stellar_params_all, stellar_params_lcfit
     
+    def mass_interp(self, star_mass_interp):
+        # star_mass_init = star_mass_init_interp * u.solMass
+        star_mass = star_mass_interp * u.solMass
+        
+        star_mass_init = np.interp(star_mass_interp, self.iso_mass, self.iso_mass_init) * u.solMass
+        star_rad = np.interp(star_mass_interp, self.iso_mass, self.iso_rad) * u.solRad
+        star_lum = np.interp(star_mass_interp, self.iso_mass, self.iso_lum) * u.W
+        star_teff = np.interp(star_mass_interp, self.iso_mass, self.iso_teff) * u.K
+        star_mag_Kp = np.interp(star_mass_interp, self.iso_mass, self.iso_mag_Kp)
+        star_mag_H = np.interp(star_mass_interp, self.iso_mass, self.iso_mag_H)
+        
+        # Export tuple with all parameters and tuple with only parameters needed for lc fit
+        stellar_params_all = (star_mass_init, star_mass, star_rad, star_lum, star_teff, star_mag_Kp, star_mag_H)
+        stellar_params_lcfit = (star_mass, star_rad, star_teff, star_mag_Kp, star_mag_H)
+        
+        return stellar_params_all, stellar_params_lcfit
 
