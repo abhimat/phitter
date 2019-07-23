@@ -24,6 +24,30 @@ mist_phase_dict['TPAGB'] = 5
 mist_phase_dict['postAGB'] = 6
 mist_phase_dict['WR'] = 9
 
+# Filter properties
+lambda_Ks = 2.18e-6 * u.m
+dlambda_Ks = 0.35e-6 * u.m
+
+lambda_Kp = 2.124e-6 * u.m
+dlambda_Kp = 0.351e-6 * u.m
+
+lambda_H = 1.633e-6 * u.m
+dlambda_H = 0.296e-6 * u.m
+
+# Reference fluxes, calculated with PopStar
+## Vega magnitudes (m_Vega = 0.03)
+ks_filt_info = synthetic.get_filter_info('naco,Ks')
+kp_filt_info = synthetic.get_filter_info('nirc2,Kp')
+h_filt_info = synthetic.get_filter_info('nirc2,H')
+
+v_filt_info = synthetic.get_filter_info('ubv,V')
+
+flux_ref_Ks = ks_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
+flux_ref_Kp = kp_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
+flux_ref_H = h_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
+
+flux_ref_V = v_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
+
 
 class isochrone_mist(object):
     filt_list = ['nirc2,Kp', 'nirc2,H']
@@ -37,15 +61,21 @@ class isochrone_mist(object):
         self.dist = dist
         self.met = met
         
-        # Evolution/Atmosphere Models and Extinction Law
+        # Evolution/Atmosphere Models
         evo_model = evolution.MISTv1()
         
         if use_atm_func == 'merged':
             atm_func = atmospheres.get_merged_atmosphere
         elif use_atm_func == 'phoenix':
             atm_func = atmospheres.get_phoenixv16_atmosphere
-            
+        
+        # Extinction law    
         red_law = reddening.RedLawNoguerasLara18()
+        self.ext_alpha = 2.30
+    
+        ## Calculate extinctions implied by isochrone extinction
+        self.A_Kp = self.A_Ks * (lambda_Ks / lambda_Kp)**self.ext_alpha
+        self.A_H = self.A_Ks * (lambda_Ks / lambda_H)**self.ext_alpha
         
         # Create an isochhrone with the given parameters        
         self.iso_curAge = synthetic.IsochronePhot(self.log_age, self.A_Ks, self.dist,
@@ -95,9 +125,16 @@ class isochrone_mist(object):
         star_mag_Kp = np.interp(star_rad_interp, self.iso_rad, self.iso_mag_Kp)
         star_mag_H = np.interp(star_rad_interp, self.iso_rad, self.iso_mag_H)
         
+        # Passband luminosities
+        star_pblum_Kp, star_pblum_H = self.calc_pb_lums(star_mag_Kp, star_mag_H)
+        
         # Export tuple with all parameters and tuple with only parameters needed for lc fit
-        stellar_params_all = (star_mass_init, star_mass, star_rad, star_lum, star_teff, star_mag_Kp, star_mag_H)
-        stellar_params_lcfit = (star_mass, star_rad, star_teff, star_mag_Kp, star_mag_H)
+        stellar_params_all = (star_mass_init, star_mass, star_rad, star_lum, star_teff,
+                              star_mag_Kp, star_mag_H,
+                              star_pblum_Kp, star_pblum_H)
+        stellar_params_lcfit = (star_mass, star_rad, star_teff,
+                                star_mag_Kp, star_mag_H,
+                                star_pblum_Kp, star_pblum_H)
         
         return stellar_params_all, stellar_params_lcfit
     
@@ -111,9 +148,16 @@ class isochrone_mist(object):
         star_mag_Kp = np.interp(star_mass_init_interp, self.iso_mass_init, self.iso_mag_Kp)
         star_mag_H = np.interp(star_mass_init_interp, self.iso_mass_init, self.iso_mag_H)
         
+        # Passband luminosities
+        star_pblum_Kp, star_pblum_H = self.calc_pb_lums(star_mag_Kp, star_mag_H)
+        
         # Export tuple with all parameters and tuple with only parameters needed for lc fit
-        stellar_params_all = (star_mass_init, star_mass, star_rad, star_lum, star_teff, star_mag_Kp, star_mag_H)
-        stellar_params_lcfit = (star_mass, star_rad, star_teff, star_mag_Kp, star_mag_H)
+        stellar_params_all = (star_mass_init, star_mass, star_rad, star_lum, star_teff,
+                              star_mag_Kp, star_mag_H,
+                              star_pblum_Kp, star_pblum_H)
+        stellar_params_lcfit = (star_mass, star_rad, star_teff,
+                                star_mag_Kp, star_mag_H,
+                                star_pblum_Kp, star_pblum_H)
         
         return stellar_params_all, stellar_params_lcfit
     
@@ -128,9 +172,38 @@ class isochrone_mist(object):
         star_mag_Kp = np.interp(star_mass_interp, self.iso_mass, self.iso_mag_Kp)
         star_mag_H = np.interp(star_mass_interp, self.iso_mass, self.iso_mag_H)
         
+        # Passband luminosities
+        star_pblum_Kp, star_pblum_H = self.calc_pb_lums(star_mag_Kp, star_mag_H)
+        
         # Export tuple with all parameters and tuple with only parameters needed for lc fit
-        stellar_params_all = (star_mass_init, star_mass, star_rad, star_lum, star_teff, star_mag_Kp, star_mag_H)
-        stellar_params_lcfit = (star_mass, star_rad, star_teff, star_mag_Kp, star_mag_H)
+        stellar_params_all = (star_mass_init, star_mass, star_rad, star_lum, star_teff,
+                              star_mag_Kp, star_mag_H,
+                              star_pblum_Kp, star_pblum_H)
+        stellar_params_lcfit = (star_mass, star_rad, star_teff,
+                                star_mag_Kp, star_mag_H,
+                                star_pblum_Kp, star_pblum_H)
         
         return stellar_params_all, stellar_params_lcfit
+    
+    
+    def calc_pb_lums(self, mag_Kp, mag_H):
+        # Calculate absolute magnitude (subtract distance modulus)
+        mag_Kp = mag_Kp - 5. * np.log10(self.dist / 10.)
+        mag_H = mag_H - 5. * np.log10(self.dist / 10.)
+    
+        # Subtract extinction
+        mag_Kp = mag_Kp - self.A_Kp
+        mag_H = mag_H - self.A_H
+    
+        # Calculate luminosity
+        ## Convert magnitudes into fluxes
+        flux_Kp = flux_ref_Kp * (10.**((mag_Kp - 0.03) / -2.5))
+        flux_H = flux_ref_H * (10.**((mag_H - 0.03) / -2.5))
+    
+        ## Calculate passband luminosities
+        lum_Kp = flux_Kp * (4. * np.pi * (10. * u.pc)**2.)
+        lum_H = flux_H * (4. * np.pi * (10. * u.pc)**2.)
+    
+        # Return passband luminosity
+        return lum_Kp.to(u.solLum), lum_H.to(u.solLum)
 
