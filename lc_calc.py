@@ -40,12 +40,14 @@ flux_ref_Kp = kp_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
 flux_ref_H = h_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
 
 # Stellar Parameters
-# stellar_params = (mass, rad, teff, mag_Kp, mag_H)
+# stellar_params = (mass, rad, teff, mag_Kp, mag_H, pblum_Kp, pblum_H)
 
-def single_star_lc(stellar_params, use_blackbody_atm=False,
-                   num_triangles=1500):
+def single_star_lc(stellar_params,
+        use_blackbody_atm=False,
+        num_triangles=1500):
     # Read in the stellar parameters of the current star
-    (star_mass, star_rad, star_teff, star_mag_Kp, star_mag_H) = stellar_params
+    (star_mass, star_rad, star_teff,
+     star_mag_Kp, star_mag_H, star_pblum_Kp, star_pblum_H) = stellar_params
     
     err_out = np.array([-1.])
 
@@ -56,9 +58,11 @@ def single_star_lc(stellar_params, use_blackbody_atm=False,
     if use_blackbody_atm:
         sing_star.add_dataset(phoebe.dataset.lc, times=[0], dataset='mod_lc_Kp', passband='Keck_NIRC2:Kp', ld_func='linear', ld_coeffs=[0.0])
         sing_star.add_dataset(phoebe.dataset.lc, times=[0], dataset='mod_lc_H', passband='Keck_NIRC2:H', ld_func='linear', ld_coeffs=[0.0])
+        # sing_star.add_dataset(phoebe.dataset.lc, times=[0], dataset='mod_lc_V', passband='Johnson:V', ld_func='linear', ld_coeffs=[0.0])
     else:
         sing_star.add_dataset(phoebe.dataset.lc, times=[0], dataset='mod_lc_Kp', passband='Keck_NIRC2:Kp')
         sing_star.add_dataset(phoebe.dataset.lc, times=[0], dataset='mod_lc_H', passband='Keck_NIRC2:H')
+        # sing_star.add_dataset(phoebe.dataset.lc, times=[0], dataset='mod_lc_V', passband='Johnson:V')
     
     # Set up compute
     if use_blackbody_atm:
@@ -66,6 +70,12 @@ def single_star_lc(stellar_params, use_blackbody_atm=False,
     else:
         sing_star.add_compute('phoebe', compute='detailed', distortion_method='sphere', irrad_method='none')
     
+    # Set a default distance
+    sing_star.set_value('distance', 10 * u.pc)
+    
+    # Set the passband luminosities
+    sing_star.set_value('pblum@mod_lc_Kp', star_pblum_Kp)
+    sing_star.set_value('pblum@mod_lc_H', star_pblum_H)
     
     # Set the stellar parameters
     sing_star.set_value('teff@component', star_teff)
@@ -82,12 +92,12 @@ def single_star_lc(stellar_params, use_blackbody_atm=False,
         return (err_out, err_out)
     
     # Retrieve computed fluxes from phoebe
-    sing_star_fluxes_Kp = np.array(sing_star['fluxes@lc@mod_lc_Kp@model'].value) * u.solLum / (4* np.pi * u.m**2)
+    sing_star_fluxes_Kp = np.array(sing_star['fluxes@lc@mod_lc_Kp@model'].value) * u.W / (u.m**2)
     sing_star_mags_Kp = -2.5 * np.log10(sing_star_fluxes_Kp / flux_ref_Kp) + 0.03
     
-    sing_star_fluxes_H = np.array(sing_star['fluxes@lc@mod_lc_H@model'].value) * u.solLum / (4* np.pi * u.m**2)
-    sing_star_mags_H = -2.5 * np.log10(sing_star_fluxes_Kp / flux_ref_H) + 0.03
-    
+    sing_star_fluxes_H = np.array(sing_star['fluxes@lc@mod_lc_H@model'].value) * u.W / (u.m**2)
+    sing_star_mags_H = -2.5 * np.log10(sing_star_fluxes_H / flux_ref_H) + 0.03
+        
     return (sing_star_mags_Kp, sing_star_mags_H)
 
 def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
@@ -120,8 +130,12 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
         phoebe.mpi_off()
     
     # Read in the stellar parameters of the binary components
-    (star1_mass, star1_rad, star1_teff, star1_mag_Kp, star1_mag_H) = star1_params
-    (star2_mass, star2_rad, star2_teff, star2_mag_Kp, star2_mag_H) = star2_params
+    (star1_mass, star1_rad, star1_teff,
+     star1_mag_Kp, star1_mag_H,
+     star1_pblum_Kp, star1_pblum_H) = star1_params
+    (star2_mass, star2_rad, star2_teff,
+     star2_mag_Kp, star2_mag_H,
+     star2_pblum_Kp, star2_pblum_H) = star2_params
     
     # Read in the parameters of the binary system
     (binary_period, binary_ecc, binary_inc, t0) = binary_params
@@ -132,10 +146,18 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     # Set up binary model
     b = phoebe.default_binary()
     
+    ## Set a default distance
+    b.set_value('distance', 10 * u.pc)
+    
     ## Set period, semimajor axis, and mass ratio (q)
     binary_sma = ((binary_period**2. * const.G * (star1_mass + star2_mass)) / (4. * np.pi**2.))**(1./3.)
     
     binary_q = star2_mass / star1_mass
+    
+    if print_diagnostics:
+        print('\nBinary orbit checks')
+        print(binary_sma.to(u.AU))
+        print(binary_q)
     
     b.set_value('period@orbit', binary_period)
     b.set_value('sma@binary@component', binary_sma)
@@ -273,6 +295,15 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     if make_mesh_plots:
         b.add_dataset('mesh', times=[binary_period/4.], dataset='mod_mesh')
     
+    # Set the passband luminosities
+    b.set_value_all('pblum_ref', 'self')
+    
+    b.set_value('pblum@primary@mod_lc_Kp', star1_pblum_Kp)
+    b.set_value('pblum@primary@mod_lc_H', star1_pblum_H)
+    
+    b.set_value('pblum@secondary@mod_lc_Kp', star2_pblum_Kp)
+    b.set_value('pblum@secondary@mod_lc_H', star2_pblum_H)
+    
     # Run compute
     # b.run_compute(compute='detailed', model='run')
     try:
@@ -306,11 +337,11 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     
     # Get fluxes
     ## Kp
-    model_fluxes_Kp = np.array(b['fluxes@lc@mod_lc_Kp@model'].value) * u.solLum / (4* np.pi * u.m**2)   # * u.W / (u.m**2.)
+    model_fluxes_Kp = np.array(b['fluxes@lc@mod_lc_Kp@model'].value) * u.W / (u.m**2.)
     model_mags_Kp = -2.5 * np.log10(model_fluxes_Kp / flux_ref_Kp) + 0.03
     
     ## H
-    model_fluxes_H = np.array(b['fluxes@lc@mod_lc_H@model'].value) * u.solLum / (4* np.pi * u.m**2)   # * u.W / (u.m**2.)
+    model_fluxes_H = np.array(b['fluxes@lc@mod_lc_H@model'].value) * u.W / (u.m**2.)
     model_mags_H = -2.5 * np.log10(model_fluxes_H / flux_ref_H) + 0.03
     
     return (model_mags_Kp, model_mags_H)
@@ -343,9 +374,9 @@ def phased_obs(observation_times, binary_period, t0):
 def dist_ext_mag_calc(input_mags, target_dist, Kp_ext, H_ext):
     (mags_Kp, mags_H) = input_mags
     
-    # App mag at target distance (default PHOEBE dist = 1m)
-    mags_Kp = mags_Kp + 5. * np.log10(target_dist / (1. * u.m))
-    mags_H = mags_H + 5. * np.log10(target_dist / (1. * u.m))
+    # App mag at target distance (default system dist = 10 pc)
+    mags_Kp = mags_Kp + 5. * np.log10(target_dist / (10. * u.pc))
+    mags_H = mags_H + 5. * np.log10(target_dist / (10. * u.pc))
     
     # Add extinction
     mags_Kp = mags_Kp + Kp_ext
@@ -430,8 +461,10 @@ def binary_mags_calc(star1_params_lcfit, star2_params_lcfit,
     dist_mod_mag_adj = 5. * np.log10(bin_dist / (isoc_dist.to(u.pc)).value)
     
     # Extract stellar parameters from input
-    (star1_mass, star1_rad, star1_teff, star1_mag_Kp, star1_mag_H) = star1_params_lcfit
-    (star2_mass, star2_rad, star2_teff, star2_mag_Kp, star2_mag_H) = star2_params_lcfit
+    (star1_mass, star1_rad, star1_teff,
+     star1_mag_Kp, star1_mag_H, star1_pblum_Kp, star1_pblum_H) = star1_params_lcfit
+    (star2_mass, star2_rad, star2_teff,
+     star2_mag_Kp, star2_mag_H, star2_pblum_Kp, star2_pblum_H) = star2_params_lcfit
     
     # Run single star model for reference flux calculations
     (star1_sing_mag_Kp, star1_sing_mag_H) = single_star_lc(star1_params_lcfit,

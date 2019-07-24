@@ -356,9 +356,9 @@ class mcmc_fitter_rad_interp(object):
         (star2_params_all, star2_params_lcfit) = self.star2_isochrone.rad_interp(star2_rad_t)
         
         (star1_mass_init, star1_mass, star1_rad, star1_lum,
-            star1_teff, star1_mag_Kp, star1_mag_H) = star1_params_all
+            star1_teff, star1_mag_Kp, star1_mag_H, star1_pblum_Kp, star1_pblum_H) = star1_params_all
         (star2_mass_init, star2_mass, star2_rad, star2_lum,
-            star2_teff, star2_mag_Kp, star2_mag_H) = star2_params_all
+            star2_teff, star2_mag_Kp, star2_mag_H, star2_pblum_Kp, star2_pblum_H) = star2_params_all
         
         # Run single star model for reference flux calculations
         (star1_sing_mag_Kp, star1_sing_mag_H) = lc_calc.single_star_lc(
