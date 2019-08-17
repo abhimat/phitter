@@ -156,8 +156,8 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     
     if print_diagnostics:
         print('\nBinary orbit checks')
-        print(binary_sma.to(u.AU))
-        print(binary_q)
+        print('Binary SMA: {0}'.format(binary_sma.to(u.AU)))
+        print('Binary Mass Ratio (q): {0}'.format(binary_q))
     
     b.set_value('period@orbit', binary_period)
     b.set_value('sma@binary@component', binary_sma)
@@ -181,8 +181,8 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     ## Check for semidetached cases
     if print_diagnostics:
         print('\nSemidetached checks')
-        print(np.abs((star1_rad - star1_rad_max) / star1_rad_max))
-        print(np.abs((star2_rad - star2_rad_max) / star2_rad_max))
+        print('Star 1: {0}'.format(np.abs((star1_rad - star1_rad_max) / star1_rad_max)))
+        print('Star 2: {0}'.format(np.abs((star2_rad - star2_rad_max) / star2_rad_max)))
     
     semidet_cut = 0.001   # (within 0.1% of max radii)
     semidet_cut = 0.015   # (within 1.5% of max radii)
@@ -210,13 +210,16 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     
     if print_diagnostics:
         print('\nOverflow Checks')
-        print(star1_semidetached)
-        print(star2_semidetached)
-        print(star1_overflow)
-        print(star2_overflow)
+        print('Star 1 Semidetached: {0}'.format(star1_semidetached))
+        print('Star 2 Semidetached: {0}'.format(star2_semidetached))
+        print('Star 1 Overflow: {0}'.format(star1_overflow))
+        print('Star 2 Overflow: {0}'.format(star2_overflow))
     
     ## If none of these overflow cases, set variable to store if binary is detached
-    binary_detached = (not star1_semidetached) and (not star2_semidetached) and (not star1_overflow) and (not star2_overflow)
+    binary_detached = (not star1_semidetached) and \
+                      (not star2_semidetached) and \
+                      (not star1_overflow) and \
+                      (not star2_overflow)
     
     ### Set non-zero eccentricity only if binary is detached
     if binary_detached:
@@ -227,6 +230,8 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     ## Change set up for contact or semidetached cases
     if star1_overflow or star2_overflow:
         b = phoebe.default_binary(contact_binary=True)
+        
+        b.set_value('distance', 10 * u.pc)
         
         b.set_value('period@orbit', binary_period)
         b.set_value('sma@binary@component', binary_sma)
@@ -344,6 +349,13 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     model_fluxes_H = np.array(b['fluxes@lc@mod_lc_H@model'].value) * u.W / (u.m**2.)
     model_mags_H = -2.5 * np.log10(model_fluxes_H / flux_ref_H) + 0.03
     
+    if print_diagnostics:
+        print('\nFlux Checks')
+        print('Fluxes, Kp: {0}'.format(model_fluxes_Kp))
+        print('Mags, Kp: {0}'.format(model_mags_Kp))
+        print('Fluxes, H: {0}'.format(model_fluxes_H))
+        print('Mags, H: {0}'.format(model_mags_H))
+    
     return (model_mags_Kp, model_mags_H)
     
 def phased_obs(observation_times, binary_period, t0):
@@ -444,7 +456,8 @@ def binary_mags_calc(star1_params_lcfit, star2_params_lcfit,
                      isoc_dist, bin_dist,
                      use_blackbody_atm=False,
                      make_mesh_plots=False, plot_name=None,
-                     num_triangles=1500):
+                     num_triangles=1500,
+                     print_diagnostics=False):
     
     # Extinction law (using Nogueras-Lara+ 2018)
     ext_alpha = 2.30
