@@ -231,6 +231,7 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     if star1_overflow or star2_overflow:
         b = phoebe.default_binary(contact_binary=True)
         
+        ### Reset all necessary binary properties for contact system
         b.set_value('distance', 10 * u.pc)
         
         b.set_value('period@orbit', binary_period)
