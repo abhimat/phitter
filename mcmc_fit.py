@@ -280,8 +280,7 @@ class mcmc_fitter_rad_interp(object):
         star2_iso_rad_min = self.star2_isochrone.iso_rad_min
         star2_iso_rad_max = self.star2_isochrone.iso_rad_max
     
-        rad_check = ((star1_rad >= star2_rad) and
-                     (star1_iso_rad_min <= star1_rad <= star1_iso_rad_max) and
+        rad_check = ((star1_iso_rad_min <= star1_rad <= star1_iso_rad_max) and
                      (star2_iso_rad_min <= star2_rad <= star2_iso_rad_max))
         
         ## Final check and return prior
