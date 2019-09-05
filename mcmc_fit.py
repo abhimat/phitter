@@ -376,14 +376,6 @@ class mcmc_fitter_rad_interp(object):
                                               self.dist,
                                               self.Kp_ext, self.H_ext)
         
-        # Apply flux correction to the binary magnitudes
-        (binary_mags_Kp, binary_mags_H) = lc_calc.flux_adj(
-                                              (star1_sing_mag_Kp, star1_sing_mag_H),
-                                              (star1_mag_Kp, star1_mag_H),
-                                              (star2_sing_mag_Kp, star2_sing_mag_H),
-                                              (star2_mag_Kp, star2_mag_H),
-                                              (binary_mags_Kp, binary_mags_H))
-        
         # Apply the extinction difference between model and the isochrone values
         binary_mags_Kp += Kp_ext_adj
         binary_mags_H += H_ext_adj
