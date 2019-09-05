@@ -358,38 +358,7 @@ class mcmc_fitter_rad_interp(object):
             star1_teff, star1_mag_Kp, star1_mag_H, star1_pblum_Kp, star1_pblum_H) = star1_params_all
         (star2_mass_init, star2_mass, star2_rad, star2_lum,
             star2_teff, star2_mag_Kp, star2_mag_H, star2_pblum_Kp, star2_pblum_H) = star2_params_all
-        
-        # Run single star model for reference flux calculations
-        (star1_sing_mag_Kp, star1_sing_mag_H) = lc_calc.single_star_lc(
-                                                    star1_params_lcfit,
-                                                    use_blackbody_atm=self.use_blackbody_atm,
-                                                    num_triangles=self.model_numTriangles)
-        
-        if (star1_sing_mag_Kp[0] == -1.) or (star1_sing_mag_H[0] == -1.):
-            return err_out
-        
-        (star2_sing_mag_Kp, star2_sing_mag_H) = lc_calc.single_star_lc(
-                                                    star2_params_lcfit,
-                                                    use_blackbody_atm=self.use_blackbody_atm,
-                                                    num_triangles=self.model_numTriangles)
-        
-        if (star2_sing_mag_Kp[0] == -1.) or (star2_sing_mag_H[0] == -1.):
-            return err_out
-        
-        ## Apply isoc. distance modulus and isoc. extinction to single star magnitudes
-        (star1_sing_mag_Kp, star1_sing_mag_H) = lc_calc.dist_ext_mag_calc(
-                                                    (star1_sing_mag_Kp,
-                                                    star1_sing_mag_H),
-                                                    self.dist,
-                                                    self.Kp_ext, self.H_ext)
-        
-        (star2_sing_mag_Kp, star2_sing_mag_H) = lc_calc.dist_ext_mag_calc(
-                                                    (star2_sing_mag_Kp,
-                                                    star2_sing_mag_H),
-                                                    self.dist,
-                                                    self.Kp_ext, self.H_ext)
-        
-        
+                
         # Run binary star model to get binary mags
         (binary_mags_Kp, binary_mags_H) = lc_calc.binary_star_lc(
                                               star1_params_lcfit,
