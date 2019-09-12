@@ -66,7 +66,11 @@ binary_sma_samps_solRad = params_table['binary_sma'][rows_ignore:].to(u.solRad).
 binary_q_samps = params_table['binary_q'][rows_ignore:]
 binary_q_init_samps = params_table['binary_q_init'][rows_ignore:]
 
+## Create inclination samples that are just between 0 and 90 degrees
+binary_inc_90max_samps = binary_inc_samps
 
+gt90_filt = np.where(binary_inc_samps > 90.)
+binary_inc_90max_samps[gt90_filt] = 180.*u.deg - binary_inc_90max_samps[gt90_filt]
 
 
 # Make plots for each quantity
@@ -185,6 +189,7 @@ param_samps_plotter(star2_mag_H_samps, 'star2_mag_H', r"$m_{H}$", '', plot_kde=F
 param_samps_plotter(binary_sma_samps, 'binary_sma', r"$a$", r"(AU)", plot_kde=False)
 param_samps_plotter(binary_sma_samps_solRad, 'binary_sma_solRad', r"$a$", r"$(R_{\odot})$", plot_kde=False)
 param_samps_plotter(binary_inc_samps, 'binary_inc', r"$i$", r"$(\degree)$", plot_kde=False)
+param_samps_plotter(binary_inc_90max_samps, 'binary_inc_90max', r"$i$", r"$(\degree)$", plot_kde=False)
 param_samps_plotter(binary_q_samps, 'binary_q', r"$q = M_{2} / M_{1}$", '', plot_kde=False)
 param_samps_plotter(binary_q_init_samps, 'binary_q_init', r"Init. $M_{2} / M_{1}$", '', plot_kde=False)
 param_samps_plotter(binary_dist_samps/1000., 'binary_dist', r"$d$", r"(kpc)", plot_kde=False)
