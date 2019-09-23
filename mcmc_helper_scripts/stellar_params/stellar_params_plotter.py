@@ -67,7 +67,7 @@ binary_q_samps = params_table['binary_q'][rows_ignore:]
 binary_q_init_samps = params_table['binary_q_init'][rows_ignore:]
 
 ## Create inclination samples that are just between 0 and 90 degrees
-binary_inc_90max_samps = binary_inc_samps
+binary_inc_90max_samps = binary_inc_samps.copy()
 
 gt90_filt = np.where(binary_inc_samps > 90.)
 binary_inc_90max_samps[gt90_filt] = 180.*u.deg - binary_inc_90max_samps[gt90_filt]
