@@ -354,10 +354,10 @@ class mcmc_fitter_rad_interp(object):
         (star1_params_all, star1_params_lcfit) = self.star1_isochrone.rad_interp(star1_rad_t)
         (star2_params_all, star2_params_lcfit) = self.star2_isochrone.rad_interp(star2_rad_t)
         
-        (star1_mass_init, star1_mass, star1_rad, star1_lum,
-            star1_teff, star1_mag_Kp, star1_mag_H, star1_pblum_Kp, star1_pblum_H) = star1_params_all
-        (star2_mass_init, star2_mass, star2_rad, star2_lum,
-            star2_teff, star2_mag_Kp, star2_mag_H, star2_pblum_Kp, star2_pblum_H) = star2_params_all
+        (star1_mass_init, star1_mass, star1_rad, star1_lum, star1_teff, star1_logg,
+            star1_mag_Kp, star1_mag_H, star1_pblum_Kp, star1_pblum_H) = star1_params_all
+        (star2_mass_init, star2_mass, star2_rad, star2_lum, star2_teff, star2_logg,
+            star2_mag_Kp, star2_mag_H, star2_pblum_Kp, star2_pblum_H) = star2_params_all
                 
         # Run binary star model to get binary mags
         (binary_mags_Kp, binary_mags_H) = lc_calc.binary_star_lc(
