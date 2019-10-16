@@ -10,8 +10,6 @@ from astropy import units as u
 from astropy import constants as const
 from astropy.table import Table
 
-from phoebe_phitter import isoc_interp
-
 import scipy.stats as stats
 
 import cPickle as pickle

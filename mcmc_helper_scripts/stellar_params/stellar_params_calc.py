@@ -115,10 +115,10 @@ for cur_samp_num in tqdm(range(num_samples)):
     (star2_params_all, star2_params_lcfit) = isochrone.rad_interp(cur_star2_rad)
     
     (cur_star1_mass_init, cur_star1_mass, cur_star1_rad, cur_star1_lum,
-        cur_star1_teff, cur_star1_mag_Kp, cur_star1_mag_H,
+        cur_star1_teff, cur_star1_logg, cur_star1_mag_Kp, cur_star1_mag_H,
         cur_star1_pblum_Kp, cur_star1_pblum_H) = star1_params_all
     (cur_star2_mass_init, cur_star2_mass, cur_star2_rad, cur_star2_lum,
-        cur_star2_teff, cur_star2_mag_Kp, cur_star2_mag_H,
+        cur_star2_teff, cur_star1_logg, cur_star2_mag_Kp, cur_star2_mag_H,
         cur_star2_pblum_Kp, cur_star2_pblum_H) = star2_params_all
     
     ## Binary parameters
