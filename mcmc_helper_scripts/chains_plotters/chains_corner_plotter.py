@@ -42,8 +42,8 @@ log_prior_samples = reader.get_blobs(flat=True)
 samples_orig = np.copy(samples)
 
 burn_ignore_len = 0
-burn_ignore_len = 500
-last_steps_count = 32
+burn_ignore_len = 173
+last_steps_count = -1
 
 ## Organize into shape that can work for us
 if last_steps_count == -1:

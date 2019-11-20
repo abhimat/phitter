@@ -33,12 +33,7 @@ log_prior_samples = reader.get_blobs()
 # print(log_prior_samples.shape)
 
 # Print burnin and thin lengths
-try:
-    tau = reader.get_autocorr_time()
-except emcee.autocorr.AutocorrError as e:
-    print('Too short chains :(')
-    print(e)
-    
+tau = reader.get_autocorr_time(quiet=True)    
 
 burnin = int(2 * np.max(tau))
 thin = int(0.5 * np.min(tau))
