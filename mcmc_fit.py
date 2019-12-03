@@ -53,6 +53,7 @@ class mcmc_fitter_rad_interp(object):
     
     # Extinction law (using Nogueras-Lara+ 2018)
     ext_alpha = 2.30
+    ext_alpha_unc = 0.08
     
     # Number of triangles and atmosphere to use for binary model
     use_blackbody_atm = False
@@ -76,6 +77,8 @@ class mcmc_fitter_rad_interp(object):
     
     lo_H_ext_mod_prior_bound = -2.0
     hi_H_ext_mod_prior_bound = 2.0
+    
+    H_ext_mod_alpha_sig_bound = -1.0
     
     lo_inc_prior_bound = 0.
     hi_inc_prior_bound = 180.
@@ -202,6 +205,9 @@ class mcmc_fitter_rad_interp(object):
         self.lo_H_ext_mod_prior_bound = lo_bound
         self.hi_H_ext_mod_prior_bound = hi_bound
     
+    def set_H_ext_mod_extLaw_sig_prior_bounds(self, sigma_bound):
+        self.H_ext_mod_alpha_sig_bound = sigma_bound
+    
     def set_inc_prior_bounds(self, lo_bound, hi_bound):
         self.lo_inc_prior_bound = lo_bound
         self.hi_inc_prior_bound = hi_bound
@@ -265,8 +271,29 @@ class mcmc_fitter_rad_interp(object):
         
         ## Extinction checks
         Kp_ext_check = (self.lo_Kp_ext_prior_bound <= Kp_ext <= self.hi_Kp_ext_prior_bound)
-        H_ext_mod_check = (self.lo_H_ext_mod_prior_bound <= H_ext_mod <= self.hi_H_ext_mod_prior_bound)
-    
+        
+        H_ext_mod_check = True
+        if self.H_ext_mod_alpha_sig_bound == -1.0:
+            H_ext_mod_check = (self.lo_H_ext_mod_prior_bound <= H_ext_mod <= self.hi_H_ext_mod_prior_bound)
+        else:
+            ### H extinction expected by Kp extinction
+            H_ext = Kp_ext * ((self.lambda_Kp/self.lambda_H)**(self.ext_alpha))
+            
+            ### Bounds given by current extinction and uncertainty on extinction law
+            H_ext_mod_bound_hi = Kp_ext * ((self.lambda_Kp/self.lambda_H)**(self.ext_alpha + self.ext_alpha_unc))
+            H_ext_mod_bound_lo = Kp_ext * ((self.lambda_Kp/self.lambda_H)**(self.ext_alpha - self.ext_alpha_unc))
+            
+            ### Subtract off the H extinction expected by the Kp extinction to get mod
+            H_ext_mod_bound_hi = H_ext_mod_bound_hi - H_ext
+            H_ext_mod_bound_lo = H_ext_mod_bound_lo - H_ext
+            
+            ### Expand bounds by the significance bound specified
+            H_ext_mod_bound_hi = H_ext_mod_bound_hi * self.H_ext_mod_alpha_sig_bound
+            H_ext_mod_bound_lo = H_ext_mod_bound_lo * self.H_ext_mod_alpha_sig_bound
+            
+            ### Check with bounds
+            H_ext_mod_check = (H_ext_mod_bound_lo <= H_ext_mod <= H_ext_mod_bound_hi)
+        
         ## Binary system configuration checks
         inc_check = (self.lo_inc_prior_bound <= binary_inc <= self.hi_inc_prior_bound)
         period_check = (self.lo_period_prior_bound <= binary_period <= self.hi_period_prior_bound)

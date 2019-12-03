@@ -122,7 +122,8 @@ mcmc_fit_obj.default_dist = 7.971e3
 
 # Set prior bounds
 mcmc_fit_obj.set_Kp_ext_prior_bounds(1.0, 4.0)
-mcmc_fit_obj.set_H_ext_mod_prior_bounds(-2.0, 2.0)
+# mcmc_fit_obj.set_H_ext_mod_prior_bounds(-2.0, 2.0)
+mcmc_fit_obj.set_H_ext_mod_extLaw_sig_prior_bounds(5.0)
 
 mcmc_fit_obj.set_period_prior_bounds(73.0, 85.0)
 mcmc_fit_obj.set_dist_prior_bounds(4000., 12000.)
