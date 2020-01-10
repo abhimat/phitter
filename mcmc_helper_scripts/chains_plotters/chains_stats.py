@@ -22,9 +22,11 @@ reader = emcee.backends.HDFBackend(filename, read_only=True)
 samples = reader.get_chain()
 (num_steps, num_chains, num_params) = samples.shape
 
-print("Number of Steps: {0}".format(num_steps))
-print("Number of Chains: {0}".format(num_chains))
-print("Number of Parameters: {0}".format(num_params))
+out_str = ''
+
+out_str += "Number of Steps: {0}\n".format(num_steps)
+out_str += "Number of Chains: {0}\n".format(num_chains)
+out_str += "Number of Parameters: {0}\n\n".format(num_params)
 
 log_prob_samples = reader.get_log_prob()
 log_prior_samples = reader.get_blobs()
@@ -38,6 +40,10 @@ tau = reader.get_autocorr_time(quiet=True)
 burnin = int(2 * np.max(tau))
 thin = int(0.5 * np.min(tau))
 
-print("Chains burn-in length: {0}".format(burnin))
-print("Chains thin length: {0}".format(thin))
-print("Tau: {0}".format(tau))
+out_str += "Chains burn-in length: {0}\n".format(burnin)
+out_str += "Chains thin length: {0}\n".format(thin)
+out_str += "Tau: {0}\n".format(tau)
+
+print(out_str)
+with open('chains_stats_try1.txt', 'w') as out_file:
+    out_file.write(out_str)
