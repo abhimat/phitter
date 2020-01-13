@@ -70,6 +70,7 @@ binary_q_init_samps = params_table['binary_q_init'][rows_ignore:]
 ## Fit Characteristics
 log_prob_samps = params_table['log_prob'][rows_ignore:]
 fit_chi2red_samps = params_table['fit_chi2red'][rows_ignore:]
+fit_BIC_samps = params_table['fit_BIC'][rows_ignore:]
 
 ## Create inclination samples that are just between 0 and 90 degrees
 binary_inc_90max_samps = binary_inc_samps.copy()
@@ -211,6 +212,7 @@ param_samps_plotter(t0_samps, 't0', r"$t_0$", '(MJD)', plot_kde=False)
 
 param_samps_plotter(log_prob_samps, 'log_prob', "Log Probability", '', plot_kde=False)
 param_samps_plotter(fit_chi2red_samps, 'fit_chi2red', r"$\chi^2_{\mathrm{red}}$", '', plot_kde=False)
+param_samps_plotter(fit_BIC_samps, 'fit_BIC', r"BIC", '', plot_kde=False)
 
 
 

@@ -118,6 +118,7 @@ binary_q_init_samps = np.empty(num_samples)
 
 ## Fit Characteristics
 fit_chi2red_samps = np.empty(num_samples)
+fit_BIC_samps = np.empty(num_samples)
 
 # Generate PopStar isochrone
 from popstar import synthetic, evolution, atmospheres, reddening
@@ -182,7 +183,11 @@ for cur_samp_num in tqdm(range(num_samples)):
     binary_q_init_samps[cur_samp_num] = cur_binary_q_init
     
     ## Fit Characteristics
+    ### Reduced chi squared
     fit_chi2red_samps[cur_samp_num] = (log_prob_samps[cur_samp_num] * -2.) / (num_observations - num_params)
+    
+    ### Bayesian Information Criterion
+    fit_BIC_samps[cur_samp_num] = (num_params * np.log(num_observations * 1.)) - (2. * log_prob_samps[cur_samp_num])
     
 
 
@@ -201,7 +206,7 @@ params_table = Table([K_ext_samps, H_ext_mod_samps,
                       star2_mag_Kp_samps, star2_mag_H_samps,
                       star2_pblum_Kp_samps*u.solLum, star2_pblum_H_samps*u.solLum,
                       binary_sma_samps*u.AU, binary_q_samps, binary_q_init_samps,
-                      log_prob_samps, fit_chi2red_samps],
+                      log_prob_samps, fit_chi2red_samps, fit_BIC_samps],
                      names=('K_ext', 'H_ext_mod',
                             'star1_rad', 'star2_rad',
                             'binary_inc', 'binary_per',
@@ -215,7 +220,7 @@ params_table = Table([K_ext_samps, H_ext_mod_samps,
                             'star2_mag_Kp', 'star2_mag_H',
                             'star2_pblum_Kp', 'star2_pblum_H',
                             'binary_sma', 'binary_q', 'binary_q_init',
-                            'log_prob', 'fit_chi2red'))
+                            'log_prob', 'fit_chi2red', 'fit_BIC'))
 
 
 if os.path.exists('stellar_params.h5'):
