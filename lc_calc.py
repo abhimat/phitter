@@ -338,7 +338,7 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
             suffix_str = '_' + plot_name
         
         ## Mesh plot
-        b['mod_mesh@model'].plot(save='./binary_mesh{0}.pdf'.format(suffix_str))
+        mesh_plot_out = b['mod_mesh@model'].plot(save='./binary_mesh{0}.pdf'.format(suffix_str))
     
     
     # Get fluxes
@@ -357,7 +357,10 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
         print('Fluxes, H: {0}'.format(model_fluxes_H))
         print('Mags, H: {0}'.format(model_mags_H))
     
-    return (model_mags_Kp, model_mags_H)
+    if make_mesh_plots:
+        return (model_mags_Kp, model_mags_H, mesh_plot_out)
+    else:
+        return (model_mags_Kp, model_mags_H)
     
 def phased_obs(observation_times, binary_period, t0):
     # Phase the observation times
@@ -482,16 +485,22 @@ def binary_mags_calc(star1_params_lcfit, star2_params_lcfit,
     
     
     # Run binary star model to get binary mags
-    (binary_mags_Kp, binary_mags_H) = binary_star_lc(
-                                          star1_params_lcfit,
-                                          star2_params_lcfit,
-                                          binary_params,
-                                          observation_times,
-                                          use_blackbody_atm=use_blackbody_atm,
-                                          make_mesh_plots=make_mesh_plots,
-                                          plot_name=plot_name,
-                                          num_triangles=num_triangles,
-                                          print_diagnostics=print_diagnostics)
+    binary_star_lc_out = binary_star_lc(
+        star1_params_lcfit,
+        star2_params_lcfit,
+        binary_params,
+        observation_times,
+        use_blackbody_atm=use_blackbody_atm,
+        make_mesh_plots=make_mesh_plots,
+        plot_name=plot_name,
+        num_triangles=num_triangles,
+        print_diagnostics=print_diagnostics)
+    
+    if make_mesh_plots:
+        (binary_mags_Kp, binary_mags_H, mesh_plot_out) = binary_star_lc_out
+    else:
+        (binary_mags_Kp, binary_mags_H) = binary_star_lc_out
+    
     if (binary_mags_Kp[0] == -1.) or (binary_mags_H[0] == -1.):
         return -np.inf
     
@@ -511,4 +520,7 @@ def binary_mags_calc(star1_params_lcfit, star2_params_lcfit,
     binary_mags_H += dist_mod_mag_adj
     
     # Return final light curve
-    return (binary_mags_Kp, binary_mags_H)
+    if make_mesh_plots:
+        return (binary_mags_Kp, binary_mags_H, mesh_plot_out)
+    else:
+        return (binary_mags_Kp, binary_mags_H)
