@@ -29,6 +29,12 @@ isoc_dist = 7.971e3
 isoc_phase = 'RGB'
 isoc_met = 0.0
 
+
+early_iters_cutoff = 200
+early_iters_num_triangles = 200
+final_iters_num_triangles = 500
+
+
 # Read in observation data
 target_star = 'S2-36'
 with open('../lc_data.pkl', 'rb') as input_pickle:
@@ -61,7 +67,7 @@ mcmc_fit_obj.set_observation_mags(
     h_target_mags, h_target_mag_errors)
 
 ## Set number of triangles to use in model mesh
-mcmc_fit_obj.set_model_numTriangles(early_iters_num_triangles)
+mcmc_fit_obj.set_model_numTriangles(final_iters_num_triangles)
 
 ## Set to use blackbody atmosphere
 mcmc_fit_obj.set_model_use_blackbody_atm(True)
@@ -75,15 +81,6 @@ mcmc_fit_obj.set_model_eccentricity(False)
 ## Set to model distance
 mcmc_fit_obj.set_model_distance(False)
 mcmc_fit_obj.default_dist = 7.971e3
-
-# Set prior bounds
-mcmc_fit_obj.set_Kp_ext_prior_bounds(1.0, 4.0)
-mcmc_fit_obj.set_H_ext_mod_prior_bounds(-2.0, 2.0)
-
-mcmc_fit_obj.set_period_prior_bounds(73.0, 85.0)
-mcmc_fit_obj.set_dist_prior_bounds(4000., 12000.)
-mcmc_fit_obj.set_t0_prior_bounds(init_t0_t - (init_binary_period_t * 0.5),
-                                 init_t0_t + (init_binary_period_t * 0.5))
 
 
 # Extract random sets of parameters from the chains
@@ -107,8 +104,7 @@ samples = reader.get_chain(flat=True)
 ## Random indices for calculation
 total_samples = (num_steps - burn_ignore_len) * num_chains
 
-rng = np.random.default_rng()
-plot_indices = rng.choice(total_samples, size=num_plot_samples, replace=False)
+plot_indices = np.random.choice(total_samples, size=num_plot_samples, replace=False)
 
 ## Samples at random indices
 samples = samples[burn_ignore_len * num_chains:,:]
@@ -129,7 +125,7 @@ def binary_lc_run(run_num, binary_params):
     
     (cur_model_mags_Kp, cur_model_mags_H) = mcmc_fit_obj.calculate_model_lc(cur_theta)
 
-    return [cur_model_mags_Kp_dataTimes, cur_model_mags_H_dataTimes]
+    return [cur_model_mags_Kp, cur_model_mags_H]
 
 
 ## Calculate model light curves with parallelization
@@ -156,8 +152,8 @@ for samp_run in range(num_plot_samples):
         continue
     else:
         model_good_trials[samp_run] = 1
-        model_obs_trials_kp[samp_run] = cur_model_mags_Kp_dataTimes
-        model_obs_trials_h[samp_run] = cur_model_mags_H_dataTimes
+        model_obs_trials_kp[samp_run] = cur_model_mags_Kp
+        model_obs_trials_h[samp_run] = cur_model_mags_H
 
 
 
@@ -168,4 +164,3 @@ with open('./obs_modelUnc_try{0}.pkl'.format(trial_num), 'wb') as output_pickle:
     pickle.dump(model_good_trials, output_pickle)
     pickle.dump(model_obs_trials_kp, output_pickle)
     pickle.dump(model_obs_trials_h, output_pickle)
-
