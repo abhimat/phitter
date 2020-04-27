@@ -22,3 +22,6 @@
 
 # Ignore FITS files (e.g. isochrones generated)
 **/*.fits
+
+# Ignore IDEA files
+.idea/*
