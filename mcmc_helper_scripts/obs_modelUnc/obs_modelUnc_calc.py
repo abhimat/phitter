@@ -8,7 +8,10 @@
 # Imports
 import numpy as np
 
-from phoebe_phitter import mcmc_fit
+from phoebe import u
+from phoebe import c as const
+
+from phoebe_phitter import lc_calc, mcmc_fit
 
 from multiprocessing import Pool
 import parmap
@@ -19,7 +22,7 @@ import time
 
 trial_num = 1
 burn_ignore_len = 500
-num_plot_samples = 100
+num_plot_samples = 200
 
 
 # Isochrone parameters
@@ -27,7 +30,7 @@ isoc_age = 12.8e9
 isoc_ext = 2.63
 isoc_dist = 7.971e3
 isoc_phase = 'RGB'
-isoc_met = 0.0
+isoc_met = 0.5
 
 
 early_iters_cutoff = 200
@@ -115,6 +118,10 @@ plot_binary_params = samples[plot_indices]
 
 # Generate binary light curves at the random parameter indices
 
+## Presorted indices
+kp_obs_indices = np.array(range(len(kp_target_MJDs)))
+h_obs_indices = np.array(range(len(h_target_MJDs)))
+
 ## Function for parallelization
 def binary_lc_run(run_num, binary_params):
     cur_binary_params = binary_params[run_num]
@@ -124,7 +131,28 @@ def binary_lc_run(run_num, binary_params):
                  cur_binary_params[6])
     
     (cur_model_mags_Kp, cur_model_mags_H) = mcmc_fit_obj.calculate_model_lc(cur_theta)
-
+    
+    ### Sort back modeled data points into original order 
+    binary_period_t = cur_binary_params[5]
+    t0_t = cur_binary_params[6]
+    
+    (kp_phase_out, h_phase_out) = lc_calc.phased_obs(
+                                      (kp_target_MJDs, h_target_MJDs),
+                                      binary_period_t * u.d, t0_t)
+    
+    (kp_phased_days, kp_phases_sorted_inds, kp_model_times) = kp_phase_out
+    (h_phased_days, h_phases_sorted_inds, h_model_times) = h_phase_out
+    
+    #### Indices for sorting back into original order
+    kp_obs_indices_sorted = kp_obs_indices[kp_phases_sorted_inds]
+    h_obs_indices_sorted = h_obs_indices[h_phases_sorted_inds]
+    
+    kp_model_to_obs_sorted_inds = np.argsort(kp_obs_indices_sorted)
+    h_model_to_obs_sorted_inds = np.argsort(h_obs_indices_sorted)
+    
+    cur_model_mags_Kp = cur_model_mags_Kp[kp_model_to_obs_sorted_inds]
+    cur_model_mags_H = cur_model_mags_H[h_model_to_obs_sorted_inds]
+    
     return [cur_model_mags_Kp, cur_model_mags_H]
 
 
