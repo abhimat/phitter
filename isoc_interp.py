@@ -101,7 +101,7 @@ class isochrone_mist(object):
         else:
             phase_check = np.where(self.iso_curAge.points['phase'] >= -1)
         
-        self.iso_mass_init = self.iso_curAge.points['mass'][phase_check]
+        self.iso_mass_init = (self.iso_curAge.points['mass'][phase_check]).to(u.solMass)
         self.iso_mass = self.iso_curAge.points['mass_current'][phase_check]
         self.iso_rad = (self.iso_curAge.points['R'][phase_check]).to(u.solRad)
         self.iso_lum = self.iso_curAge.points['L'][phase_check]
@@ -121,6 +121,10 @@ class isochrone_mist(object):
         ## Maximum bounds on the radius in isochrone
         self.iso_rad_min = np.min(self.iso_rad).value
         self.iso_rad_max = np.max(self.iso_rad).value
+        
+        ## Maximum bounds on the initial mass in isochrone
+        self.iso_mass_init_min = np.min(self.iso_mass_init).value
+        self.iso_mass_init_max = np.max(self.iso_mass_init).value
     
     def rad_interp(self, star_rad_interp):
         # Reverse isochrones, if radius not increasing, for numpy interpolation to work
