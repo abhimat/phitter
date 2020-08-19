@@ -66,6 +66,8 @@ class isochrone_mist(object):
         
         if use_atm_func == 'merged':
             atm_func = atmospheres.get_merged_atmosphere
+        elif use_atm_func == 'castelli':
+            atm_fun = atmospheres.get_castelli_atmosphere
         elif use_atm_func == 'phoenix':
             atm_func = atmospheres.get_phoenixv16_atmosphere
         
