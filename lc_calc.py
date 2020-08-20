@@ -199,6 +199,8 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     if (star2_rad > star2_rad_max) and not star2_semidetached:
         star2_overflow = True
     
+    
+    
     ### Check for if both stars are overflowing; which star overflows more?
     ### Choose that star to be overflowing more
     if star1_overflow and star2_overflow:
@@ -258,8 +260,19 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     
     ## Secondary
     b.set_value('teff@secondary@component', star2_teff)
-    if (not star2_semidetached) and (not star1_overflow):
-        b.set_value('requiv@secondary@component', star2_rad)
+    if (not star2_semidetached) and (not star1_overflow) and (not star2_overflow):
+        try:
+            b.set_value('requiv@secondary@component', star2_rad)
+        except:
+            print('\nOverflow Checks')
+            print('Star 1 Semidetached: {0}'.format(star1_semidetached))
+            print('Star 2 Semidetached: {0}'.format(star2_semidetached))
+            print('Star 1 Overflow: {0}'.format(star1_overflow))
+            print('Star 2 Overflow: {0}'.format(star2_overflow))
+            
+            print("Cannot set secondary radius: {0}".format(sys.exc_info()[0]))
+            
+            return err_out
     
     
     # Set the number of triangles in the mesh

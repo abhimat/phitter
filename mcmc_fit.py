@@ -647,7 +647,7 @@ class mcmc_fitter_mass_init_interp(mcmc_fitter_base_interp):
             star1_mag_Kp, star1_mag_H, star1_pblum_Kp, star1_pblum_H) = star1_params_all
         (star2_mass_init, star2_mass, star2_rad, star2_lum, star2_teff, star2_logg,
             star2_mag_Kp, star2_mag_H, star2_pblum_Kp, star2_pblum_H) = star2_params_all
-                
+        
         # Run binary star model to get binary mags
         (binary_mags_Kp, binary_mags_H) = lc_calc.binary_star_lc(
                                               star1_params_lcfit,
