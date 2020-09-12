@@ -300,9 +300,12 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     kp_model_times = kp_model_times[kp_phases_sorted_inds]
     
     if use_blackbody_atm:
-        b.add_dataset(phoebe.dataset.lc, time=kp_model_times, dataset='mod_lc_Kp', passband='Keck_NIRC2:Kp', ld_func='linear', ld_coeffs=[0.0])
+        b.add_dataset(phoebe.dataset.lc, time=kp_model_times,
+                      dataset='mod_lc_Kp', passband='Keck_NIRC2:Kp',
+                      ld_func='linear', ld_coeffs=[0.0])
     else:
-        b.add_dataset(phoebe.dataset.lc, time=kp_model_times, dataset='mod_lc_Kp', passband='Keck_NIRC2:Kp')
+        b.add_dataset(phoebe.dataset.lc, time=kp_model_times,
+                      dataset='mod_lc_Kp', passband='Keck_NIRC2:Kp')
     
     ## H
     h_phases_sorted_inds = np.argsort(h_phased_days)
@@ -311,9 +314,12 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     h_model_times = h_model_times[h_phases_sorted_inds]
     
     if use_blackbody_atm:
-        b.add_dataset(phoebe.dataset.lc, times=h_model_times, dataset='mod_lc_H', passband='Keck_NIRC2:H', ld_func='linear', ld_coeffs=[0.0])
+        b.add_dataset(phoebe.dataset.lc, times=h_model_times,
+                      dataset='mod_lc_H', passband='Keck_NIRC2:H',
+                      ld_func='linear', ld_coeffs=[0.0])
     else:
-        b.add_dataset(phoebe.dataset.lc, times=h_model_times, dataset='mod_lc_H', passband='Keck_NIRC2:H')
+        b.add_dataset(phoebe.dataset.lc, times=h_model_times,
+                      dataset='mod_lc_H', passband='Keck_NIRC2:H')
     
     ## RV
     rv_phases_sorted_inds = np.argsort(rv_phased_days)
@@ -321,7 +327,13 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     rv_model_times = (rv_phased_days) * binary_period.to(u.d).value
     rv_model_times = rv_model_times[rv_phases_sorted_inds]
     
-    b.add_dataset(phoebe.dataset.rv, time=rv_model_times, dataset='mod_rv', passband='Keck_NIRC2:Kp')
+    if use_blackbody_atm:
+        b.add_dataset(phoebe.dataset.rv, time=rv_model_times,
+                      dataset='mod_rv', passband='Keck_NIRC2:Kp',
+                      ld_func='linear', ld_coeffs=[0.0])
+    else:
+        b.add_dataset(phoebe.dataset.rv, time=rv_model_times,
+                      dataset='mod_rv', passband='Keck_NIRC2:Kp')
     
     
     # Add mesh dataset if making mesh plot
