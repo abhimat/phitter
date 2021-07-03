@@ -35,16 +35,7 @@ log_prior_samples = reader.get_blobs()
 
 
 # Set up plot
-#### Plot Nerdery
-plt.rc('font', family='serif')
-plt.rc('font', serif='Computer Modern Roman')
-plt.rc('text', usetex=True)
-plt.rc('text.latex', preamble=r"\usepackage{gensymb}")
-
-plt.rc('xtick', direction = 'in')
-plt.rc('ytick', direction = 'in')
-plt.rc('xtick', top = True)
-plt.rc('ytick', right = True)
+plt.style.use(['tex_paper', 'ticks_outtie'])
 
 fig = plt.figure(figsize=(10,20))
 
@@ -121,11 +112,38 @@ for cur_chain_num in chain_nums:
              log_prob_samples[:, cur_chain_num],
              '-', color=chain_color, alpha=chain_alpha)
 
+ax1.set_xlim([0, num_steps])
 
-y_majorLocator = MultipleLocator(200)
-y_minorLocator = MultipleLocator(50)
-ax1.yaxis.set_major_locator(y_majorLocator)
-ax1.yaxis.set_minor_locator(y_minorLocator)
+if num_steps < 200:
+    y_majorLocator = MultipleLocator(200)
+    y_minorLocator = MultipleLocator(50)
+    ax1.yaxis.set_major_locator(y_majorLocator)
+    ax1.yaxis.set_minor_locator(y_minorLocator)
+    
+elif num_steps < 500:
+    ax1.set_ylim([-250, -50])
+    
+    y_majorLocator = MultipleLocator(20)
+    y_minorLocator = MultipleLocator(5)
+    ax1.yaxis.set_major_locator(y_majorLocator)
+    ax1.yaxis.set_minor_locator(y_minorLocator)
+    
+    x_majorLocator = MultipleLocator(100)
+    x_minorLocator = MultipleLocator(20)
+    ax1.xaxis.set_major_locator(x_majorLocator)
+    ax1.xaxis.set_minor_locator(x_minorLocator)
+else:
+    ax1.set_ylim([-100, -50])
+    
+    y_majorLocator = MultipleLocator(10)
+    y_minorLocator = MultipleLocator(2)
+    ax1.yaxis.set_major_locator(y_majorLocator)
+    ax1.yaxis.set_minor_locator(y_minorLocator)
+    
+    x_majorLocator = MultipleLocator(200)
+    x_minorLocator = MultipleLocator(50)
+    ax1.xaxis.set_major_locator(x_majorLocator)
+    ax1.xaxis.set_minor_locator(x_minorLocator)
 
 # Save out plot
 fig.tight_layout()

@@ -42,7 +42,7 @@ log_prior_samples = reader.get_blobs(flat=True)
 samples_orig = np.copy(samples)
 
 burn_ignore_len = 0
-burn_ignore_len = 173
+burn_ignore_len = 500
 last_steps_count = -1
 
 ## Organize into shape that can work for us
@@ -83,16 +83,7 @@ print('t0 = {0:.4f} + {1:.4f} - {2:.4f}'.format(t0_mcmc[0], t0_mcmc[1], t0_mcmc[
 
 
 ## Corner Plot
-### Plot Nerdery
-plt.rc('font', family='serif')
-plt.rc('font', serif='Computer Modern Roman')
-plt.rc('text', usetex=True)
-plt.rc('text.latex', preamble=r"\usepackage{gensymb}")
-
-plt.rc('xtick', direction = 'out')
-plt.rc('ytick', direction = 'out')
-plt.rc('xtick', top = True)
-plt.rc('ytick', right = True)
+plt.style.use(['tex_paper', 'ticks_outtie'])
 
 import corner
 fig = corner.corner(samples, labels=parameters)
