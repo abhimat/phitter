@@ -101,7 +101,8 @@ def single_star_lc(stellar_params,
     return (sing_star_mags_Kp, sing_star_mags_H)
 
 def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
-        use_blackbody_atm=False, make_mesh_plots=False, plot_name=None,
+        use_blackbody_atm=False,
+        make_mesh_plots=False, mesh_temp=False, plot_name=None,
         print_diagnostics=False, par_compute=False, num_par_processes=8,
         num_triangles=1500):
     """Compute the light curve for a binary system
@@ -313,6 +314,9 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     # Add mesh dataset if making mesh plot
     if make_mesh_plots:
         b.add_dataset('mesh', times=[binary_period/4.], dataset='mod_mesh')
+        
+        if mesh_temp:
+            b['columns@mesh'] = ['teffs']
     
     # Set the passband luminosities for the stars
     b.set_value_all('pblum_ref', 'self')
@@ -343,15 +347,20 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
 
         plt.rc('xtick', direction = 'in')
         plt.rc('ytick', direction = 'in')
-        plt.rc('xtick', top = True)
-        plt.rc('ytick', right = True)
+        # plt.rc('xtick', top = True)
+        # plt.rc('ytick', right = True)
         
         suffix_str = ''
         if plot_name is not None:
             suffix_str = '_' + plot_name
         
         ## Mesh plot
-        mesh_plot_out = b['mod_mesh@model'].plot(save='./binary_mesh{0}.pdf'.format(suffix_str))
+        if mesh_temp:
+            mesh_plot_out = b['mod_mesh@model'].plot(save='./binary_mesh{0}.pdf'.format(suffix_str),
+                                                     fc='teffs',
+                                                     fclim=(None, 5000))
+        else:
+            mesh_plot_out = b['mod_mesh@model'].plot(save='./binary_mesh{0}.pdf'.format(suffix_str))
     
     
     # Get fluxes
@@ -472,7 +481,7 @@ def binary_mags_calc(star1_params_lcfit, star2_params_lcfit,
                      isoc_Ks_ext, Kp_ext, H_ext, ext_alpha,
                      isoc_dist, bin_dist,
                      use_blackbody_atm=False,
-                     make_mesh_plots=False, plot_name=None,
+                     make_mesh_plots=False, mesh_temp=False, plot_name=None,
                      num_triangles=1500,
                      print_diagnostics=False):
     
@@ -505,6 +514,7 @@ def binary_mags_calc(star1_params_lcfit, star2_params_lcfit,
         observation_times,
         use_blackbody_atm=use_blackbody_atm,
         make_mesh_plots=make_mesh_plots,
+        mesh_temp=mesh_temp,
         plot_name=plot_name,
         num_triangles=num_triangles,
         print_diagnostics=print_diagnostics)
