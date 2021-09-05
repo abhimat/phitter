@@ -747,3 +747,264 @@ class mcmc_fitter_mass_init_interp(mcmc_fitter_base_interp):
         if not np.isfinite(lp):
             return -np.inf
         return lp + self.lnlike(theta)
+
+class mcmc_fitter_mass_init_and_rad_interp(mcmc_fitter_base_interp):
+    # Priors
+    ## Using uniform priors, with mass init and radius interpolation
+    ## for stellar parameters
+    def lnprior(self, theta):
+        # Extract model parameters from theta
+        theta_index = 0
+        
+        Kp_ext = theta[theta_index]
+        theta_index += 1
+        
+        if self.model_H_ext_mod:
+            H_ext_mod = theta[theta_index]
+            theta_index += 1
+        else:
+            H_ext_mod = self.default_H_ext_mod
+        
+        star1_mass_init = theta[theta_index]
+        theta_index += 1
+        
+        star2_rad = theta[theta_index]
+        theta_index += 1
+        
+        binary_inc = theta[theta_index]
+        theta_index += 1
+        
+        binary_period = theta[theta_index]
+        theta_index += 1
+        
+        if self.model_eccentricity:
+            binary_ecc = theta[theta_index]
+            theta_index += 1
+        else:
+            binary_ecc = self.default_ecc
+        
+        if self.model_distance:
+            binary_dist = theta[theta_index]
+            theta_index += 1
+        else:
+            binary_dist = self.default_dist
+        
+        t0 = theta[theta_index]
+        
+        ## Extinction checks
+        Kp_ext_check = (self.lo_Kp_ext_prior_bound <= Kp_ext <= self.hi_Kp_ext_prior_bound)
+        
+        H_ext_mod_check = True
+        if self.H_ext_mod_alpha_sig_bound == -1.0:
+            H_ext_mod_check = (self.lo_H_ext_mod_prior_bound <= H_ext_mod <= self.hi_H_ext_mod_prior_bound)
+        else:
+            ### H extinction expected by Kp extinction
+            H_ext = Kp_ext * ((self.lambda_Kp/self.lambda_H)**(self.ext_alpha))
+            
+            ### Bounds given by current extinction and uncertainty on extinction law
+            H_ext_mod_bound_hi = Kp_ext * ((self.lambda_Kp/self.lambda_H)**(self.ext_alpha + self.ext_alpha_unc))
+            H_ext_mod_bound_lo = Kp_ext * ((self.lambda_Kp/self.lambda_H)**(self.ext_alpha - self.ext_alpha_unc))
+            
+            ### Subtract off the H extinction expected by the Kp extinction to get mod
+            H_ext_mod_bound_hi = H_ext_mod_bound_hi - H_ext
+            H_ext_mod_bound_lo = H_ext_mod_bound_lo - H_ext
+            
+            ### Expand bounds by the significance bound specified
+            H_ext_mod_bound_hi = H_ext_mod_bound_hi * self.H_ext_mod_alpha_sig_bound
+            H_ext_mod_bound_lo = H_ext_mod_bound_lo * self.H_ext_mod_alpha_sig_bound
+            
+            ### Check with bounds
+            H_ext_mod_check = (H_ext_mod_bound_lo <= H_ext_mod <= H_ext_mod_bound_hi)
+        
+        ## Binary system configuration checks
+        inc_check = (self.lo_inc_prior_bound <= binary_inc <= self.hi_inc_prior_bound)
+        period_check = (self.lo_period_prior_bound <= binary_period <= self.hi_period_prior_bound)
+        ecc_check = (self.lo_ecc_prior_bound <= binary_ecc <= self.hi_ecc_prior_bound)
+        dist_check = (self.lo_dist_prior_bound <= binary_dist <= self.hi_dist_prior_bound)
+        t0_check = (self.lo_t0_prior_bound <= t0 <= self.hi_t0_prior_bound)
+        
+        ## Stellar parameters check
+        star1_iso_mass_init_min = self.star1_isochrone.iso_mass_init_min
+        star1_iso_mass_init_max = self.star1_isochrone.iso_mass_init_max
+        star2_iso_rad_min = self.star2_isochrone.iso_rad_min
+        star2_iso_rad_max = self.star2_isochrone.iso_rad_max
+    
+        mass_init_check = (star1_iso_mass_init_min <= star1_mass_init <= star1_iso_mass_init_max)
+        rad_check = (star2_iso_rad_min <= star2_rad <= star2_iso_rad_max)
+        
+        ## Final check and return prior
+        if ((Kp_ext_check and H_ext_mod_check) and
+            inc_check and period_check
+            and ecc_check and dist_check and t0_check
+            and mass_init_check
+            and rad_check):
+            return 0.0
+        return -np.inf
+    
+    # Calculate model light curve
+    def calculate_model_lc(self, theta):
+        # Extract model parameters from theta
+        theta_index = 0
+        
+        Kp_ext_t = theta[theta_index]
+        theta_index += 1
+        
+        if self.model_H_ext_mod:
+            H_ext_mod_t = theta[theta_index]
+            theta_index += 1
+        else:
+            H_ext_mod_t = self.default_H_ext_mod
+        
+        star1_mass_init_t = theta[theta_index]
+        theta_index += 1
+        
+        star2_rad_t = theta[theta_index]
+        theta_index += 1
+        
+        binary_inc_t = theta[theta_index]
+        theta_index += 1
+        
+        binary_period_t = theta[theta_index]
+        theta_index += 1
+        
+        if self.model_eccentricity:
+            binary_ecc_t = theta[theta_index]
+            theta_index += 1
+        else:
+            binary_ecc_t = self.default_ecc
+        
+        if self.model_distance:
+            binary_dist_t = theta[theta_index]
+            theta_index += 1
+        else:
+            binary_dist_t = self.default_dist
+        
+        t0_t = theta[theta_index]
+        
+        err_out = (np.array([-1.]), np.array([-1.]))
+        
+        # Add units to input parameters if necessary
+        binary_inc = binary_inc_t * u.deg
+        binary_period = binary_period_t * u.d
+        binary_ecc = binary_ecc_t
+        t0 = t0_t
+        
+        ## Construct tuple with binary parameters
+        binary_params = (binary_period, binary_ecc, binary_inc, t0)
+        
+        # Calculate extinction adjustments
+        Kp_ext_adj = (Kp_ext_t - self.Kp_ext)
+        H_ext_adj = (((Kp_ext_t * (self.lambda_Kp / self.lambda_H)**self.ext_alpha)
+                      - self.H_ext) + H_ext_mod_t)
+        
+        # Calculate distance modulus adjustments
+        dist_mod_mag_adj = 5. * np.log10(binary_dist_t / ((self.dist).to(u.pc)).value)
+        
+        # Perform interpolation
+        (star1_params_all, star1_params_lcfit) = self.star1_isochrone.mass_init_interp(star1_mass_init_t)
+        (star2_params_all, star2_params_lcfit) = self.star2_isochrone.rad_interp(star2_rad_t)
+        
+        (star1_mass_init, star1_mass, star1_rad, star1_lum, star1_teff, star1_logg,
+            star1_mag_Kp, star1_mag_H, star1_pblum_Kp, star1_pblum_H) = star1_params_all
+        (star2_mass_init, star2_mass, star2_rad, star2_lum, star2_teff, star2_logg,
+            star2_mag_Kp, star2_mag_H, star2_pblum_Kp, star2_pblum_H) = star2_params_all
+        
+        # Run binary star model to get binary mags
+        (binary_mags_Kp, binary_mags_H) = lc_calc.binary_star_lc(
+                                              star1_params_lcfit,
+                                              star2_params_lcfit,
+                                              binary_params,
+                                              self.observation_times,
+                                              use_blackbody_atm=self.use_blackbody_atm,
+                                              num_triangles=self.model_numTriangles)
+        if (binary_mags_Kp[0] == -1.) or (binary_mags_H[0] == -1.):
+            return err_out
+        
+        ## Apply isoc. distance modulus and isoc. extinction to binary magnitudes
+        (binary_mags_Kp, binary_mags_H) = lc_calc.dist_ext_mag_calc(
+                                              (binary_mags_Kp, binary_mags_H),
+                                              self.dist,
+                                              self.Kp_ext, self.H_ext)
+        
+        # Apply the extinction difference between model and the isochrone values
+        binary_mags_Kp += Kp_ext_adj
+        binary_mags_H += H_ext_adj
+        
+        # Apply the distance modulus for difference between isoc. distance and bin. distance
+        # (Same for each filter)
+        binary_mags_Kp += dist_mod_mag_adj
+        binary_mags_H += dist_mod_mag_adj
+        
+        # Return final light curve
+        return (binary_mags_Kp, binary_mags_H)
+    
+    # Log Likelihood function
+    def lnlike(self, theta):    
+        # Extract model parameters from theta
+        theta_index = 0
+        
+        Kp_ext_t = theta[theta_index]
+        theta_index += 1
+        
+        if self.model_H_ext_mod:
+            H_ext_mod_t = theta[theta_index]
+            theta_index += 1
+        else:
+            H_ext_mod_t = self.default_H_ext_mod
+        
+        star1_mass_init_t = theta[theta_index]
+        theta_index += 1
+        
+        star2_rad_t = theta[theta_index]
+        theta_index += 1
+        
+        binary_inc_t = theta[theta_index]
+        theta_index += 1
+        
+        binary_period_t = theta[theta_index]
+        theta_index += 1
+        
+        if self.model_eccentricity:
+            binary_ecc_t = theta[theta_index]
+            theta_index += 1
+        else:
+            binary_ecc_t = self.default_ecc
+        
+        if self.model_distance:
+            binary_dist_t = theta[theta_index]
+            theta_index += 1
+        else:
+            binary_dist_t = self.default_dist
+        
+        t0_t = theta[theta_index]
+        
+        (binary_model_mags_Kp, binary_model_mags_H) = self.calculate_model_lc(theta)
+        if (binary_model_mags_Kp[0] == -1.) or (binary_model_mags_H[0] == -1.):
+            return -np.inf
+        
+        # Phase the observation times
+        (kp_phase_out, h_phase_out) = lc_calc.phased_obs(
+                                          self.observation_times,
+                                          binary_period_t * u.d, t0_t)
+        
+        (kp_phased_days, kp_phases_sorted_inds, kp_model_times) = kp_phase_out
+        (h_phased_days, h_phases_sorted_inds, h_model_times) = h_phase_out
+        
+        # Calculate log likelihood and return
+        log_likelihood = np.sum((self.kp_obs_mags[kp_phases_sorted_inds] -
+                             binary_model_mags_Kp)**2. /
+                             (self.kp_obs_mag_errors[kp_phases_sorted_inds])**2.)
+        log_likelihood += np.sum((self.h_obs_mags[h_phases_sorted_inds] -
+                              binary_model_mags_H)**2. /
+                              (self.h_obs_mag_errors[h_phases_sorted_inds])**2.)
+    
+        log_likelihood = -0.5 * log_likelihood
+    
+        return log_likelihood
+    
+    # Posterior Probability Function
+    def lnprob(self, theta):
+        lp = self.lnprior(theta)
+        if not np.isfinite(lp):
+            return -np.inf
+        return lp + self.lnlike(theta)
