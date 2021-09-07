@@ -102,7 +102,8 @@ def single_star_lc(stellar_params,
 
 def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
         use_blackbody_atm=False,
-        make_mesh_plots=False, mesh_temp=False, plot_name=None,
+        make_mesh_plots=False, mesh_temp=False, mesh_temp_cmap=None,
+        plot_name=None,
         print_diagnostics=False, par_compute=False, num_par_processes=8,
         num_triangles=1500):
     """Compute the light curve for a binary system
@@ -358,7 +359,7 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
         if mesh_temp:
             mesh_plot_out = b['mod_mesh@model'].plot(save='./binary_mesh{0}.pdf'.format(suffix_str),
                                                      fc='teffs',
-                                                     fclim=(None, 5000))
+                                                     fcmap=mesh_temp_cmap)
         else:
             mesh_plot_out = b['mod_mesh@model'].plot(save='./binary_mesh{0}.pdf'.format(suffix_str))
     
@@ -481,7 +482,8 @@ def binary_mags_calc(star1_params_lcfit, star2_params_lcfit,
                      isoc_Ks_ext, Kp_ext, H_ext, ext_alpha,
                      isoc_dist, bin_dist,
                      use_blackbody_atm=False,
-                     make_mesh_plots=False, mesh_temp=False, plot_name=None,
+                     make_mesh_plots=False, mesh_temp=False, mesh_temp_cmap=None,
+                     plot_name=None,
                      num_triangles=1500,
                      print_diagnostics=False):
     
@@ -515,6 +517,7 @@ def binary_mags_calc(star1_params_lcfit, star2_params_lcfit,
         use_blackbody_atm=use_blackbody_atm,
         make_mesh_plots=make_mesh_plots,
         mesh_temp=mesh_temp,
+        mesh_temp_cmap=mesh_temp_cmap,
         plot_name=plot_name,
         num_triangles=num_triangles,
         print_diagnostics=print_diagnostics)
