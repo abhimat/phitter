@@ -44,8 +44,12 @@ log_prior_samples = reader.get_blobs()
 log_prob_max = np.max(log_prob_samples)
 log_prob_argmax_index = np.unravel_index(np.argmax(log_prob_samples), log_prob_samples.shape)
 
+dof = 69-7
+red_chi_sq_min = -2. * log_prob_max / dof
+
 
 out_str += "Log Likelihood max: {0}\n".format(log_prob_max)
+out_str += "Reduced Chi Squared min: {0}\n".format(red_chi_sq_min)
 out_str += "Log Likelihood argmax: {0}\n\n".format(log_prob_argmax_index)
 
 out_str += "Parameter values at argmax\n"

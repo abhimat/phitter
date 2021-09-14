@@ -76,10 +76,12 @@ for cur_chain_num in chain_nums:
 
     for param_index in range(num_params):
         cur_chain_param_samps = cur_chain_rows[:, param_index]
-
+        
         plot_axs[param_index].plot(range(1,num_steps+1,1),
                                    cur_chain_param_samps,
                                    '-', color=chain_color, alpha=chain_alpha)
+        
+        plot_axs[param_index].set_xlim([0, num_steps])
 
 
 

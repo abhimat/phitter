@@ -369,8 +369,8 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
 
         plt.rc('xtick', direction = 'in')
         plt.rc('ytick', direction = 'in')
-        plt.rc('xtick', top = True)
-        plt.rc('ytick', right = True)
+        # plt.rc('xtick', top = True)
+        # plt.rc('ytick', right = True)
         
         suffix_str = ''
         if plot_name is not None:
