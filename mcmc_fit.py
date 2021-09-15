@@ -795,6 +795,8 @@ class mcmc_fitter_mass_init_and_rad_interp(mcmc_fitter_base_interp):
         Kp_ext_check = (self.lo_Kp_ext_prior_bound <= Kp_ext <= self.hi_Kp_ext_prior_bound)
         
         H_ext_mod_check = True
+        
+        H_ext_mod_bound_oneSig = 1.0
         if self.H_ext_mod_alpha_sig_bound == -1.0:
             H_ext_mod_check = (self.lo_H_ext_mod_prior_bound <= H_ext_mod <= self.hi_H_ext_mod_prior_bound)
         else:
@@ -807,14 +809,9 @@ class mcmc_fitter_mass_init_and_rad_interp(mcmc_fitter_base_interp):
             
             ### Subtract off the H extinction expected by the Kp extinction to get mod
             H_ext_mod_bound_hi = H_ext_mod_bound_hi - H_ext
-            H_ext_mod_bound_lo = H_ext_mod_bound_lo - H_ext
+            H_ext_mod_bound_lo = H_ext - H_ext_mod_bound_lo
             
-            ### Expand bounds by the significance bound specified
-            H_ext_mod_bound_hi = H_ext_mod_bound_hi * self.H_ext_mod_alpha_sig_bound
-            H_ext_mod_bound_lo = H_ext_mod_bound_lo * self.H_ext_mod_alpha_sig_bound
-            
-            ### Check with bounds
-            H_ext_mod_check = (H_ext_mod_bound_lo <= H_ext_mod <= H_ext_mod_bound_hi)
+            H_ext_mod_bound_oneSig = np.max(np.abs([H_ext_mod_bound_hi, H_ext_mod_bound_lo]))
         
         ## Binary system configuration checks
         inc_check = (self.lo_inc_prior_bound <= binary_inc <= self.hi_inc_prior_bound)
@@ -833,12 +830,27 @@ class mcmc_fitter_mass_init_and_rad_interp(mcmc_fitter_base_interp):
         rad_check = (star2_iso_rad_min <= star2_rad <= star2_iso_rad_max)
         
         ## Final check and return prior
-        if ((Kp_ext_check and H_ext_mod_check) and
-            inc_check and period_check
-            and ecc_check and dist_check and t0_check
-            and mass_init_check
-            and rad_check):
-            return 0.0
+        if self.H_ext_mod_alpha_sig_bound == -1.0:  # If doing simple H_ext check
+            if ((Kp_ext_check and H_ext_mod_check) and
+                inc_check and period_check
+                and ecc_check and dist_check and t0_check
+                and mass_init_check
+                and rad_check):
+                return 0.0
+        else:   # Else doing Gaussian prior check on H_ext
+            if (Kp_ext_check
+                and inc_check and period_check
+                and ecc_check and dist_check and t0_check
+                and mass_init_check
+                and rad_check):
+                
+                # Return gaussian prior for H_ext_mod parameter
+                log_prior = np.log(1.0/(np.sqrt(2*np.pi)*H_ext_mod_bound_oneSig))
+                log_prior = (log_prior - 
+                             0.5 * (H_ext_mod**2) / (H_ext_mod_bound_oneSig**2))
+                return log_prior
+        
+        # If here at this point, all previous checks failed
         return -np.inf
     
     # Calculate model light curve
