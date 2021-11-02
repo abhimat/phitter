@@ -104,18 +104,18 @@ class isochrone_mist(object):
             phase_check = np.where(self.iso_curAge.points['phase'] >= -1)
         
         self.iso_mass_init = (self.iso_curAge.points['mass'][phase_check]).to(u.solMass)
-        self.iso_mass = self.iso_curAge.points['mass_current'][phase_check]
+        self.iso_mass = (self.iso_curAge.points['mass_current'][phase_check]).to(u.solMass)
         self.iso_rad = (self.iso_curAge.points['R'][phase_check]).to(u.solRad)
-        self.iso_lum = self.iso_curAge.points['L'][phase_check]
-        self.iso_teff = self.iso_curAge.points['Teff'][phase_check]
+        self.iso_lum = (self.iso_curAge.points['L'][phase_check]).to(u.solLum)
+        self.iso_teff = (self.iso_curAge.points['Teff'][phase_check]).to(u.K)
         self.iso_logg = self.iso_curAge.points['logg'][phase_check]
         
         self.iso_mag_Kp = self.iso_curAge.points['m_nirc2_Kp'][phase_check]
         self.iso_mag_H = self.iso_curAge.points['m_nirc2_H'][phase_check]
         
         ## Stellar parameters from the absolute magnitude isochrones
-        self.iso_absMag_mass_init = self.iso_absMag.points['mass'][phase_check]
-        self.iso_absMag_mass = self.iso_absMag.points['mass_current'][phase_check]
+        self.iso_absMag_mass_init = (self.iso_absMag.points['mass'][phase_check]).to(u.solMass)
+        self.iso_absMag_mass = (self.iso_absMag.points['mass_current'][phase_check]).to(u.solMass)
         self.iso_absMag_rad = (self.iso_absMag.points['R'][phase_check]).to(u.solRad)
         self.iso_absMag_Kp = self.iso_absMag.points['m_nirc2_Kp'][phase_check]
         self.iso_absMag_H = self.iso_absMag.points['m_nirc2_H'][phase_check]
@@ -143,16 +143,16 @@ class isochrone_mist(object):
         
         star_rad = star_rad_interp * u.solRad
         
-        star_mass_init = np.interp(star_rad_interp, self.iso_rad, self.iso_mass_init) * u.solMass
-        star_mass = np.interp(star_rad_interp, self.iso_rad, self.iso_mass) * u.solMass
-        star_lum = np.interp(star_rad_interp, self.iso_rad, self.iso_lum) * u.W
-        star_teff = np.interp(star_rad_interp, self.iso_rad, self.iso_teff) * u.K
-        star_logg = np.interp(star_rad_interp, self.iso_rad, self.iso_logg)
-        star_mag_Kp = np.interp(star_rad_interp, self.iso_rad, self.iso_mag_Kp)
-        star_mag_H = np.interp(star_rad_interp, self.iso_rad, self.iso_mag_H)
+        star_mass_init = np.interp(star_rad, self.iso_rad, self.iso_mass_init)
+        star_mass = np.interp(star_rad, self.iso_rad, self.iso_mass)
+        star_lum = np.interp(star_rad, self.iso_rad, self.iso_lum)
+        star_teff = np.interp(star_rad, self.iso_rad, self.iso_teff)
+        star_logg = np.interp(star_rad, self.iso_rad, self.iso_logg)
+        star_mag_Kp = np.interp(star_rad, self.iso_rad, self.iso_mag_Kp)
+        star_mag_H = np.interp(star_rad, self.iso_rad, self.iso_mag_H)
 
-        star_absMag_Kp = np.interp(star_rad_interp, self.iso_absMag_rad, self.iso_absMag_Kp)
-        star_absMag_H = np.interp(star_rad_interp, self.iso_absMag_rad, self.iso_absMag_H)
+        star_absMag_Kp = np.interp(star_rad, self.iso_absMag_rad, self.iso_absMag_Kp)
+        star_absMag_H = np.interp(star_rad, self.iso_absMag_rad, self.iso_absMag_H)
         
         # Passband luminosities
         star_pblum_Kp, star_pblum_H = self.calc_pb_lums(star_absMag_Kp, star_absMag_H)
@@ -161,7 +161,7 @@ class isochrone_mist(object):
         stellar_params_all = (star_mass_init, star_mass, star_rad, star_lum, star_teff, star_logg,
                               star_mag_Kp, star_mag_H,
                               star_pblum_Kp, star_pblum_H)
-        stellar_params_lcfit = (star_mass, star_rad, star_teff,
+        stellar_params_lcfit = (star_mass, star_rad, star_teff, star_logg,
                                 star_mag_Kp, star_mag_H,
                                 star_pblum_Kp, star_pblum_H)
         
@@ -170,16 +170,16 @@ class isochrone_mist(object):
     def mass_init_interp(self, star_mass_init_interp):
         star_mass_init = star_mass_init_interp * u.solMass
         
-        star_mass = np.interp(star_mass_init_interp, self.iso_mass_init, self.iso_mass) * u.solMass
-        star_rad = np.interp(star_mass_init_interp, self.iso_mass_init, self.iso_rad) * u.solRad
-        star_lum = np.interp(star_mass_init_interp, self.iso_mass_init, self.iso_lum) * u.W
-        star_teff = np.interp(star_mass_init_interp, self.iso_mass_init, self.iso_teff) * u.K
-        star_logg = np.interp(star_mass_init_interp, self.iso_mass_init, self.iso_logg)
-        star_mag_Kp = np.interp(star_mass_init_interp, self.iso_mass_init, self.iso_mag_Kp)
-        star_mag_H = np.interp(star_mass_init_interp, self.iso_mass_init, self.iso_mag_H)
+        star_mass = np.interp(star_mass_init, self.iso_mass_init, self.iso_mass)
+        star_rad = np.interp(star_mass_init, self.iso_mass_init, self.iso_rad)
+        star_lum = np.interp(star_mass_init, self.iso_mass_init, self.iso_lum)
+        star_teff = np.interp(star_mass_init, self.iso_mass_init, self.iso_teff)
+        star_logg = np.interp(star_mass_init, self.iso_mass_init, self.iso_logg)
+        star_mag_Kp = np.interp(star_mass_init, self.iso_mass_init, self.iso_mag_Kp)
+        star_mag_H = np.interp(star_mass_init, self.iso_mass_init, self.iso_mag_H)
         
-        star_absMag_Kp = np.interp(star_mass_init_interp, self.iso_absMag_mass_init, self.iso_absMag_Kp)
-        star_absMag_H = np.interp(star_mass_init_interp, self.iso_absMag_mass_init, self.iso_absMag_H)
+        star_absMag_Kp = np.interp(star_mass_init, self.iso_absMag_mass_init, self.iso_absMag_Kp)
+        star_absMag_H = np.interp(star_mass_init, self.iso_absMag_mass_init, self.iso_absMag_H)
         
         # Passband luminosities
         star_pblum_Kp, star_pblum_H = self.calc_pb_lums(star_absMag_Kp, star_absMag_H)
@@ -188,26 +188,25 @@ class isochrone_mist(object):
         stellar_params_all = (star_mass_init, star_mass, star_rad, star_lum, star_teff, star_logg,
                               star_mag_Kp, star_mag_H,
                               star_pblum_Kp, star_pblum_H)
-        stellar_params_lcfit = (star_mass, star_rad, star_teff,
+        stellar_params_lcfit = (star_mass, star_rad, star_teff, star_logg,
                                 star_mag_Kp, star_mag_H,
                                 star_pblum_Kp, star_pblum_H)
         
         return stellar_params_all, stellar_params_lcfit
     
     def mass_interp(self, star_mass_interp):
-        # star_mass_init = star_mass_init_interp * u.solMass
         star_mass = star_mass_interp * u.solMass
         
-        star_mass_init = np.interp(star_mass_interp, self.iso_mass, self.iso_mass_init) * u.solMass
-        star_rad = np.interp(star_mass_interp, self.iso_mass, self.iso_rad) * u.solRad
-        star_lum = np.interp(star_mass_interp, self.iso_mass, self.iso_lum) * u.W
-        star_teff = np.interp(star_mass_interp, self.iso_mass, self.iso_teff) * u.K
-        star_logg = np.interp(star_mass_interp, self.iso_mass, self.iso_logg)
-        star_mag_Kp = np.interp(star_mass_interp, self.iso_mass, self.iso_mag_Kp)
-        star_mag_H = np.interp(star_mass_interp, self.iso_mass, self.iso_mag_H)
+        star_mass_init = np.interp(star_mass, self.iso_mass, self.iso_mass_init)
+        star_rad = np.interp(star_mass, self.iso_mass, self.iso_rad)
+        star_lum = np.interp(star_mass, self.iso_mass, self.iso_lum)
+        star_teff = np.interp(star_mass, self.iso_mass, self.iso_teff)
+        star_logg = np.interp(star_mass, self.iso_mass, self.iso_logg)
+        star_mag_Kp = np.interp(star_mass, self.iso_mass, self.iso_mag_Kp)
+        star_mag_H = np.interp(star_mass, self.iso_mass, self.iso_mag_H)
         
-        star_absMag_Kp = np.interp(star_mass_interp, self.iso_absMag_mass, self.iso_absMag_Kp)
-        star_absMag_H = np.interp(star_mass_interp, self.iso_absMag_mass, self.iso_absMag_H)
+        star_absMag_Kp = np.interp(star_mass, self.iso_absMag_mass, self.iso_absMag_Kp)
+        star_absMag_H = np.interp(star_mass, self.iso_absMag_mass, self.iso_absMag_H)
         
         # Passband luminosities
         star_pblum_Kp, star_pblum_H = self.calc_pb_lums(star_absMag_Kp, star_absMag_H)
@@ -216,7 +215,7 @@ class isochrone_mist(object):
         stellar_params_all = (star_mass_init, star_mass, star_rad, star_lum, star_teff,
                               star_mag_Kp, star_mag_H,
                               star_pblum_Kp, star_pblum_H)
-        stellar_params_lcfit = (star_mass, star_rad, star_teff,
+        stellar_params_lcfit = (star_mass, star_rad, star_teff, star_logg,
                                 star_mag_Kp, star_mag_H,
                                 star_pblum_Kp, star_pblum_H)
         

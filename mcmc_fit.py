@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Light curve calculation functions,
+# MCMC classes,
 # for fitting with PHOEBE
 # ---
 # Abhimat Gautam
