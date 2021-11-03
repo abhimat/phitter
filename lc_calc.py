@@ -325,17 +325,17 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     
     
     # Set the number of triangles in the mesh
+    # Individual stars
     if len(b.filter('ntriangles@primary@detailed@compute')) == 1: 
         b.set_value('ntriangles@primary@detailed@compute', num_triangles)
         
-        if len(b.filter('ntriangles@secondary@detailed@compute')) == 1: 
-            b.set_value('ntriangles@secondary@detailed@compute', num_triangles)
-    elif len(b.filter('ntriangles@contact_envelope@detailed@compute')) == 1:
-        print(b.filter('ntriangles@contact_envelope@detailed@compute'))
+    if len(b.filter('ntriangles@secondary@detailed@compute')) == 1: 
+        b.set_value('ntriangles@secondary@detailed@compute', num_triangles)
+    
+    # Contact envelope
+    if len(b.filter('ntriangles@contact_envelope@detailed@compute')) == 1:
         b.set_value('ntriangles@contact_envelope@detailed@compute',
                     num_triangles * 2.)
-    
-    
     
     # Phase the observation times
     ## Read in observation times
