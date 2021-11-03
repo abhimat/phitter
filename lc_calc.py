@@ -151,19 +151,21 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
         if star1_teff > (31000 * u.K) and (4.0 > star1_logg > 3.5):
             star1_teff_round = 30995.0 * u.K
             
-            print('Star 1 out of C&K 2004 grid')
-            print('star1_logg = {0:.4f}'.format(star1_logg))
-            print('Rounding down star1_teff')
-            print('{0:.4f} -> {1:.4f}'.format(star1_teff, star1_teff_round))
+            if print_diagnostics:
+                print('Star 1 out of C&K 2004 grid')
+                print('star1_logg = {0:.4f}'.format(star1_logg))
+                print('Rounding down star1_teff')
+                print('{0:.4f} -> {1:.4f}'.format(star1_teff, star1_teff_round))
             
             star1_teff = star1_teff_round
         if star2_teff > (31000 * u.K) and (4.0 > star2_logg > 3.5):
             star2_teff_round = 30995.0 * u.K
             
-            print('Star 2 out of C&K 2004 grid')
-            print('star2_logg = {0:.4f}'.format(star2_logg))
-            print('Rounding down star2_teff')
-            print('{0:.4f} -> {1:.4f}'.format(star2_teff, star2_teff_round))
+            if print_diagnostics:
+                print('Star 2 out of C&K 2004 grid')
+                print('star2_logg = {0:.4f}'.format(star2_logg))
+                print('Rounding down star2_teff')
+                print('{0:.4f} -> {1:.4f}'.format(star2_teff, star2_teff_round))
             
             star2_teff = star2_teff_round
         
@@ -323,8 +325,13 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     
     
     # Set the number of triangles in the mesh
-    b.set_value('ntriangles@primary@detailed@compute', num_triangles)
-    b.set_value('ntriangles@secondary@detailed@compute', num_triangles)
+    if len(b.filter('ntriangles@primary@detailed@compute')) == 1: 
+        b.set_value('ntriangles@primary@detailed@compute', num_triangles)
+    else:
+        print(b.filter('ntriangles@detailed@compute'))
+    
+    if len(b.filter('ntriangles@secondary@detailed@compute')) == 1: 
+        b.set_value('ntriangles@secondary@detailed@compute', num_triangles)
     
     # Phase the observation times
     ## Read in observation times
