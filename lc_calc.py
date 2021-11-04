@@ -263,6 +263,27 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
         print('Star 1 Overflow: {0}'.format(star1_overflow))
         print('Star 2 Overflow: {0}'.format(star2_overflow))
     
+    # If star 2 is overflowing, have to re set up model:
+    # Calling this same binary_star_lc function again,
+    # with star 2 as primary and star 1 as secondary.
+    # Change t0 = t0 - per/2 to make sure phase is correct,
+    # wrt stars 1 and 2 being in same respective position
+    if star2_overflow and not star1_overflow:
+        redo_binary_params = (binary_period, binary_ecc, binary_inc,
+                              t0 - (binary_period.to(u.d).value/2.))
+        
+        return binary_star_lc(star2_params, star1_params,
+                    redo_binary_params,
+                    observation_times,
+                    use_blackbody_atm=use_blackbody_atm,
+                    make_mesh_plots=make_mesh_plots,
+                    mesh_temp=mesh_temp, mesh_temp_cmap=mesh_temp_cmap,
+                    plot_name=plot_name,
+                    print_diagnostics=print_diagnostics,
+                    par_compute=par_compute, num_par_processes=num_par_processes,
+                    num_triangles=num_triangles)
+    
+    
     ## If none of these overflow cases, set variable to store if binary is detached
     binary_detached = (not star1_semidetached) and \
                       (not star2_semidetached) and \
@@ -334,7 +355,9 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     
     # Contact envelope
     if len(b.filter('ntriangles@contact_envelope@detailed@compute')) == 1:
-        b.set_value('ntriangles@contact_envelope@detailed@compute',
+       if print_diagnostics:
+           print('Setting number of triangles for contact envelope')
+       b.set_value('ntriangles@contact_envelope@detailed@compute',
                     num_triangles * 2.)
     
     # Phase the observation times
@@ -403,8 +426,11 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     b.set_value('pblum@secondary@mod_lc_H', star2_pblum_H)
     
     # Run compute
-    # b.run_compute(compute='detailed', model='run',
-    #               progressbar=False)
+    # if print_diagnostics:
+    #     print("Trying inital compute run")
+    #     b.run_compute(compute='detailed', model='run',
+    #                   progressbar=False)
+
     try:
         b.run_compute(compute='detailed', model='run',
                       progressbar=False)
