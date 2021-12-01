@@ -46,7 +46,7 @@ def single_star_lc(stellar_params,
         use_blackbody_atm=False,
         num_triangles=1500):
     # Read in the stellar parameters of the current star
-    (star_mass, star_rad, star_teff,
+    (star_mass, star_rad, star_teff, star_logg,
      star_mag_Kp, star_mag_H, star_pblum_Kp, star_pblum_H) = stellar_params
     
     err_out = np.array([-1.])
@@ -124,7 +124,6 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     par_compute
     num_par_processes
     """
-    
     
     if par_compute:
         # TODO: Need to implement parallelization correctly
@@ -283,7 +282,6 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
                     par_compute=par_compute, num_par_processes=num_par_processes,
                     num_triangles=num_triangles)
     
-    
     ## If none of these overflow cases, set variable to store if binary is detached
     binary_detached = (not star1_semidetached) and \
                       (not star2_semidetached) and \
@@ -346,7 +344,7 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     
     
     # Set the number of triangles in the mesh
-    # Individual stars
+    # Detached stars
     if len(b.filter('ntriangles@primary@detailed@compute')) == 1: 
         b.set_value('ntriangles@primary@detailed@compute', num_triangles)
         
@@ -358,7 +356,7 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
        if print_diagnostics:
            print('Setting number of triangles for contact envelope')
        b.set_value('ntriangles@contact_envelope@detailed@compute',
-                    num_triangles * 2.)
+                   num_triangles * 2.)
     
     # Phase the observation times
     ## Read in observation times
@@ -379,7 +377,7 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     #               dataset='mod_lc_Kp', passband='Keck_NIRC2:Kp')
     if use_blackbody_atm:
         b.add_dataset(phoebe.dataset.lc, time=kp_model_times,
-                      dataset='mod_lc_Kp', passband='Keck_NIRC2:Kp')    #  ld_coeffs=[0.0, 0.0]
+                      dataset='mod_lc_Kp', passband='Keck_NIRC2:Kp')
         b.set_value('ld_mode@primary@mod_lc_Kp', 'manual')
         b.set_value('ld_mode@secondary@mod_lc_Kp', 'manual')
         b.set_value('ld_func@primary@mod_lc_Kp', 'logarithmic')
@@ -604,9 +602,9 @@ def binary_mags_calc(star1_params_lcfit, star2_params_lcfit,
     dist_mod_mag_adj = 5. * np.log10(bin_dist / (isoc_dist.to(u.pc)).value)
     
     # Extract stellar parameters from input
-    (star1_mass, star1_rad, star1_teff, star_logg,
+    (star1_mass, star1_rad, star1_teff, star1_logg,
      star1_mag_Kp, star1_mag_H, star1_pblum_Kp, star1_pblum_H) = star1_params_lcfit
-    (star2_mass, star2_rad, star2_teff, star_logg,
+    (star2_mass, star2_rad, star2_teff, star2_logg,
      star2_mag_Kp, star2_mag_H, star2_pblum_Kp, star2_pblum_H) = star2_params_lcfit
     
     
