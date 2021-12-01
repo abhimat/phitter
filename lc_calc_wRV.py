@@ -46,7 +46,7 @@ def single_star_lc(stellar_params,
         use_blackbody_atm=False,
         num_triangles=1500):
     # Read in the stellar parameters of the current star
-    (star_mass, star_rad, star_teff,
+    (star_mass, star_rad, star_teff, star_logg,
      star_mag_Kp, star_mag_H, star_pblum_Kp, star_pblum_H) = stellar_params
     
     err_out = np.array([-1.])
@@ -86,7 +86,8 @@ def single_star_lc(stellar_params,
     
     # Run compute
     try:
-        sing_star.run_compute(compute='detailed', model='run')
+        sing_star.run_compute(compute='detailed', model='run',
+                              progressbar=False)
     except: # Catch errors during computation (probably shouldn't happen during individual star computation)
         print("Error during primary ind. star compute: {0}".format(sys.exc_info()[0]))
         return (err_out, err_out)
@@ -101,7 +102,9 @@ def single_star_lc(stellar_params,
     return (sing_star_mags_Kp, sing_star_mags_H)
 
 def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
-        use_blackbody_atm=False, make_mesh_plots=False, plot_name=None,
+        use_blackbody_atm=False,
+        make_mesh_plots=False, mesh_temp=False, mesh_temp_cmap=None,
+        plot_name=None,
         print_diagnostics=False, par_compute=False, num_par_processes=8,
         num_triangles=1500):
     """Compute the light curve for a binary system
@@ -129,10 +132,10 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
         phoebe.mpi_off()
     
     # Read in the stellar parameters of the binary components
-    (star1_mass, star1_rad, star1_teff,
+    (star1_mass, star1_rad, star1_teff, star1_logg,
      star1_mag_Kp, star1_mag_H,
      star1_pblum_Kp, star1_pblum_H) = star1_params
-    (star2_mass, star2_rad, star2_teff,
+    (star2_mass, star2_rad, star2_teff, star2_logg,
      star2_mag_Kp, star2_mag_H,
      star2_pblum_Kp, star2_pblum_H) = star2_params
     
@@ -146,6 +149,49 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
                    np.array([-1.]), np.array([-1.]),
                    np.array([-1.]))
     
+    # Check for high temp ck2004 atmosphere limits
+    if not use_blackbody_atm:
+        # log g = 3.5, high temp bounds (above 31e3 K)
+        if star1_teff > (31000 * u.K) and (4.0 > star1_logg > 3.5):
+            star1_teff_round = 30995.0 * u.K
+            
+            if print_diagnostics:
+                print('Star 1 out of C&K 2004 grid')
+                print('star1_logg = {0:.4f}'.format(star1_logg))
+                print('Rounding down star1_teff')
+                print('{0:.4f} -> {1:.4f}'.format(star1_teff, star1_teff_round))
+            
+            star1_teff = star1_teff_round
+        if star2_teff > (31000 * u.K) and (4.0 > star2_logg > 3.5):
+            star2_teff_round = 30995.0 * u.K
+            
+            if print_diagnostics:
+                print('Star 2 out of C&K 2004 grid')
+                print('star2_logg = {0:.4f}'.format(star2_logg))
+                print('Rounding down star2_teff')
+                print('{0:.4f} -> {1:.4f}'.format(star2_teff, star2_teff_round))
+            
+            star2_teff = star2_teff_round
+        
+        # log g = 4.0, high temp bounds (above 40e3 K)
+        if star1_teff > (40000 * u.K) and (4.5 > star1_logg > 4.0):
+            star1_teff_round = 39995.0 * u.K
+            
+            print('Star 1 out of C&K 2004 grid')
+            print('star1_logg = {0:.4f}'.format(star1_logg))
+            print('Rounding down star1_teff')
+            print('{0:.4f} -> {1:.4f}'.format(star1_teff, star1_teff_round))
+            
+            star1_teff = star1_teff_round
+        if star2_teff > (40000 * u.K) and (4.0 > star2_logg > 3.50):
+            star2_teff_round = 39995.0 * u.K
+            
+            print('Star 2 out of C&K 2004 grid')
+            print('star2_logg = {0:.4f}'.format(star2_logg))
+            print('Rounding down star2_teff')
+            print('{0:.4f} -> {1:.4f}'.format(star2_teff, star2_teff_round))
+            
+            star2_teff = star2_teff_round
     
     # Set up binary model
     b = phoebe.default_binary()
@@ -221,6 +267,26 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
         print('Star 1 Overflow: {0}'.format(star1_overflow))
         print('Star 2 Overflow: {0}'.format(star2_overflow))
     
+    # If star 2 is overflowing, have to re set up model:
+    # Calling this same binary_star_lc function again,
+    # with star 2 as primary and star 1 as secondary.
+    # Change t0 = t0 - per/2 to make sure phase is correct,
+    # wrt stars 1 and 2 being in same respective position
+    if star2_overflow and not star1_overflow:
+        redo_binary_params = (binary_period, binary_ecc, binary_inc,
+                              t0 - (binary_period.to(u.d).value/2.))
+        
+        return binary_star_lc(star2_params, star1_params,
+                    redo_binary_params,
+                    observation_times,
+                    use_blackbody_atm=use_blackbody_atm,
+                    make_mesh_plots=make_mesh_plots,
+                    mesh_temp=mesh_temp, mesh_temp_cmap=mesh_temp_cmap,
+                    plot_name=plot_name,
+                    print_diagnostics=print_diagnostics,
+                    par_compute=par_compute, num_par_processes=num_par_processes,
+                    num_triangles=num_triangles)
+    
     ## If none of these overflow cases, set variable to store if binary is detached
     binary_detached = (not star1_semidetached) and \
                       (not star2_semidetached) and \
@@ -252,18 +318,21 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     
     # Set up compute
     if use_blackbody_atm:
-        b.add_compute('phoebe', compute='detailed', irrad_method='wilson', atm='blackbody')
+        b.add_compute('phoebe', compute='detailed',
+                      irrad_method='wilson', atm='blackbody')
     else:
         b.add_compute('phoebe', compute='detailed', irrad_method='wilson')
     
     # Set the parameters of the component stars of the system
     ## Primary
     b.set_value('teff@primary@component', star1_teff)
+    # b.set_value('logg@primary@component', star1_logg)
     if (not star1_semidetached) and (not star2_overflow):
         b.set_value('requiv@primary@component', star1_rad)
     
     ## Secondary
     b.set_value('teff@secondary@component', star2_teff)
+    # b.set_value('logg@secondary@component', star2_logg)
     if (not star2_semidetached) and (not star1_overflow) and (not star2_overflow):
         try:
             b.set_value('requiv@secondary@component', star2_rad)
@@ -280,8 +349,19 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     
     
     # Set the number of triangles in the mesh
-    b.set_value('ntriangles@primary@detailed@compute', num_triangles)
-    b.set_value('ntriangles@secondary@detailed@compute', num_triangles)
+    # Detached stars
+    if len(b.filter('ntriangles@primary@detailed@compute')) == 1: 
+        b.set_value('ntriangles@primary@detailed@compute', num_triangles)
+        
+    if len(b.filter('ntriangles@secondary@detailed@compute')) == 1: 
+        b.set_value('ntriangles@secondary@detailed@compute', num_triangles)
+    
+    # Contact envelope
+    if len(b.filter('ntriangles@contact_envelope@detailed@compute')) == 1:
+       if print_diagnostics:
+           print('Setting number of triangles for contact envelope')
+       b.set_value('ntriangles@contact_envelope@detailed@compute',
+                   num_triangles * 2.)
     
     # Phase the observation times
     ## Read in observation times
@@ -301,8 +381,11 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     
     if use_blackbody_atm:
         b.add_dataset(phoebe.dataset.lc, time=kp_model_times,
-                      dataset='mod_lc_Kp', passband='Keck_NIRC2:Kp',
-                      ld_func='linear', ld_coeffs=[0.0])
+                      dataset='mod_lc_Kp', passband='Keck_NIRC2:Kp')
+        b.set_value('ld_mode@primary@mod_lc_Kp', 'manual')
+        b.set_value('ld_mode@secondary@mod_lc_Kp', 'manual')
+        b.set_value('ld_func@primary@mod_lc_Kp', 'logarithmic')
+        b.set_value('ld_func@secondary@mod_lc_Kp', 'logarithmic')
     else:
         b.add_dataset(phoebe.dataset.lc, time=kp_model_times,
                       dataset='mod_lc_Kp', passband='Keck_NIRC2:Kp')
@@ -315,8 +398,11 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     
     if use_blackbody_atm:
         b.add_dataset(phoebe.dataset.lc, times=h_model_times,
-                      dataset='mod_lc_H', passband='Keck_NIRC2:H',
-                      ld_func='linear', ld_coeffs=[0.0])
+                      dataset='mod_lc_H', passband='Keck_NIRC2:H')
+        b.set_value('ld_mode@primary@mod_lc_H', 'manual')
+        b.set_value('ld_mode@secondary@mod_lc_H', 'manual')
+        b.set_value('ld_func@primary@mod_lc_H', 'logarithmic')
+        b.set_value('ld_func@secondary@mod_lc_H', 'logarithmic')
     else:
         b.add_dataset(phoebe.dataset.lc, times=h_model_times,
                       dataset='mod_lc_H', passband='Keck_NIRC2:H')
@@ -329,8 +415,11 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     
     if use_blackbody_atm:
         b.add_dataset(phoebe.dataset.rv, time=rv_model_times,
-                      dataset='mod_rv', passband='Keck_NIRC2:Kp',
-                      ld_func='linear', ld_coeffs=[0.0])
+                      dataset='mod_rv', passband='Keck_NIRC2:Kp')
+        b.set_value('ld_mode@primary@mod_rv', 'manual')
+        b.set_value('ld_mode@secondary@mod_rv', 'manual')
+        b.set_value('ld_func@primary@mod_rv', 'logarithmic')
+        b.set_value('ld_func@secondary@mod_rv', 'logarithmic')
     else:
         b.add_dataset(phoebe.dataset.rv, time=rv_model_times,
                       dataset='mod_rv', passband='Keck_NIRC2:Kp')
@@ -338,10 +427,15 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     
     # Add mesh dataset if making mesh plot
     if make_mesh_plots:
-        b.add_dataset('mesh', times=[binary_period/4.], dataset='mod_mesh')
+        b.add_dataset('mesh', times=[(binary_period/4.).to(u.d).value],
+                      dataset='mod_mesh')
+        
+        if mesh_temp:
+            b['columns@mesh'] = ['teffs']
     
     # Set the passband luminosities for the stars
-    b.set_value_all('pblum_ref', 'self')
+    b.set_value('pblum_mode@mod_lc_Kp', 'decoupled')
+    b.set_value('pblum_mode@mod_lc_H', 'decoupled')
     
     b.set_value('pblum@primary@mod_lc_Kp', star1_pblum_Kp)
     b.set_value('pblum@primary@mod_lc_H', star1_pblum_H)
@@ -377,7 +471,12 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
             suffix_str = '_' + plot_name
         
         ## Mesh plot
-        mesh_plot_out = b['mod_mesh@model'].plot(save='./binary_mesh{0}.pdf'.format(suffix_str))
+        if mesh_temp:
+            mesh_plot_out = b['mod_mesh@model'].plot(save='./binary_mesh{0}.pdf'.format(suffix_str),
+                                                     fc='teffs',
+                                                     fcmap=mesh_temp_cmap)
+        else:
+            mesh_plot_out = b['mod_mesh@model'].plot(save='./binary_mesh{0}.pdf'.format(suffix_str))
     
     
     # Get fluxes
@@ -518,7 +617,8 @@ def binary_mags_calc(star1_params_lcfit, star2_params_lcfit,
                      isoc_Ks_ext, Kp_ext, H_ext, ext_alpha,
                      isoc_dist, bin_dist,
                      use_blackbody_atm=False,
-                     make_mesh_plots=False, plot_name=None,
+                     make_mesh_plots=False, mesh_temp=False, mesh_temp_cmap=None,
+                     plot_name=None,
                      num_triangles=1500,
                      print_diagnostics=False):
     
@@ -537,9 +637,9 @@ def binary_mags_calc(star1_params_lcfit, star2_params_lcfit,
     dist_mod_mag_adj = 5. * np.log10(bin_dist / (isoc_dist.to(u.pc)).value)
     
     # Extract stellar parameters from input
-    (star1_mass, star1_rad, star1_teff,
+    (star1_mass, star1_rad, star1_teff, star1_logg,
      star1_mag_Kp, star1_mag_H, star1_pblum_Kp, star1_pblum_H) = star1_params_lcfit
-    (star2_mass, star2_rad, star2_teff,
+    (star2_mass, star2_rad, star2_teff, star2_logg,
      star2_mag_Kp, star2_mag_H, star2_pblum_Kp, star2_pblum_H) = star2_params_lcfit
     
     
@@ -551,6 +651,8 @@ def binary_mags_calc(star1_params_lcfit, star2_params_lcfit,
         observation_times,
         use_blackbody_atm=use_blackbody_atm,
         make_mesh_plots=make_mesh_plots,
+        mesh_temp=mesh_temp,
+        mesh_temp_cmap=mesh_temp_cmap,
         plot_name=plot_name,
         num_triangles=num_triangles,
         print_diagnostics=print_diagnostics)
