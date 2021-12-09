@@ -15,6 +15,8 @@ from popstar import synthetic
 
 import sys
 
+from astropy.table import Table
+
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as font_manager
 from matplotlib.ticker import MultipleLocator
@@ -409,10 +411,10 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     if make_mesh_plots:
         b.add_dataset('mesh', times=[(binary_period/4.).to(u.d).value],
                       dataset='mod_mesh')
-        
         if mesh_temp:
-            b['columns@mesh'] = ['teffs']
-    
+            b['columns@mesh'] = ['teffs', 'loggs', 'areas',
+                                 '*@mod_lc_Kp', '*@mod_lc_H']
+        
     # Set the passband luminosities for the stars
     b.set_value('pblum_mode@mod_lc_Kp', 'decoupled')
     b.set_value('pblum_mode@mod_lc_H', 'decoupled')
@@ -459,7 +461,61 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
         if mesh_temp:
             mesh_plot_out = b['mod_mesh@model'].plot(save='./binary_mesh{0}.pdf'.format(suffix_str),
                                                      fc='teffs',
-                                                     fcmap=mesh_temp_cmap)
+                                                     fcmap=mesh_temp_cmap,
+                                                     ec='none')
+                                                     
+            # print(mesh_plot_out.axs)
+            
+            # Extract and output mesh quantities
+            mesh_quant_names = ['teffs', 'loggs', 'areas', 'abs_intensities']
+            mesh_quant_do_filt = [False, False, False, True]
+            mesh_quant_units = [u.K, 1.0, u.solRad**2, u.W / (u.m**3)]
+            
+            mesh_quant_filts = ['mod_lc_Kp', 'mod_lc_H']            
+            mesh_quants_pri = {}
+            mesh_quants_sec = {}
+            
+            for (quant, do_filt,
+                 quant_unit) in zip(mesh_quant_names, mesh_quant_do_filt,
+                                    mesh_quant_units):
+                if do_filt:
+                    for filt in mesh_quant_filts:
+                        quant_pri = b['{0}@primary@{1}'.format(quant, filt)].value *\
+                                    quant_unit
+                        quant_sec = b['{0}@secondary@{1}'.format(quant, filt)].value *\
+                                    quant_unit
+                    
+                        mesh_quants_pri['{0}_{1}'.format(quant, filt)] = quant_pri
+                        mesh_quants_sec['{0}_{1}'.format(quant, filt)] = quant_sec
+                else:
+                    quant_pri = b['{0}@primary'.format(quant)].value * quant_unit
+                    quant_sec = b['{0}@secondary'.format(quant)].value * quant_unit
+                    
+                    mesh_quants_pri[quant] = quant_pri
+                    mesh_quants_sec[quant] = quant_sec
+            
+            # Construct mesh tables for each star and output
+            mesh_pri_table = Table(mesh_quants_pri)
+            mesh_pri_table.sort(['teffs'], reverse=True)
+            with open('mesh_pri.txt', 'w') as out_file:
+                for line in mesh_pri_table.pformat_all():
+                    out_file.write(line + '\n')
+            mesh_pri_table.write('mesh_pri.h5', format='hdf5',
+                                 path='data', serialize_meta=True,
+                                 overwrite=True)
+            mesh_pri_table.write('mesh_pri.fits', format='fits',
+                                 overwrite=True)
+            
+            mesh_sec_table = Table(mesh_quants_sec)
+            mesh_sec_table.sort(['teffs'], reverse=True)
+            with open('mesh_sec.txt', 'w') as out_file:
+                for line in mesh_sec_table.pformat_all():
+                    out_file.write(line + '\n')
+            mesh_sec_table.write('mesh_sec.h5', format='hdf5',
+                                 path='data', serialize_meta=True,
+                                 overwrite=True)
+            mesh_sec_table.write('mesh_sec.fits', format='fits',
+                                 overwrite=True)
         else:
             mesh_plot_out = b['mod_mesh@model'].plot(save='./binary_mesh{0}.pdf'.format(suffix_str))
     
