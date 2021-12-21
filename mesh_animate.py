@@ -465,19 +465,37 @@ def binary_star_mesh(star1_params, star2_params, binary_params, observation_time
             suffix_str = '_' + plot_name
         
         ## Mesh plot
+        mesh_plot_out = []
+        
         if mesh_temp:
-            mesh_plot_out = b['mod_mesh@model'].plot(
+            b['mod_mesh@model'].plot(
                 fc='teffs',
                 fcmap=mesh_temp_cmap,
                 ec='face',
                 animate=True,
                 save='./binary_mesh{0}.gif'.format(suffix_str),
                 save_kwargs={'writer': 'imagemagick'})
+            for (mesh_model_time, mesh_index) in zip(mesh_model_times, range(len(mesh_model_times))):
+                plt.clf()
+                new_fig = plt.figure()
+                (mesh_af_fig, mesh_plt_fig) = b['mod_mesh@model'].plot(
+                    fig=new_fig,
+                    time=mesh_model_time,
+                    fc='teffs',
+                    fcmap=mesh_temp_cmap,
+                    ec='face',
+                    save='./binary_mesh_{0}.pdf'.format(mesh_index))
+                mesh_plot_out.append(mesh_plt_fig)
+                plt.close(new_fig)
         else:
-            mesh_plot_out = b['mod_mesh@model'].plot(
+            b['mod_mesh@model'].plot(
                 animate=True,
                 save='./binary_mesh{0}.gif'.format(suffix_str),
                 save_kwargs={'writer': 'imagemagick'})
+            for mesh_model_time in mesh_model_times:
+                mesh_plot_out.append(b['mod_mesh@model'].plot(
+                    time=mesh_model_time,
+                    save='./binary_mesh.pdf'.format(suffix_str)))
     
     
     # Get fluxes
