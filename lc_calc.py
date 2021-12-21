@@ -11,7 +11,7 @@ from phoebe import c as const
 
 import numpy as np
 
-from popstar import synthetic
+from spisea import synthetic
 
 import sys
 
@@ -317,6 +317,9 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     if use_blackbody_atm:
         b.add_compute('phoebe', compute='detailed',
                       irrad_method='wilson', atm='blackbody')
+        
+        b.set_value('atm@primary@detailed', 'blackbody')
+        b.set_value('atm@secondary@detailed', 'blackbody')
     else:
         b.add_compute('phoebe', compute='detailed', irrad_method='wilson')
     
@@ -380,10 +383,17 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     if use_blackbody_atm:
         b.add_dataset(phoebe.dataset.lc, time=kp_model_times,
                       dataset='mod_lc_Kp', passband='Keck_NIRC2:Kp')
+        
         b.set_value('ld_mode@primary@mod_lc_Kp', 'manual')
         b.set_value('ld_mode@secondary@mod_lc_Kp', 'manual')
+        
         b.set_value('ld_func@primary@mod_lc_Kp', 'logarithmic')
-        b.set_value('ld_func@secondary@mod_lc_Kp', 'logarithmic')
+        b.set_value('ld_func@secondary@mod_lc_Kp', 'linear')
+        
+        b.set_value('ld_coeffs@secondary@mod_lc_Kp', [0.0])
+        
+        print(b.filter('ld_coeffs@primary@mod_lc_Kp'))
+        print(b.filter('ld_coeffs@secondary@mod_lc_Kp'))
     else:
         b.add_dataset(phoebe.dataset.lc, time=kp_model_times,
                       dataset='mod_lc_Kp', passband='Keck_NIRC2:Kp')
@@ -399,10 +409,17 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     if use_blackbody_atm:
         b.add_dataset(phoebe.dataset.lc, times=h_model_times,
                       dataset='mod_lc_H', passband='Keck_NIRC2:H')
+                
         b.set_value('ld_mode@primary@mod_lc_H', 'manual')
         b.set_value('ld_mode@secondary@mod_lc_H', 'manual')
+        
         b.set_value('ld_func@primary@mod_lc_H', 'logarithmic')
-        b.set_value('ld_func@secondary@mod_lc_H', 'logarithmic')
+        b.set_value('ld_func@secondary@mod_lc_H', 'linear')
+        
+        b.set_value('ld_coeffs@secondary@mod_lc_H', [0.0])
+        
+        print(b.filter('ld_coeffs@primary@mod_lc_H'))
+        print(b.filter('ld_coeffs@secondary@mod_lc_H'))
     else:
         b.add_dataset(phoebe.dataset.lc, times=h_model_times,
                       dataset='mod_lc_H', passband='Keck_NIRC2:H')
@@ -426,18 +443,18 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     b.set_value('pblum@secondary@mod_lc_H', star2_pblum_H)
     
     # Run compute
-    # if print_diagnostics:
-    #     print("Trying inital compute run")
-    #     b.run_compute(compute='detailed', model='run',
-    #                   progressbar=False)
-
-    try:
+    if print_diagnostics:
+        print("Trying inital compute run")
         b.run_compute(compute='detailed', model='run',
                       progressbar=False)
-    except:
-        if print_diagnostics:
-            print("Error during primary binary compute: {0}".format(sys.exc_info()[0]))
-        return err_out
+
+    # try:
+    #     b.run_compute(compute='detailed', model='run',
+    #                   progressbar=False)
+    # except:
+    #     if print_diagnostics:
+    #         print("Error during primary binary compute: {0}".format(sys.exc_info()[0]))
+    #     return err_out
     
     
     # Save out mesh plot

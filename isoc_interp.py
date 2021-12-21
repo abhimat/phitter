@@ -5,8 +5,8 @@
 # ---
 # Abhimat Gautam
 
-from popstar import synthetic, evolution, atmospheres, reddening
-from popstar.imf import imf, multiplicity
+from spisea import synthetic, evolution, atmospheres, reddening
+from spisea.imf import imf, multiplicity
 
 from phoebe import u
 from phoebe import c as const
@@ -231,7 +231,7 @@ class isochrone_mist(object):
         ## Calculate passband luminosities
         lum_Kp = flux_Kp * (4. * np.pi * (10. * u.pc)**2.)
         lum_H = flux_H * (4. * np.pi * (10. * u.pc)**2.)
-    
+        
         # Return passband luminosity
         return lum_Kp.to(u.solLum), lum_H.to(u.solLum)
 

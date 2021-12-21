@@ -11,7 +11,7 @@ from phoebe import c as const
 
 import numpy as np
 
-from popstar import synthetic
+from spisea import synthetic
 
 from phoebe_phitter import lc_calc, isoc_interp
 
