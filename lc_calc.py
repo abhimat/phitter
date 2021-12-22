@@ -447,14 +447,14 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
         print("Trying inital compute run")
         b.run_compute(compute='detailed', model='run',
                       progressbar=False)
-
-    # try:
-    #     b.run_compute(compute='detailed', model='run',
-    #                   progressbar=False)
-    # except:
-    #     if print_diagnostics:
-    #         print("Error during primary binary compute: {0}".format(sys.exc_info()[0]))
-    #     return err_out
+    else:
+        try:
+            b.run_compute(compute='detailed', model='run',
+                          progressbar=False)
+        except:
+            if print_diagnostics:
+                print("Error during primary binary compute: {0}".format(sys.exc_info()[0]))
+            return err_out
     
     
     # Save out mesh plot
