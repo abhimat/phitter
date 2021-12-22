@@ -16,92 +16,69 @@ import numpy as np
 
 import time
 
-# Dictionary to help map phases to corresponding code in the MIST isochrone
-mist_phase_dict = {}
-mist_phase_dict['PMS'] = -1
-mist_phase_dict['MS'] = 0
-mist_phase_dict['RGB'] = 2
-mist_phase_dict['CHeB'] = 3
-mist_phase_dict['EAGB'] = 4
-mist_phase_dict['TPAGB'] = 5
-mist_phase_dict['postAGB'] = 6
-mist_phase_dict['WR'] = 9
-
 # Filter properties
 lambda_Ks = 2.18e-6 * u.m
 dlambda_Ks = 0.35e-6 * u.m
 
-lambda_Kp = 2.124e-6 * u.m
-dlambda_Kp = 0.351e-6 * u.m
-
-lambda_H = 1.633e-6 * u.m
-dlambda_H = 0.296e-6 * u.m
-
 # Reference fluxes, calculated with PopStar
 ## Vega magnitudes (m_Vega = 0.03)
 ks_filt_info = synthetic.get_filter_info('naco,Ks')
-kp_filt_info = synthetic.get_filter_info('nirc2,Kp')
-h_filt_info = synthetic.get_filter_info('nirc2,H')
-
 v_filt_info = synthetic.get_filter_info('ubv,V')
 
 flux_ref_Ks = ks_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
-flux_ref_Kp = kp_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
-flux_ref_H = h_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
-
 flux_ref_V = v_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
 
-start_time = time.time()
-
-bb_temp = 25000 * u.K
-bb_rad = 10.0 * u.solRad
-bb_distance = 8000 * u.pc
-bb_ext = 2.63  # A_Ks
-
-# Make spectrum and apply distance, reddening
-bb_atm_func = atmospheres.get_bb_atmosphere
-red_law = reddening.RedLawNoguerasLara18()
-
-bb_atm = bb_atm_func(temperature=bb_temp.to(u.K).value)
-
-# Trim wavelength range down to JHKL range (0.5 - 5.2 microns)
-wave_range=[5000, 52000]
-bb_atm = spectrum.trimSpectrum(bb_atm, wave_range[0], wave_range[1])
-
-# Convert into flux observed at Earth (unreddened)
-bb_atm *= ((bb_rad / bb_distance).to(1).value)**2   # in erg s^-1 cm^-2 A^-1
-
-# Redden the spectrum. This doesn't take much time at all.
-red = red_law.reddening(bb_ext).resample(bb_atm.wave) 
-bb_atm *= red
-
-# Make synthetic photometry
-bb_mag_kp = synthetic.mag_in_filter(bb_atm, kp_filt_info)
-bb_mag_h = synthetic.mag_in_filter(bb_atm, h_filt_info)
-
-print(bb_mag_kp)
-print(bb_mag_h)
-
-end_time = time.time()
-print('Time taken: {0:.2f} seconds'.format(end_time - start_time))
+# start_time = time.time()
+#
+# bb_temp = 25000 * u.K
+# bb_rad = 10.0 * u.solRad
+# bb_distance = 8000 * u.pc
+# bb_ext = 2.63  # A_Ks
+#
+# # Make spectrum and apply distance, reddening
+# bb_atm_func = atmospheres.get_bb_atmosphere
+# red_law = reddening.RedLawNoguerasLara18()
+#
+# bb_atm = bb_atm_func(temperature=bb_temp.to(u.K).value)
+#
+# # Trim wavelength range down to JHKL range (0.5 - 5.2 microns)
+# wave_range=[5000, 52000]
+# bb_atm = spectrum.trimSpectrum(bb_atm, wave_range[0], wave_range[1])
+#
+# # Convert into flux observed at Earth (unreddened)
+# bb_atm *= ((bb_rad / bb_distance).to(1).value)**2   # in erg s^-1 cm^-2 A^-1
+#
+# # Redden the spectrum. This doesn't take much time at all.
+# red = red_law.reddening(bb_ext).resample(bb_atm.wave)
+# bb_atm *= red
+#
+# # Make synthetic photometry
+# bb_mag_kp = synthetic.mag_in_filter(bb_atm, kp_filt_info)
+# bb_mag_h = synthetic.mag_in_filter(bb_atm, h_filt_info)
+#
+# print(bb_mag_kp)
+# print(bb_mag_h)
+#
+# end_time = time.time()
+# print('Time taken: {0:.2f} seconds'.format(end_time - start_time))
 
 # Object to get synthetic magnitudes for blackbody objects
 class bb_stellar_params(object):
     def __init__(self, ext=2.63, dist=7.971e3,
-                 filt_list=['nirc2,Kp', 'nirc2,H']):
+                 filts_list=['nirc2,Kp', 'nirc2,H']):
         # Define extinction and distance
         self.A_Ks = ext
         self.dist = dist * u.pc
         
         # Specify filters and get filter information
-        self.filt_list = filt_list
-        self.num_filts = len(self.filt_list)
+        self.filts_list = filts_list
+        self.num_filts = len(self.filts_list)
         
         self.filts_info = []
         self.filts_flux_ref = np.empty(self.num_filts) *\
                                   (u.erg / u.s) / (u.cm**2.)
         for cur_filt_index in range(self.num_filts):
-            cur_filt = self.filt_list[cur_filt_index]
+            cur_filt = self.filts_list[cur_filt_index]
             
             cur_filt_info = synthetic.get_filter_info(cur_filt)
             self.filts_info.append(cur_filt_info)
@@ -152,7 +129,7 @@ class bb_stellar_params(object):
         bb_absMag_atm = bb_atm * ((bb_rad / (10. * u.pc)).to(1).value)**2
         bb_atm = bb_atm * ((bb_rad / self.dist).to(1).value)**2
         
-        # Redden the spectrum. This doesn't take much time at all.
+        # Redden the spectrum
         red = red_law.reddening(self.A_Ks).resample(bb_atm.wave) 
         bb_atm *= red
         
@@ -161,7 +138,7 @@ class bb_stellar_params(object):
         filt_bb_absMags = np.empty(self.num_filts)
         
         for cur_filt_index in range(self.num_filts):
-            cur_filt = self.filt_list[cur_filt_index]
+            cur_filt = self.filts_list[cur_filt_index]
             cur_filt_info = self.filts_info[cur_filt_index]
             
             # Make synthetic photometry
