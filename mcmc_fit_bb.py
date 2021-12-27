@@ -13,7 +13,7 @@ import numpy as np
 
 from spisea import synthetic
 
-from phoebe_phitter import lc_calc, isoc_interp
+from phoebe_phitter import lc_calc, blackbody_params
 
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as font_manager
@@ -64,12 +64,23 @@ class mcmc_fitter_bb(object):
     
     # Model star 1 parameters
     model_star1_mass = True
-    model_star1_rad = True
-    model_star1_teff = True
+    default_star1_mass = 10.0 * u.solMass
     
+    model_star1_rad = True
+    default_star1_rad = 10.0 * u.solRad
+    
+    model_star1_teff = True
+    default_star1_teff = 8000. * u.K
+    
+    # Model star 2 parameters
     model_star2_mass = True
+    default_star2_mass = 10.0 * u.solMass
+    
     model_star2_rad = True
+    default_star2_rad = 10.0 * u.solRad
+    
     model_star2_teff = True
+    default_star2_teff = 8000. * u.K
     
     # Default prior bounds
     lo_Kp_ext_prior_bound = 2.0
@@ -133,19 +144,38 @@ class mcmc_fitter_bb(object):
                              self.filts_lambda[cur_filt])**self.ext_alpha)
             
             self.filts_ext[cur_filt_index] = cur_filt_ext
+        
+        # Make blackbody stellar params object
+        self.bb_params_obj = blackbody_params.bb_stellar_params(
+                                 ext=self.Ks_ext,
+                                 dist=self.dist.to(u.pc).value
+                                 filts_list=self.filts_list)
+        
     
     # Function to set observation filters
     def set_observation_times(self, obs_filts):
         self.obs_filts = obs_filts
+        
+        self.search_filt_kp = np.where(self.obs_filts == 'kp')
+        self.search_filt_h = np.where(self.obs_filts == 'h')
     
     # Function to set observation times
     def set_observation_times(self, obs_times):
         self.obs_times = obs_times
+        
+        self.observation_times = (obs_times[search_filt_kp],
+                                  obs_times[search_filt_h])
     
     # Function to set observation mags
     def set_observation_mags(self, obs_mags, obs_mag_errors):
         self.obs_mags = obs_mags
         self.obs_mag_erros = obs_mag_errors
+        
+        self.kp_obs_mags = obs_mags[search_filt_kp]
+        self.kp_obs_mag_errors = obs_mag_errors[search_filt_kp]
+        
+        self.h_obs_mags = obs_mags[search_filt_h]
+        self.h_obs_mag_errors = obs_mag_errors[search_filt_h]
     
     # Function to set model mesh number of triangles
     def set_model_numTriangles(self, model_numTriangles):
@@ -216,29 +246,41 @@ class mcmc_fitter_bb(object):
         
         # Star 1 model parameters
         if model_star1_mass:
-            star1_mass = theta[theta_index]
+            star1_mass = theta[theta_index] * u.solMass
             theta_index += 1
+        else:
+            star1_mass = default_star1_mass
         
         if model_star1_rad:
-            star1_rad = theta[theta_index]
+            star1_rad = theta[theta_index] * u.solRad
             theta_index += 1
+        else:
+            star1_rad = default_star1_rad
         
         if model_star1_teff:
-            star1_teff = theta[theta_index]
+            star1_teff = theta[theta_index] * u.K
             theta_index += 1
+        else:
+            star1_teff = default_star1_teff
         
         # Star 2 model parameters
         if model_star2_mass:
-            star2_mass = theta[theta_index]
+            star2_mass = theta[theta_index] * u.solMass
             theta_index += 1
+        else:
+            star2_mass = default_star2_mass
         
         if model_star2_rad:
-            star2_rad = theta[theta_index]
+            star2_rad = theta[theta_index] * u.solRad
             theta_index += 1
+        else:
+            star2_rad = default_star2_rad
         
         if model_star2_teff:
-            star2_teff = theta[theta_index]
+            star2_teff = theta[theta_index] * u.K
             theta_index += 1
+        else:
+            star2_teff = default_star2_teff
         
         # Binary model parameters
         binary_inc = theta[theta_index]
@@ -333,63 +375,99 @@ class mcmc_fitter_bb(object):
         # Extract model parameters from theta
         theta_index = 0
         
-        Kp_ext_t = theta[theta_index]
+        # Extinction model parameters
+        Kp_ext = theta[theta_index]
         theta_index += 1
         
         if self.model_H_ext_mod:
-            H_ext_mod_t = theta[theta_index]
+            H_ext_mod = theta[theta_index]
             theta_index += 1
         else:
-            H_ext_mod_t = self.default_H_ext_mod
+            H_ext_mod = self.default_H_ext_mod
         
-        star1_mass_init_t = theta[theta_index]
+        # Star 1 model parameters
+        if model_star1_mass:
+            star1_mass = theta[theta_index] * u.solMass
+            theta_index += 1
+        else:
+            star1_mass = default_star1_mass
+        
+        if model_star1_rad:
+            star1_rad = theta[theta_index] * u.solRad
+            theta_index += 1
+        else:
+            star1_rad = default_star1_rad
+        
+        if model_star1_teff:
+            star1_teff = theta[theta_index] * u.K
+            theta_index += 1
+        else:
+            star1_teff = default_star1_teff
+        
+        # Star 2 model parameters
+        if model_star2_mass:
+            star2_mass = theta[theta_index] * u.solMass
+            theta_index += 1
+        else:
+            star2_mass = default_star2_mass
+        
+        if model_star2_rad:
+            star2_rad = theta[theta_index] * u.solRad
+            theta_index += 1
+        else:
+            star2_rad = default_star2_rad
+        
+        if model_star2_teff:
+            star2_teff = theta[theta_index] * u.K
+            theta_index += 1
+        else:
+            star2_teff = default_star2_teff
+        
+        # Binary model parameters
+        binary_inc = theta[theta_index] * u.deg
         theta_index += 1
         
-        star2_rad_t = theta[theta_index]
-        theta_index += 1
-        
-        binary_inc_t = theta[theta_index]
-        theta_index += 1
-        
-        binary_period_t = theta[theta_index]
+        binary_period = theta[theta_index] * u.d
         theta_index += 1
         
         if self.model_eccentricity:
-            binary_ecc_t = theta[theta_index]
+            binary_ecc = theta[theta_index]
             theta_index += 1
         else:
-            binary_ecc_t = self.default_ecc
+            binary_ecc = self.default_ecc
         
         if self.model_distance:
-            binary_dist_t = theta[theta_index]
+            binary_dist = theta[theta_index] * u.pc
             theta_index += 1
         else:
-            binary_dist_t = self.default_dist
+            binary_dist = self.default_dist
         
-        t0_t = theta[theta_index]
+        t0 = theta[theta_index]
         
         err_out = (np.array([-1.]), np.array([-1.]))
-        
-        # Add units to input parameters if necessary
-        binary_inc = binary_inc_t * u.deg
-        binary_period = binary_period_t * u.d
-        binary_ecc = binary_ecc_t
-        t0 = t0_t
         
         ## Construct tuple with binary parameters
         binary_params = (binary_period, binary_ecc, binary_inc, t0)
         
         # Calculate extinction adjustments
-        Kp_ext_adj = (Kp_ext_t - self.Kp_ext)
-        H_ext_adj = (((Kp_ext_t * (self.lambda_Kp / self.lambda_H)**self.ext_alpha)
-                      - self.H_ext) + H_ext_mod_t)
+        filt_ext_adj = np.empty(self.num_filts)
+        
+        Kp_ext_adj = (Kp_ext - self.Kp_ext)
+        H_ext_adj = (((Kp_ext * (self.lambda_Kp / self.lambda_H)**self.ext_alpha)
+                      - self.H_ext) + H_ext_mod)
+        
+        filt_ext_adj = np.array([Kp_ext_adj, H_ext_adj])
         
         # Calculate distance modulus adjustments
-        dist_mod_mag_adj = 5. * np.log10(binary_dist_t / ((self.dist).to(u.pc)).value)
+        dist_mod_mag_adj = 5. * np.log10(binary_dist / ((self.dist).to(u.pc)).value)
         
         # Perform interpolation
-        (star1_params_all, star1_params_lcfit) = self.star1_isochrone.mass_init_interp(star1_mass_init_t)
-        (star2_params_all, star2_params_lcfit) = self.star2_isochrone.rad_interp(star2_rad_t)
+        (star1_params_all,
+         star1_params_lcfit) = self.bb_params_obj.calc_stellar_params(
+                                 star1_mass, star1_rad, star1_teff)
+        (star2_params_all,
+         star2_params_lcfit) = self.bb_params_obj.calc_stellar_params(
+                                 star2_mass, star2_rad, star2_teff)
         
         (star1_mass_init, star1_mass, star1_rad, star1_lum, star1_teff, star1_logg,
             star1_mag_Kp, star1_mag_H, star1_pblum_Kp, star1_pblum_H) = star1_params_all
@@ -426,44 +504,78 @@ class mcmc_fitter_bb(object):
         return (binary_mags_Kp, binary_mags_H)
     
     # Log Likelihood function
-    def lnlike(self, theta):    
+    def lnlike(self, theta):
         # Extract model parameters from theta
         theta_index = 0
         
-        Kp_ext_t = theta[theta_index]
+        # Extinction model parameters
+        Kp_ext = theta[theta_index]
         theta_index += 1
         
         if self.model_H_ext_mod:
-            H_ext_mod_t = theta[theta_index]
+            H_ext_mod = theta[theta_index]
             theta_index += 1
         else:
-            H_ext_mod_t = self.default_H_ext_mod
+            H_ext_mod = self.default_H_ext_mod
         
-        star1_mass_init_t = theta[theta_index]
+        # Star 1 model parameters
+        if model_star1_mass:
+            star1_mass = theta[theta_index] * u.solMass
+            theta_index += 1
+        else:
+            star1_mass = default_star1_mass
+        
+        if model_star1_rad:
+            star1_rad = theta[theta_index] * u.solRad
+            theta_index += 1
+        else:
+            star1_rad = default_star1_rad
+        
+        if model_star1_teff:
+            star1_teff = theta[theta_index] * u.K
+            theta_index += 1
+        else:
+            star1_teff = default_star1_teff
+        
+        # Star 2 model parameters
+        if model_star2_mass:
+            star2_mass = theta[theta_index] * u.solMass
+            theta_index += 1
+        else:
+            star2_mass = default_star2_mass
+        
+        if model_star2_rad:
+            star2_rad = theta[theta_index] * u.solRad
+            theta_index += 1
+        else:
+            star2_rad = default_star2_rad
+        
+        if model_star2_teff:
+            star2_teff = theta[theta_index] * u.K
+            theta_index += 1
+        else:
+            star2_teff = default_star2_teff
+        
+        # Binary model parameters
+        binary_inc = theta[theta_index] * u.deg
         theta_index += 1
         
-        star2_rad_t = theta[theta_index]
-        theta_index += 1
-        
-        binary_inc_t = theta[theta_index]
-        theta_index += 1
-        
-        binary_period_t = theta[theta_index]
+        binary_period = theta[theta_index] * u.d
         theta_index += 1
         
         if self.model_eccentricity:
-            binary_ecc_t = theta[theta_index]
+            binary_ecc = theta[theta_index]
             theta_index += 1
         else:
-            binary_ecc_t = self.default_ecc
+            binary_ecc = self.default_ecc
         
         if self.model_distance:
-            binary_dist_t = theta[theta_index]
+            binary_dist = theta[theta_index] * u.pc
             theta_index += 1
         else:
-            binary_dist_t = self.default_dist
+            binary_dist = self.default_dist
         
-        t0_t = theta[theta_index]
+        t0 = theta[theta_index]
         
         (binary_model_mags_Kp, binary_model_mags_H) = self.calculate_model_lc(theta)
         if (binary_model_mags_Kp[0] == -1.) or (binary_model_mags_H[0] == -1.):
