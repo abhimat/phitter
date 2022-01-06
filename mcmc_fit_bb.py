@@ -83,6 +83,7 @@ class mcmc_fitter_bb(object):
     default_star2_teff = 8000. * u.K
     
     # Default prior bounds
+    # Extinction prior bounds
     lo_Kp_ext_prior_bound = 2.0
     hi_Kp_ext_prior_bound = 4.0
     
@@ -91,6 +92,27 @@ class mcmc_fitter_bb(object):
     
     H_ext_mod_alpha_sig_bound = -1.0
     
+    # Star 1 prior bounds
+    lo_star1_mass_prior_bound = 0.1
+    hi_star1_mass_prior_bound = 20
+    
+    lo_star1_rad_prior_bound = 0.1
+    hi_star1_rad_prior_bound = 100
+    
+    lo_star1_teff_prior_bound = 5000
+    hi_star1_teff_prior_bound = 50000
+    
+    # Star 2 prior bounds
+    lo_star2_mass_prior_bound = 0.1
+    hi_star2_mass_prior_bound = 20
+    
+    lo_star2_rad_prior_bound = 0.1
+    hi_star2_rad_prior_bound = 100
+    
+    lo_star2_teff_prior_bound = 5000
+    hi_star2_teff_prior_bound = 50000
+    
+    # Binary system prior bounds
     lo_inc_prior_bound = 0.
     hi_inc_prior_bound = 180.
     
@@ -109,7 +131,7 @@ class mcmc_fitter_bb(object):
     def __init__(self):
         return
     
-    # Functions to make and store isochrones
+    # Functions to make blackbody parameters object
     def make_bb_params(self, Ks_ext, dist, filts_list=['nirc2,Kp', 'nirc2,H']):
         self.Ks_ext = Ks_ext
         
@@ -127,7 +149,7 @@ class mcmc_fitter_bb(object):
         self.filts_flux_ref = np.empty(self.num_filts) *\
                                   (u.erg / u.s) / (u.cm**2.)
         
-        self.filts_ext = np.empty(self.num_filts)
+        self.filts_ext = {}
         
         for cur_filt_index in range(self.num_filts):
             cur_filt = self.filts_list[cur_filt_index]
@@ -143,17 +165,17 @@ class mcmc_fitter_bb(object):
                             (self.lambda_Ks /
                              self.filts_lambda[cur_filt])**self.ext_alpha)
             
-            self.filts_ext[cur_filt_index] = cur_filt_ext
+            self.filts_ext[cur_filt] = cur_filt_ext
         
         # Make blackbody stellar params object
         self.bb_params_obj = blackbody_params.bb_stellar_params(
                                  ext=self.Ks_ext,
-                                 dist=self.dist.to(u.pc).value
+                                 dist=self.dist.to(u.pc).value,
                                  filts_list=self.filts_list)
         
     
     # Function to set observation filters
-    def set_observation_times(self, obs_filts):
+    def set_observation_filts(self, obs_filts):
         self.obs_filts = obs_filts
         
         self.search_filt_kp = np.where(self.obs_filts == 'kp')
@@ -163,19 +185,19 @@ class mcmc_fitter_bb(object):
     def set_observation_times(self, obs_times):
         self.obs_times = obs_times
         
-        self.observation_times = (obs_times[search_filt_kp],
-                                  obs_times[search_filt_h])
+        self.observation_times = (obs_times[self.search_filt_kp],
+                                  obs_times[self.search_filt_h])
     
     # Function to set observation mags
     def set_observation_mags(self, obs_mags, obs_mag_errors):
         self.obs_mags = obs_mags
-        self.obs_mag_erros = obs_mag_errors
+        self.obs_mag_errors = obs_mag_errors
         
-        self.kp_obs_mags = obs_mags[search_filt_kp]
-        self.kp_obs_mag_errors = obs_mag_errors[search_filt_kp]
+        self.kp_obs_mags = obs_mags[self.search_filt_kp]
+        self.kp_obs_mag_errors = obs_mag_errors[self.search_filt_kp]
         
-        self.h_obs_mags = obs_mags[search_filt_h]
-        self.h_obs_mag_errors = obs_mag_errors[search_filt_h]
+        self.h_obs_mags = obs_mags[self.search_filt_h]
+        self.h_obs_mag_errors = obs_mag_errors[self.search_filt_h]
     
     # Function to set model mesh number of triangles
     def set_model_numTriangles(self, model_numTriangles):
@@ -184,20 +206,9 @@ class mcmc_fitter_bb(object):
     # Function to set if using blackbody atmosphere
     def set_model_use_blackbody_atm(self, use_blackbody_atm):
         self.use_blackbody_atm = use_blackbody_atm
-    
-    # Function to set for modelling H extinction modifier
-    def set_model_H_ext_mod(self, model_H_ext_mod):
-        self.model_H_ext_mod = model_H_ext_mod
-    
-    # Function to set for modelling eccentricity
-    def set_model_eccentricity(self, model_eccentricity):
-        self.model_eccentricity = model_eccentricity
-    
-    # Function to set for modelling distance
-    def set_model_distance(self, model_distance):
-        self.model_distance = model_distance
-    
+            
     # Functions to define prior bounds
+    # Extinction priors
     def set_Kp_ext_prior_bounds(self, lo_bound, hi_bound):
         self.lo_Kp_ext_prior_bound = lo_bound
         self.hi_Kp_ext_prior_bound = hi_bound
@@ -209,6 +220,32 @@ class mcmc_fitter_bb(object):
     def set_H_ext_mod_extLaw_sig_prior_bounds(self, sigma_bound):
         self.H_ext_mod_alpha_sig_bound = sigma_bound
     
+    # Stellar parameter priors
+    def set_star1_mass_prior_bounds(self, lo_bound, hi_bound):
+        self.lo_star1_mass_prior_bound = lo_bound
+        self.hi_star1_mass_prior_bound = hi_bound
+    
+    def set_star1_rad_prior_bounds(self, lo_bound, hi_bound):
+        self.lo_star1_rad_prior_bound = lo_bound
+        self.hi_star1_rad_prior_bound = hi_bound
+    
+    def set_star1_teff_prior_bounds(self, lo_bound, hi_bound):
+        self.lo_star1_teff_prior_bound = lo_bound
+        self.hi_star1_teff_prior_bound = hi_bound
+    
+    def set_star2_mass_prior_bounds(self, lo_bound, hi_bound):
+        self.lo_star2_mass_prior_bound = lo_bound
+        self.hi_star2_mass_prior_bound = hi_bound
+    
+    def set_star2_rad_prior_bounds(self, lo_bound, hi_bound):
+        self.lo_star2_rad_prior_bound = lo_bound
+        self.hi_star2_rad_prior_bound = hi_bound
+    
+    def set_star2_teff_prior_bounds(self, lo_bound, hi_bound):
+        self.lo_star2_teff_prior_bound = lo_bound
+        self.hi_star2_teff_prior_bound = hi_bound
+    
+    # Binary system parameter priors
     def set_inc_prior_bounds(self, lo_bound, hi_bound):
         self.lo_inc_prior_bound = lo_bound
         self.hi_inc_prior_bound = hi_bound
@@ -245,42 +282,42 @@ class mcmc_fitter_bb(object):
             H_ext_mod = self.default_H_ext_mod
         
         # Star 1 model parameters
-        if model_star1_mass:
-            star1_mass = theta[theta_index] * u.solMass
+        if self.model_star1_mass:
+            star1_mass = theta[theta_index]
             theta_index += 1
         else:
-            star1_mass = default_star1_mass
+            star1_mass = self.default_star1_mass
         
-        if model_star1_rad:
-            star1_rad = theta[theta_index] * u.solRad
+        if self.model_star1_rad:
+            star1_rad = theta[theta_index]
             theta_index += 1
         else:
-            star1_rad = default_star1_rad
+            star1_rad = self.default_star1_rad
         
-        if model_star1_teff:
-            star1_teff = theta[theta_index] * u.K
+        if self.model_star1_teff:
+            star1_teff = theta[theta_index]
             theta_index += 1
         else:
-            star1_teff = default_star1_teff
+            star1_teff = self.default_star1_teff
         
         # Star 2 model parameters
-        if model_star2_mass:
-            star2_mass = theta[theta_index] * u.solMass
+        if self.model_star2_mass:
+            star2_mass = theta[theta_index]
             theta_index += 1
         else:
-            star2_mass = default_star2_mass
+            star2_mass = self.default_star2_mass
         
-        if model_star2_rad:
-            star2_rad = theta[theta_index] * u.solRad
+        if self.model_star2_rad:
+            star2_rad = theta[theta_index]
             theta_index += 1
         else:
-            star2_rad = default_star2_rad
+            star2_rad = self.default_star2_rad
         
-        if model_star2_teff:
-            star2_teff = theta[theta_index] * u.K
+        if self.model_star2_teff:
+            star2_teff = theta[theta_index]
             theta_index += 1
         else:
-            star2_teff = default_star2_teff
+            star2_teff = self.default_star2_teff
         
         # Binary model parameters
         binary_inc = theta[theta_index]
@@ -315,11 +352,11 @@ class mcmc_fitter_bb(object):
                                self.hi_H_ext_mod_prior_bound)
         else:
             ### H extinction expected by Kp extinction
-            H_ext = Kp_ext * ((self.lambda_Kp/self.lambda_H)**(self.ext_alpha))
+            H_ext = Kp_ext * ((self.filts_lambda['nirc2,Kp']/self.filts_lambda['nirc2,H'])**(self.ext_alpha))
             
             ### Bounds given by current extinction and uncertainty on extinction law
-            H_ext_mod_bound_hi = Kp_ext * ((self.lambda_Kp/self.lambda_H)**(self.ext_alpha + self.ext_alpha_unc))
-            H_ext_mod_bound_lo = Kp_ext * ((self.lambda_Kp/self.lambda_H)**(self.ext_alpha - self.ext_alpha_unc))
+            H_ext_mod_bound_hi = Kp_ext * ((self.filts_lambda['nirc2,Kp']/self.filts_lambda['nirc2,H'])**(self.ext_alpha + self.ext_alpha_unc))
+            H_ext_mod_bound_lo = Kp_ext * ((self.filts_lambda['nirc2,Kp']/self.filts_lambda['nirc2,H'])**(self.ext_alpha - self.ext_alpha_unc))
             
             ### Subtract off the H extinction expected by the Kp extinction to get mod
             H_ext_mod_bound_hi = H_ext_mod_bound_hi - H_ext
@@ -327,6 +364,42 @@ class mcmc_fitter_bb(object):
             
             H_ext_mod_bound_oneSig = np.max(np.abs([H_ext_mod_bound_hi, H_ext_mod_bound_lo]))
         
+        # Stellar parameters checks
+        star1_mass_check = True
+        if self.model_star1_mass:
+            star1_mass_check = (self.lo_star1_mass_prior_bound <= star1_mass <=
+                                self.hi_star1_mass_prior_bound)
+        
+        star1_rad_check = True
+        if self.model_star1_rad:
+            star1_rad_check = (self.lo_star1_rad_prior_bound <= star1_rad <=
+                               self.hi_star1_rad_prior_bound)
+        
+        star1_teff_check = True
+        if self.model_star1_teff:
+            star1_teff_check = (self.lo_star1_teff_prior_bound <= star1_teff <=
+                                self.hi_star1_teff_prior_bound)
+        
+        star1_checks = star1_mass_check and star1_rad_check and star1_teff_check
+        
+        
+        star2_mass_check = True
+        if self.model_star2_mass:
+            star2_mass_check = (self.lo_star2_mass_prior_bound <= star2_mass <=
+                                self.hi_star2_mass_prior_bound)
+        
+        star2_rad_check = True
+        if self.model_star2_rad:
+            star2_rad_check = (self.lo_star2_rad_prior_bound <= star2_rad <=
+                               self.hi_star2_rad_prior_bound)
+        
+        star2_teff_check = True
+        if self.model_star2_teff:
+            star2_teff_check = (self.lo_star2_teff_prior_bound <= star2_teff <=
+                                self.hi_star2_teff_prior_bound)
+        
+        star2_checks = star2_mass_check and star2_rad_check and star2_teff_check
+                
         ## Binary system configuration checks
         inc_check = (self.lo_inc_prior_bound <= binary_inc <=
                      self.hi_inc_prior_bound)
@@ -337,29 +410,28 @@ class mcmc_fitter_bb(object):
         dist_check = (self.lo_dist_prior_bound <= binary_dist <= self.hi_dist_prior_bound)
         t0_check = (self.lo_t0_prior_bound <= t0 <= self.hi_t0_prior_bound)
         
-        ## Stellar parameters check
-        star1_iso_mass_init_min = self.star1_isochrone.iso_mass_init_min
-        star1_iso_mass_init_max = self.star1_isochrone.iso_mass_init_max
-        star2_iso_rad_min = self.star2_isochrone.iso_rad_min
-        star2_iso_rad_max = self.star2_isochrone.iso_rad_max
-    
-        mass_init_check = (star1_iso_mass_init_min <= star1_mass_init <= star1_iso_mass_init_max)
-        rad_check = (star2_iso_rad_min <= star2_rad <= star2_iso_rad_max)
+        # print(Kp_ext_check)
+        # print(H_ext_mod_check)
+        # print(inc_check)
+        # print(period_check)
+        # print(ecc_check)
+        # print(dist_check)
+        # print(t0_check)
+        # print(star1_checks)
+        # print(star2_checks)
         
         ## Final check and return prior
         if self.H_ext_mod_alpha_sig_bound == -1.0:  # If doing simple H_ext check
             if ((Kp_ext_check and H_ext_mod_check) and
                 inc_check and period_check
                 and ecc_check and dist_check and t0_check
-                and mass_init_check
-                and rad_check):
+                and star1_checks and star2_checks):
                 return 0.0
         else:   # Else doing Gaussian prior check on H_ext
             if (Kp_ext_check
                 and inc_check and period_check
                 and ecc_check and dist_check and t0_check
-                and mass_init_check
-                and rad_check):
+                and star1_checks and star2_checks):
                 
                 # Return gaussian prior for H_ext_mod parameter
                 log_prior = np.log(1.0/(np.sqrt(2*np.pi)*H_ext_mod_bound_oneSig))
@@ -386,42 +458,42 @@ class mcmc_fitter_bb(object):
             H_ext_mod = self.default_H_ext_mod
         
         # Star 1 model parameters
-        if model_star1_mass:
+        if self.model_star1_mass:
             star1_mass = theta[theta_index] * u.solMass
             theta_index += 1
         else:
-            star1_mass = default_star1_mass
+            star1_mass = self.default_star1_mass
         
-        if model_star1_rad:
+        if self.model_star1_rad:
             star1_rad = theta[theta_index] * u.solRad
             theta_index += 1
         else:
-            star1_rad = default_star1_rad
+            star1_rad = self.default_star1_rad
         
-        if model_star1_teff:
+        if self.model_star1_teff:
             star1_teff = theta[theta_index] * u.K
             theta_index += 1
         else:
-            star1_teff = default_star1_teff
+            star1_teff = self.default_star1_teff
         
         # Star 2 model parameters
-        if model_star2_mass:
+        if self.model_star2_mass:
             star2_mass = theta[theta_index] * u.solMass
             theta_index += 1
         else:
-            star2_mass = default_star2_mass
+            star2_mass = self.default_star2_mass
         
-        if model_star2_rad:
+        if self.model_star2_rad:
             star2_rad = theta[theta_index] * u.solRad
             theta_index += 1
         else:
-            star2_rad = default_star2_rad
+            star2_rad = self.default_star2_rad
         
-        if model_star2_teff:
+        if self.model_star2_teff:
             star2_teff = theta[theta_index] * u.K
             theta_index += 1
         else:
-            star2_teff = default_star2_teff
+            star2_teff = self.default_star2_teff
         
         # Binary model parameters
         binary_inc = theta[theta_index] * u.deg
@@ -452,9 +524,9 @@ class mcmc_fitter_bb(object):
         # Calculate extinction adjustments
         filt_ext_adj = np.empty(self.num_filts)
         
-        Kp_ext_adj = (Kp_ext - self.Kp_ext)
-        H_ext_adj = (((Kp_ext * (self.lambda_Kp / self.lambda_H)**self.ext_alpha)
-                      - self.H_ext) + H_ext_mod)
+        Kp_ext_adj = (Kp_ext - self.filts_ext['nirc2,Kp'])
+        H_ext_adj = (((Kp_ext * (self.filts_lambda['nirc2,Kp'] / self.filts_lambda['nirc2,H'])**self.ext_alpha)
+                      - self.filts_ext['nirc2,H']) + H_ext_mod)
         
         filt_ext_adj = np.array([Kp_ext_adj, H_ext_adj])
         
@@ -470,9 +542,11 @@ class mcmc_fitter_bb(object):
                                  star2_mass, star2_rad, star2_teff)
         
         (star1_mass_init, star1_mass, star1_rad, star1_lum, star1_teff, star1_logg,
-            star1_mag_Kp, star1_mag_H, star1_pblum_Kp, star1_pblum_H) = star1_params_all
+            [star1_mag_Kp, star1_mag_H],
+            [star1_pblum_Kp, star1_pblum_H]) = star1_params_all
         (star2_mass_init, star2_mass, star2_rad, star2_lum, star2_teff, star2_logg,
-            star2_mag_Kp, star2_mag_H, star2_pblum_Kp, star2_pblum_H) = star2_params_all
+            [star2_mag_Kp, star2_mag_H],
+            [star2_pblum_Kp, star2_pblum_H]) = star2_params_all
         
         # Run binary star model to get binary mags
         (binary_mags_Kp, binary_mags_H) = lc_calc.binary_star_lc(
@@ -481,6 +555,7 @@ class mcmc_fitter_bb(object):
                                               binary_params,
                                               self.observation_times,
                                               use_blackbody_atm=self.use_blackbody_atm,
+                                              use_eclipse_only_horizon=True,
                                               num_triangles=self.model_numTriangles)
         if (binary_mags_Kp[0] == -1.) or (binary_mags_H[0] == -1.):
             return err_out
@@ -489,7 +564,8 @@ class mcmc_fitter_bb(object):
         (binary_mags_Kp, binary_mags_H) = lc_calc.dist_ext_mag_calc(
                                               (binary_mags_Kp, binary_mags_H),
                                               self.dist,
-                                              self.Kp_ext, self.H_ext)
+                                              self.filts_ext['nirc2,Kp'],
+                                              self.filts_ext['nirc2,H'])
         
         # Apply the extinction difference between model and the isochrone values
         binary_mags_Kp += Kp_ext_adj
@@ -519,42 +595,42 @@ class mcmc_fitter_bb(object):
             H_ext_mod = self.default_H_ext_mod
         
         # Star 1 model parameters
-        if model_star1_mass:
+        if self.model_star1_mass:
             star1_mass = theta[theta_index] * u.solMass
             theta_index += 1
         else:
-            star1_mass = default_star1_mass
+            star1_mass = self.default_star1_mass
         
-        if model_star1_rad:
+        if self.model_star1_rad:
             star1_rad = theta[theta_index] * u.solRad
             theta_index += 1
         else:
-            star1_rad = default_star1_rad
+            star1_rad = self.default_star1_rad
         
-        if model_star1_teff:
+        if self.model_star1_teff:
             star1_teff = theta[theta_index] * u.K
             theta_index += 1
         else:
-            star1_teff = default_star1_teff
+            star1_teff = self.default_star1_teff
         
         # Star 2 model parameters
-        if model_star2_mass:
+        if self.model_star2_mass:
             star2_mass = theta[theta_index] * u.solMass
             theta_index += 1
         else:
-            star2_mass = default_star2_mass
+            star2_mass = self.default_star2_mass
         
-        if model_star2_rad:
+        if self.model_star2_rad:
             star2_rad = theta[theta_index] * u.solRad
             theta_index += 1
         else:
-            star2_rad = default_star2_rad
+            star2_rad = self.default_star2_rad
         
-        if model_star2_teff:
+        if self.model_star2_teff:
             star2_teff = theta[theta_index] * u.K
             theta_index += 1
         else:
-            star2_teff = default_star2_teff
+            star2_teff = self.default_star2_teff
         
         # Binary model parameters
         binary_inc = theta[theta_index] * u.deg
@@ -577,14 +653,16 @@ class mcmc_fitter_bb(object):
         
         t0 = theta[theta_index]
         
+        # Calculate light curve
         (binary_model_mags_Kp, binary_model_mags_H) = self.calculate_model_lc(theta)
+        
         if (binary_model_mags_Kp[0] == -1.) or (binary_model_mags_H[0] == -1.):
             return -np.inf
         
         # Phase the observation times
         (kp_phase_out, h_phase_out) = lc_calc.phased_obs(
                                           self.observation_times,
-                                          binary_period_t * u.d, t0_t)
+                                          binary_period, t0)
         
         (kp_phased_days, kp_phases_sorted_inds, kp_model_times) = kp_phase_out
         (h_phased_days, h_phases_sorted_inds, h_model_times) = h_phase_out
@@ -598,7 +676,7 @@ class mcmc_fitter_bb(object):
                               (self.h_obs_mag_errors[h_phases_sorted_inds])**2.)
     
         log_likelihood = -0.5 * log_likelihood
-    
+        
         return log_likelihood
     
     # Posterior Probability Function
