@@ -130,7 +130,7 @@ class bb_stellar_params(object):
         bb_atm = bb_atm * ((bb_rad / self.dist).to(1).value)**2
         
         # Redden the spectrum
-        red = red_law.reddening(self.A_Ks).resample(bb_atm.wave) 
+        red = self.red_law.reddening(self.A_Ks).resample(bb_atm.wave) 
         bb_atm *= red
         
         # Calculate mags and absolute Mags for each filter
