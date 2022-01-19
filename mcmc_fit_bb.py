@@ -555,7 +555,7 @@ class mcmc_fitter_bb(object):
                                               binary_params,
                                               self.observation_times,
                                               use_blackbody_atm=self.use_blackbody_atm,
-                                              use_eclipse_only_horizon=True,
+                                              use_compact_object=True,
                                               num_triangles=self.model_numTriangles)
         if (binary_mags_Kp[0] == -1.) or (binary_mags_H[0] == -1.):
             return err_out

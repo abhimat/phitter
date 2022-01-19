@@ -106,7 +106,7 @@ def single_star_lc(stellar_params,
 
 def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
         use_blackbody_atm=False,
-        use_eclipse_only_horizon=False,
+        use_compact_object=False,
         make_mesh_plots=False, mesh_temp=False, mesh_temp_cmap=None,
         plot_name=None,
         print_diagnostics=False, par_compute=False, num_par_processes=8,
@@ -122,7 +122,7 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
         (kp_MJDs, h_MJDs) = observation_times
     use_blackbody_atm -- Use blackbody atmosphere
         instead of default Castelli & Kurucz (default False)
-    use_eclipse_only_horizon -- Set eclipse_method to 'only_horizon',
+    use_compact_object -- Set eclipse_method to 'only_horizon',
         necessary for compact companions without eclipses (default False)
     make_mesh_plots -- Make a mesh plot of the binary system (default False)
     plot_name
@@ -323,7 +323,7 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
                       irrad_method='wilson', atm='blackbody')
         
         b.set_value('atm@primary@detailed', 'blackbody')
-        b.set_value('atm@secondary@detailed', 'blackbody')        
+        b.set_value('atm@secondary@detailed', 'blackbody')
     else:
         b.add_compute('phoebe', compute='detailed', irrad_method='wilson')
     
@@ -376,11 +376,14 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     h_phased_days = ((h_MJDs - t0) % binary_period.to(u.d).value) / binary_period.to(u.d).value
     
     # Add light curve datasets
+    if use_blackbody_atm:
+        b.set_value_all('ld_mode_bol', 'manual')
+        b.set_value_all('ld_func_bol', 'linear')
+        b.set_value_all('ld_coeffs_bol', [0.0])
+    
     # Check for compact companion
-    if use_eclipse_only_horizon:
-        b.set_value('ld_mode_bol@secondary', 'manual')
-        b.set_value('ld_func_bol@secondary', 'linear')
-        b.set_value('ld_coeffs_bol@secondary', [0.0])
+    if use_compact_object:
+        b.set_value('irrad_method@detailed', 'none')
     
     ## Kp
     kp_phases_sorted_inds = np.argsort(kp_phased_days)
@@ -394,13 +397,11 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
         b.add_dataset(phoebe.dataset.lc, time=kp_model_times,
                       dataset='mod_lc_Kp', passband='Keck_NIRC2:Kp')
         
-        b.set_value('ld_mode@primary@mod_lc_Kp', 'manual')
-        b.set_value('ld_mode@secondary@mod_lc_Kp', 'manual')
+        b.set_value_all('ld_mode@mod_lc_Kp', 'manual')
         
-        b.set_value('ld_func@primary@mod_lc_Kp', 'logarithmic')
-        b.set_value('ld_func@secondary@mod_lc_Kp', 'linear')
+        b.set_value_all('ld_func@mod_lc_Kp', 'linear')
         
-        b.set_value('ld_coeffs@secondary@mod_lc_Kp', [0.0])
+        b.set_value_all('ld_coeffs@mod_lc_Kp', [0.0])
     else:
         b.add_dataset(phoebe.dataset.lc, time=kp_model_times,
                       dataset='mod_lc_Kp', passband='Keck_NIRC2:Kp')
@@ -417,13 +418,11 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
         b.add_dataset(phoebe.dataset.lc, times=h_model_times,
                       dataset='mod_lc_H', passband='Keck_NIRC2:H')
                 
-        b.set_value('ld_mode@primary@mod_lc_H', 'manual')
-        b.set_value('ld_mode@secondary@mod_lc_H', 'manual')
+        b.set_value_all('ld_mode@mod_lc_H', 'manual')
         
-        b.set_value('ld_func@primary@mod_lc_H', 'logarithmic')
-        b.set_value('ld_func@secondary@mod_lc_H', 'linear')
+        b.set_value_all('ld_func@mod_lc_H', 'linear')
         
-        b.set_value('ld_coeffs@secondary@mod_lc_H', [0.0])
+        b.set_value_all('ld_coeffs@mod_lc_H', [0.0])
     else:
         b.add_dataset(phoebe.dataset.lc, times=h_model_times,
                       dataset='mod_lc_H', passband='Keck_NIRC2:H')
@@ -447,9 +446,8 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     b.set_value('pblum@secondary@mod_lc_H', star2_pblum_H)
     
     # Run compute
-    
     # Determine eclipse method
-    if use_eclipse_only_horizon:
+    if use_compact_object:
         eclipse_method = 'only_horizon'
     else:
         eclipse_method = 'native'
@@ -666,7 +664,7 @@ def binary_mags_calc(star1_params_lcfit, star2_params_lcfit,
                      isoc_Ks_ext, Kp_ext, H_ext, ext_alpha,
                      isoc_dist, bin_dist,
                      use_blackbody_atm=False,
-                     use_eclipse_only_horizon=False,
+                     use_compact_object=False,
                      make_mesh_plots=False, mesh_temp=False, mesh_temp_cmap=None,
                      plot_name=None,
                      num_triangles=1500,
@@ -702,7 +700,7 @@ def binary_mags_calc(star1_params_lcfit, star2_params_lcfit,
         binary_params,
         observation_times,
         use_blackbody_atm=use_blackbody_atm,
-        use_eclipse_only_horizon=use_eclipse_only_horizon,
+        use_compact_object=use_compact_object,
         make_mesh_plots=make_mesh_plots,
         mesh_temp=mesh_temp,
         mesh_temp_cmap=mesh_temp_cmap,
