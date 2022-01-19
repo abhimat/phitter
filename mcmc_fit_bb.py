@@ -102,6 +102,10 @@ class mcmc_fitter_bb(object):
     lo_star1_teff_prior_bound = 5000
     hi_star1_teff_prior_bound = 50000
     
+    star1_teff_sig_bound = False
+    star1_teff_bound_mu = 10000
+    star1_teff_bound_sigma = 1000
+    
     # Star 2 prior bounds
     lo_star2_mass_prior_bound = 0.1
     hi_star2_mass_prior_bound = 20
@@ -376,7 +380,7 @@ class mcmc_fitter_bb(object):
                                self.hi_star1_rad_prior_bound)
         
         star1_teff_check = True
-        if self.model_star1_teff:
+        if self.model_star1_teff and (not self.star1_teff_sig_bound):
             star1_teff_check = (self.lo_star1_teff_prior_bound <= star1_teff <=
                                 self.hi_star1_teff_prior_bound)
         
@@ -421,7 +425,8 @@ class mcmc_fitter_bb(object):
         # print(star2_checks)
         
         ## Final check and return prior
-        if self.H_ext_mod_alpha_sig_bound == -1.0:  # If doing simple H_ext check
+        # If doing simple prior checks
+        if self.H_ext_mod_alpha_sig_bound == -1.0 and not self.star1_teff_sig_bound: 
             if ((Kp_ext_check and H_ext_mod_check) and
                 inc_check and period_check
                 and ecc_check and dist_check and t0_check
@@ -433,10 +438,25 @@ class mcmc_fitter_bb(object):
                 and ecc_check and dist_check and t0_check
                 and star1_checks and star2_checks):
                 
+                log_prior = 0.0
+                
                 # Return gaussian prior for H_ext_mod parameter
-                log_prior = np.log(1.0/(np.sqrt(2*np.pi)*H_ext_mod_bound_oneSig))
-                log_prior = (log_prior - 
-                             0.5 * (H_ext_mod**2) / (H_ext_mod_bound_oneSig**2))
+                if self.H_ext_mod_alpha_sig_bound is not -1.0:
+                    log_prior_add = np.log(1.0/(np.sqrt(2*np.pi)*H_ext_mod_bound_oneSig))
+                    log_prior_add += (-0.5 * (H_ext_mod**2) /
+                                      (H_ext_mod_bound_oneSig**2))
+                    
+                    log_prior += log_prior_add
+                
+                # Return gaussian prior for Teff parameter
+                if self.star1_teff_sig_bound:
+                    log_prior_add = np.log(1.0/(np.sqrt(2*np.pi)*self.star1_teff_bound_sigma))
+                    log_prior_add += (-0.5 *
+                                      (star1_teff - self.star1_teff_bound_mu)**2 /
+                                      self.star1_teff_bound_sigma**2)
+                    
+                    log_prior += log_prior_add
+                
                 return log_prior
         
         # If here at this point, all previous checks failed
