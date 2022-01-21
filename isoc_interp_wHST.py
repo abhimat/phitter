@@ -50,11 +50,17 @@ flux_ref_V = v_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
 
 
 class isochrone_mist(object):
-    filts_list = ['nirc2,Kp', 'nirc2,H']
+    filts_list = ['nirc2,Kp', 'nirc2,H',
+                  'wfc3,ir,f127m',
+                  'wfc3,ir,f139m',
+                  'wfc3,ir,f153m']
     
     def __init__(self, age=3.9e6, ext=2.63, dist=7.971e3, met=0.0, phase=None,
                  use_atm_func='merged',
-                 filts_list=['nirc2,Kp', 'nirc2,H']):
+                 filts_list=['nirc2,Kp', 'nirc2,H',
+                             'wfc3,ir,f127m',
+                             'wfc3,ir,f139m',
+                             'wfc3,ir,f153m']):
         log_age = np.log10(age)
         
         self.log_age = log_age
@@ -72,13 +78,26 @@ class isochrone_mist(object):
         elif use_atm_func == 'phoenix':
             atm_func = atmospheres.get_phoenixv16_atmosphere
         
+        # Set filters
+        self.filts_list = filts_list
+        self.num_filts = len(self.filts_list)
+        
+        self.filts_info = []
+        self.filts_flux_ref = np.empty(self.num_filts) *\
+                                  (u.erg / u.s) / (u.cm**2.)
+        for cur_filt_index in range(self.num_filts):
+            cur_filt = self.filts_list[cur_filt_index]
+            
+            cur_filt_info = synthetic.get_filter_info(cur_filt)
+            self.filts_info.append(cur_filt_info)
+            
+            cur_filt_flux_ref = cur_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
+            self.filts_flux_ref[cur_filt_index] = cur_filt_flux_ref
+        
+        
         # Extinction law    
         red_law = reddening.RedLawNoguerasLara18()
         self.ext_alpha = 2.30
-    
-        ## Calculate extinctions implied by isochrone extinction
-        self.A_Kp = self.A_Ks * (lambda_Ks / lambda_Kp)**self.ext_alpha
-        self.A_H = self.A_Ks * (lambda_Ks / lambda_H)**self.ext_alpha
         
         # Create an isochrone with the given parameters        
         self.iso_curAge = synthetic.IsochronePhot(self.log_age, self.A_Ks, self.dist,
@@ -86,7 +105,7 @@ class isochrone_mist(object):
                                                   atm_func=atm_func,
                                                   red_law=red_law,
                                                   metallicity=self.met,
-                                                  filters=self.filt_list)
+                                                  filters=self.filts_list)
         
         ## Create another isochrone for absolute mags / passband luminosities
         self.iso_absMag = synthetic.IsochronePhot(self.log_age, 0.0, 10.0,
@@ -94,7 +113,7 @@ class isochrone_mist(object):
                                                   atm_func=atm_func,
                                                   red_law=red_law,
                                                   metallicity=self.met,
-                                                  filters=self.filt_list)
+                                                  filters=self.filts_list)
         
         
         # Save out specific stellar parameter columns needed
@@ -129,7 +148,7 @@ class isochrone_mist(object):
             filt_dict_name = filt_dict_name.replace('wfc3_ir', 'hst')
             
             self.iso_absMag_mag[filt] = self.iso_absMag.points['m_' + filt_dict_name][phase_check]
-        
+                
         ## Maximum bounds on the radius in isochrone
         self.iso_rad_min = np.min(self.iso_rad).value
         self.iso_rad_max = np.max(self.iso_rad).value
@@ -147,7 +166,7 @@ class isochrone_mist(object):
             self.iso_lum = self.iso_lum[::-1]
             self.iso_teff = self.iso_teff[::-1]
             self.iso_logg = self.iso_logg[::-1]
-
+            
             for filt in self.filts_list:
                 self.iso_mag[filt] = (self.iso_mag[filt])[::-1]
                 self.iso_absMag_mag[filt] = (self.iso_absMag[filt])[::-1]
@@ -263,7 +282,6 @@ class isochrone_mist(object):
                                 star_mags, star_pblums)
         
         return stellar_params_all, stellar_params_lcfit
-    
     
     def calc_pblums(self, filt_absMags):
         # Calculate luminosities in each filter
