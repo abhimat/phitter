@@ -15,6 +15,8 @@ from spisea import synthetic
 
 import sys
 
+from astropy.table import Table
+
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as font_manager
 from matplotlib.ticker import MultipleLocator
@@ -104,7 +106,7 @@ def single_star_lc(stellar_params,
 
 def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
         use_blackbody_atm=False,
-        use_eclipse_only_horizon=False,
+        use_compact_object=False,
         make_mesh_plots=False, mesh_temp=False, mesh_temp_cmap=None,
         plot_name=None,
         print_diagnostics=False, par_compute=False, num_par_processes=8,
@@ -120,7 +122,7 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
         (kp_MJDs, h_MJDs, rv_MJDs) = observation_times
     use_blackbody_atm -- Use blackbody atmosphere
         instead of default Castelli & Kurucz (default False)
-    use_eclipse_only_horizon -- Set eclipse_method to 'only_horizon',
+    use_compact_object -- Set eclipse_method to 'only_horizon',
             necessary for compact companions without eclipses (default False)
     make_mesh_plots -- Make a mesh plot of the binary system (default False)
     plot_name
@@ -380,11 +382,14 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     rv_phased_days = ((rv_MJDs - t0) % binary_period.to(u.d).value) / binary_period.to(u.d).value
     
     # Add light curve datasets
+    if use_blackbody_atm:
+        b.set_value_all('ld_mode_bol', 'manual')
+        b.set_value_all('ld_func_bol', 'linear')
+        b.set_value_all('ld_coeffs_bol', [0.0])
+    
     # Check for compact companion
-    if use_eclipse_only_horizon:
-        b.set_value('ld_mode_bol@secondary', 'manual')
-        b.set_value('ld_func_bol@secondary', 'linear')
-        b.set_value('ld_coeffs_bol@secondary', [0.0])
+    if use_compact_object:
+        b.set_value('irrad_method@detailed', 'none')
     
     ## Kp
     kp_phases_sorted_inds = np.argsort(kp_phased_days)
@@ -396,13 +401,11 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
         b.add_dataset(phoebe.dataset.lc, time=kp_model_times,
                       dataset='mod_lc_Kp', passband='Keck_NIRC2:Kp')
         
-        b.set_value('ld_mode@primary@mod_lc_Kp', 'manual')
-        b.set_value('ld_mode@secondary@mod_lc_Kp', 'manual')
+        b.set_value_all('ld_mode@mod_lc_Kp', 'manual')
         
-        b.set_value('ld_func@primary@mod_lc_Kp', 'logarithmic')
-        b.set_value('ld_func@secondary@mod_lc_Kp', 'linear')
+        b.set_value_all('ld_func@mod_lc_Kp', 'linear')
         
-        b.set_value('ld_coeffs@secondary@mod_lc_Kp', [0.0])
+        b.set_value_all('ld_coeffs@mod_lc_Kp', [0.0])
     else:
         b.add_dataset(phoebe.dataset.lc, time=kp_model_times,
                       dataset='mod_lc_Kp', passband='Keck_NIRC2:Kp')
@@ -417,13 +420,11 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
         b.add_dataset(phoebe.dataset.lc, times=h_model_times,
                       dataset='mod_lc_H', passband='Keck_NIRC2:H')
         
-        b.set_value('ld_mode@primary@mod_lc_H', 'manual')
-        b.set_value('ld_mode@secondary@mod_lc_H', 'manual')
+        b.set_value_all('ld_mode@mod_lc_H', 'manual')
         
-        b.set_value('ld_func@primary@mod_lc_H', 'logarithmic')
-        b.set_value('ld_func@secondary@mod_lc_H', 'linear')
+        b.set_value_all('ld_func@mod_lc_H', 'linear')
         
-        b.set_value('ld_coeffs@secondary@mod_lc_H', [0.0])
+        b.set_value_all('ld_coeffs@mod_lc_H', [0.0])
     else:
         b.add_dataset(phoebe.dataset.lc, times=h_model_times,
                       dataset='mod_lc_H', passband='Keck_NIRC2:H')
@@ -438,13 +439,11 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
         b.add_dataset(phoebe.dataset.rv, time=rv_model_times,
                       dataset='mod_rv', passband='Keck_NIRC2:Kp')
         
-        b.set_value('ld_mode@primary@mod_rv', 'manual')
-        b.set_value('ld_mode@secondary@mod_rv', 'manual')
+        b.set_value_all('ld_mode@mod_rv', 'manual')
         
-        b.set_value('ld_func@primary@mod_rv', 'logarithmic')
-        b.set_value('ld_func@secondary@mod_rv', 'linear')
+        b.set_value_all('ld_func@mod_rv', 'linear')
         
-        b.set_value('ld_coeffs@secondary@mod_rv', [0.0])
+        b.set_value_all('ld_coeffs@mod_rv', [0.0])
     else:
         b.add_dataset(phoebe.dataset.rv, time=rv_model_times,
                       dataset='mod_rv', passband='Keck_NIRC2:Kp')
@@ -454,7 +453,6 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     if make_mesh_plots:
         b.add_dataset('mesh', times=[(binary_period/4.).to(u.d).value],
                       dataset='mod_mesh')
-        
         if mesh_temp:
             b['columns@mesh'] = ['teffs', 'loggs', 'areas',
                                  '*@mod_lc_Kp', '*@mod_lc_H']
@@ -470,9 +468,8 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     b.set_value('pblum@secondary@mod_lc_H', star2_pblum_H)
     
     # Run compute
-    
     # Determine eclipse method
-    if use_eclipse_only_horizon:
+    if use_compact_object:
         eclipse_method = 'only_horizon'
     else:
         eclipse_method = 'native'
@@ -512,7 +509,61 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
         if mesh_temp:
             mesh_plot_out = b['mod_mesh@model'].plot(save='./binary_mesh{0}.pdf'.format(suffix_str),
                                                      fc='teffs',
-                                                     fcmap=mesh_temp_cmap)
+                                                     fcmap=mesh_temp_cmap,
+                                                     ec='none')
+                                                     
+            # print(mesh_plot_out.axs)
+            
+            # Extract and output mesh quantities
+            mesh_quant_names = ['teffs', 'loggs', 'areas', 'abs_intensities']
+            mesh_quant_do_filt = [False, False, False, True]
+            mesh_quant_units = [u.K, 1.0, u.solRad**2, u.W / (u.m**3)]
+            
+            mesh_quant_filts = ['mod_lc_Kp', 'mod_lc_H']            
+            mesh_quants_pri = {}
+            mesh_quants_sec = {}
+            
+            for (quant, do_filt,
+                 quant_unit) in zip(mesh_quant_names, mesh_quant_do_filt,
+                                    mesh_quant_units):
+                if do_filt:
+                    for filt in mesh_quant_filts:
+                        quant_pri = b['{0}@primary@{1}'.format(quant, filt)].value *\
+                                    quant_unit
+                        quant_sec = b['{0}@secondary@{1}'.format(quant, filt)].value *\
+                                    quant_unit
+                    
+                        mesh_quants_pri['{0}_{1}'.format(quant, filt)] = quant_pri
+                        mesh_quants_sec['{0}_{1}'.format(quant, filt)] = quant_sec
+                else:
+                    quant_pri = b['{0}@primary'.format(quant)].value * quant_unit
+                    quant_sec = b['{0}@secondary'.format(quant)].value * quant_unit
+                    
+                    mesh_quants_pri[quant] = quant_pri
+                    mesh_quants_sec[quant] = quant_sec
+            
+            # Construct mesh tables for each star and output
+            mesh_pri_table = Table(mesh_quants_pri)
+            mesh_pri_table.sort(['teffs'], reverse=True)
+            with open('mesh_pri.txt', 'w') as out_file:
+                for line in mesh_pri_table.pformat_all():
+                    out_file.write(line + '\n')
+            mesh_pri_table.write('mesh_pri.h5', format='hdf5',
+                                 path='data', serialize_meta=True,
+                                 overwrite=True)
+            mesh_pri_table.write('mesh_pri.fits', format='fits',
+                                 overwrite=True)
+            
+            mesh_sec_table = Table(mesh_quants_sec)
+            mesh_sec_table.sort(['teffs'], reverse=True)
+            with open('mesh_sec.txt', 'w') as out_file:
+                for line in mesh_sec_table.pformat_all():
+                    out_file.write(line + '\n')
+            mesh_sec_table.write('mesh_sec.h5', format='hdf5',
+                                 path='data', serialize_meta=True,
+                                 overwrite=True)
+            mesh_sec_table.write('mesh_sec.fits', format='fits',
+                                 overwrite=True)
         else:
             mesh_plot_out = b['mod_mesh@model'].plot(save='./binary_mesh{0}.pdf'.format(suffix_str))
     
@@ -655,7 +706,7 @@ def binary_mags_calc(star1_params_lcfit, star2_params_lcfit,
                      isoc_Ks_ext, Kp_ext, H_ext, ext_alpha,
                      isoc_dist, bin_dist,
                      use_blackbody_atm=False,
-                     use_eclipse_only_horizon=False,
+                     use_compact_object=False,
                      make_mesh_plots=False, mesh_temp=False, mesh_temp_cmap=None,
                      plot_name=None,
                      num_triangles=1500,
@@ -691,7 +742,7 @@ def binary_mags_calc(star1_params_lcfit, star2_params_lcfit,
         binary_params,
         observation_times,
         use_blackbody_atm=use_blackbody_atm,
-        use_eclipse_only_horizon=use_eclipse_only_horizon,
+        use_compact_object=use_compact_object,
         make_mesh_plots=make_mesh_plots,
         mesh_temp=mesh_temp,
         mesh_temp_cmap=mesh_temp_cmap,

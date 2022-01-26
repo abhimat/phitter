@@ -391,8 +391,6 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     kp_model_times = (kp_phased_days) * binary_period.to(u.d).value
     kp_model_times = kp_model_times[kp_phases_sorted_inds]
     
-    # b.add_dataset(phoebe.dataset.lc, time=kp_model_times,
-    #               dataset='mod_lc_Kp', passband='Keck_NIRC2:Kp')
     if use_blackbody_atm:
         b.add_dataset(phoebe.dataset.lc, time=kp_model_times,
                       dataset='mod_lc_Kp', passband='Keck_NIRC2:Kp')
@@ -412,8 +410,6 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     h_model_times = (h_phased_days) * binary_period.to(u.d).value
     h_model_times = h_model_times[h_phases_sorted_inds]
     
-    # b.add_dataset(phoebe.dataset.lc, times=h_model_times,
-    #               dataset='mod_lc_H', passband='Keck_NIRC2:H')
     if use_blackbody_atm:
         b.add_dataset(phoebe.dataset.lc, times=h_model_times,
                       dataset='mod_lc_H', passband='Keck_NIRC2:H')
