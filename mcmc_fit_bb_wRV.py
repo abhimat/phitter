@@ -86,6 +86,19 @@ class mcmc_fitter_bb(object):
     model_star2_teff = True
     default_star2_teff = 8000. * u.K
     
+    model_compact = True
+    
+    # Relational requirements for the parameters:
+    # If a certain parameter for a star
+    # needs to be larger than for the other star
+    star1_mass_larger = False
+    star1_rad_larger = False
+    star1_teff_larger = False
+    
+    star2_mass_larger = False
+    star2_rad_larger = False
+    star2_teff_larger = False
+    
     # Default prior bounds
     # Extinction prior bounds
     lo_Kp_ext_prior_bound = 2.0
@@ -412,8 +425,6 @@ class mcmc_fitter_bb(object):
             star1_teff_check = (self.lo_star1_teff_prior_bound <= star1_teff <=
                                 self.hi_star1_teff_prior_bound)
         
-        star1_checks = star1_mass_check and star1_rad_check and star1_teff_check
-        
         
         star2_mass_check = True
         if self.model_star2_mass:
@@ -430,8 +441,31 @@ class mcmc_fitter_bb(object):
             star2_teff_check = (self.lo_star2_teff_prior_bound <= star2_teff <=
                                 self.hi_star2_teff_prior_bound)
         
+        
+        
+        # Relational checks for the parameters
+        if self.star1_mass_larger:
+            star1_mass_check = star1_mass_check and (star1_mass > star2_mass)
+        
+        if self.star1_rad_larger:
+            star1_rad_check = star1_rad_check and (star1_rad > star2_rad)
+        
+        if self.star1_teff_larger:
+            star1_teff_check = star1_teff_check and (star1_teff > star2_teff)
+        
+        if self.star2_mass_larger:
+            star2_mass_check = star2_mass_check and (star2_mass > star1_mass)
+        
+        if self.star2_rad_larger:
+            star2_rad_check = star2_rad_check and (star2_rad > star1_rad)
+        
+        if self.star2_teff_larger:
+            star2_teff_check = star2_teff_check and (star2_teff > star1_teff)
+        
+        
+        star1_checks = star1_mass_check and star1_rad_check and star1_teff_check
         star2_checks = star2_mass_check and star2_rad_check and star2_teff_check
-                
+        
         ## Binary system configuration checks
         inc_check = (self.lo_inc_prior_bound <= binary_inc <=
                      self.hi_inc_prior_bound)
@@ -611,7 +645,7 @@ class mcmc_fitter_bb(object):
                                               binary_params,
                                               self.observation_times,
                                               use_blackbody_atm=self.use_blackbody_atm,
-                                              use_compact_object=True,
+                                              use_compact_object=self.model_compact,
                                               num_triangles=self.model_numTriangles)
         if (binary_mags_Kp[0] == -1.) or (binary_mags_H[0] == -1.):
             return err_out
