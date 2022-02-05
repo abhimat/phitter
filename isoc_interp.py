@@ -86,7 +86,7 @@ class isochrone_mist(object):
                                                   atm_func=atm_func,
                                                   red_law=red_law,
                                                   metallicity=self.met,
-                                                  filters=self.filt_list)
+                                                  filters=self.filts_list)
         
         ## Create another isochrone for absolute mags / passband luminosities
         self.iso_absMag = synthetic.IsochronePhot(self.log_age, 0.0, 10.0,
@@ -94,7 +94,7 @@ class isochrone_mist(object):
                                                   atm_func=atm_func,
                                                   red_law=red_law,
                                                   metallicity=self.met,
-                                                  filters=self.filt_list)
+                                                  filters=self.filts_list)
         
         
         # Save out specific stellar parameter columns needed
