@@ -62,6 +62,22 @@ class isochrone_mist(object):
         self.dist = dist
         self.met = met
         
+        # Specify filters and get filter information
+        self.filts_list = filts_list
+        self.num_filts = len(self.filts_list)
+        
+        self.filts_info = []
+        self.filts_flux_ref = np.empty(self.num_filts) *\
+                                  (u.erg / u.s) / (u.cm**2.)
+        for cur_filt_index in range(self.num_filts):
+            cur_filt = self.filts_list[cur_filt_index]
+            
+            cur_filt_info = synthetic.get_filter_info(cur_filt)
+            self.filts_info.append(cur_filt_info)
+            
+            cur_filt_flux_ref = cur_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
+            self.filts_flux_ref[cur_filt_index] = cur_filt_flux_ref
+        
         # Evolution/Atmosphere Models
         evo_model = evolution.MISTv1()
         
