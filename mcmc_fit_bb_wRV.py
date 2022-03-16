@@ -218,7 +218,7 @@ class mcmc_fitter_bb(object):
         
         self.observation_times = (obs_times[self.search_filt_kp],
                                   obs_times[self.search_filt_h],
-                                  obs_times[self.search_filt_rv])
+                                  np.unique(obs_times[self.search_filt_rv]))
     
     # Function to set observation mags
     def set_observations(self, obs, obs_errors):
@@ -506,7 +506,7 @@ class mcmc_fitter_bb(object):
                 log_prior = 0.0
                 
                 # Return gaussian prior for H_ext_mod parameter
-                if self.H_ext_mod_alpha_sig_bound is not -1.0:
+                if self.H_ext_mod_alpha_sig_bound != -1.0:
                     log_prior_add = np.log(1.0/(np.sqrt(2*np.pi)*H_ext_mod_bound_oneSig))
                     log_prior_add += (-0.5 * (H_ext_mod**2) /
                                       (H_ext_mod_bound_oneSig**2))
@@ -785,22 +785,30 @@ class mcmc_fitter_bb(object):
         pri_filt = np.where(self.obs_filts_rv == 'rv_pri')
         sec_filt = np.where(self.obs_filts_rv == 'rv_sec')
         
-        binary_model_RVs_pri = binary_model_RVs_pri[pri_filt]
-        binary_model_RVs_sec = binary_model_RVs_sec[sec_filt]
+        # binary_model_RVs_pri = binary_model_RVs_pri[pri_filt]
+        # binary_model_RVs_sec = binary_model_RVs_sec[sec_filt]
         
-        if len(binary_model_RVs_pri) > 0:
-            rv_pri_phases_sorted_inds = rv_pri_phases_sorted_inds[pri_filt]
+        if len(pri_filt) > 0:
+            obs_rv_pri = self.obs_rv_pri[rv_pri_phases_sorted_inds]
+            obs_rv_pri_errors = self.obs_rv_pri_errors[rv_pri_phases_sorted_inds]
             
-            log_likelihood += np.sum((self.obs_rv_pri[rv_pri_phases_sorted_inds] -
-                                  binary_model_RVs_pri)**2. /
-                                  (self.obs_rv_pri_errors[rv_pri_phases_sorted_inds])**2.)
+            # Filter out NAN observations
+            nan_filt = np.where(np.logical_not(np.isnan(obs_rv_pri)))
+            
+            log_likelihood += np.sum((obs_rv_pri[nan_filt] -
+                                  binary_model_RVs_pri[nan_filt])**2. /
+                                  (obs_rv_pri_errors[nan_filt])**2.)
         
-        if len(binary_model_RVs_sec) > 0:
-            rv_sec_phases_sorted_inds = rv_sec_phases_sorted_inds[sec_filt]
+        if len(sec_filt) > 0:
+            obs_rv_sec = self.obs_rv_sec[rv_sec_phases_sorted_inds]
+            obs_rv_sec_errors = self.obs_rv_sec_errors[rv_sec_phases_sorted_inds]
             
-            log_likelihood += np.sum((self.obs_rv_sec[rv_sec_phases_sorted_inds] -
-                                  binary_model_RVs_sec)**2. /
-                                  (self.obs_rv_sec_errors[rv_sec_phases_sorted_inds])**2.)
+            # Filter out NAN observations
+            nan_filt = np.where(np.logical_not(np.isnan(obs_rv_sec)))
+            
+            log_likelihood += np.sum((obs_rv_sec[nan_filt] -
+                                  binary_model_RVs_sec[nan_filt])**2. /
+                                  (obs_rv_sec_errors[nan_filt])**2.)
         
         
         # Finalize log likelihood and return
