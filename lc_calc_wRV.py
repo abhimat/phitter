@@ -107,6 +107,7 @@ def single_star_lc(stellar_params,
 def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
         use_blackbody_atm=False,
         use_compact_object=False,
+        irrad_frac_refl=0.6,
         make_mesh_plots=False, mesh_temp=False, mesh_temp_cmap=None,
         plot_name=None,
         print_diagnostics=False, par_compute=False, num_par_processes=8,
@@ -325,12 +326,12 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     # Set up compute
     if use_blackbody_atm:
         b.add_compute('phoebe', compute='detailed',
-                      irrad_method='wilson', atm='blackbody')
+                      irrad_method='horvat', atm='blackbody')
         
         b.set_value('atm@primary@detailed', 'blackbody')
         b.set_value('atm@secondary@detailed', 'blackbody')
     else:
-        b.add_compute('phoebe', compute='detailed', irrad_method='wilson')
+        b.add_compute('phoebe', compute='detailed', irrad_method='horvat')
     
     # Set the parameters of the component stars of the system
     ## Primary
@@ -386,6 +387,9 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
         b.set_value_all('ld_mode_bol', 'manual')
         b.set_value_all('ld_func_bol', 'linear')
         b.set_value_all('ld_coeffs_bol', [0.0])
+    
+    # Set irradiation reflection fraction 
+    b.set_value_all('irrad_frac_refl_bol', irrad_frac_refl)
     
     # Check for compact companion
     if use_compact_object:
@@ -707,6 +711,7 @@ def binary_mags_calc(star1_params_lcfit, star2_params_lcfit,
                      isoc_dist, bin_dist,
                      use_blackbody_atm=False,
                      use_compact_object=False,
+                     irrad_frac_refl=0.6,
                      make_mesh_plots=False, mesh_temp=False, mesh_temp_cmap=None,
                      plot_name=None,
                      num_triangles=1500,
@@ -743,6 +748,7 @@ def binary_mags_calc(star1_params_lcfit, star2_params_lcfit,
         observation_times,
         use_blackbody_atm=use_blackbody_atm,
         use_compact_object=use_compact_object,
+        irrad_frac_refl=irrad_frac_refl,
         make_mesh_plots=make_mesh_plots,
         mesh_temp=mesh_temp,
         mesh_temp_cmap=mesh_temp_cmap,

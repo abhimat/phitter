@@ -50,6 +50,9 @@ class mcmc_fitter_bb(object):
     use_blackbody_atm = True
     model_numTriangles = 1500
     
+    # Set irradiation reflection fraction
+    irrad_frac_refl = 0.6
+    
     # Model H Extinction Modifier
     default_H_ext_mod = 0.0
     model_H_ext_mod = True
@@ -646,6 +649,7 @@ class mcmc_fitter_bb(object):
                                               self.observation_times,
                                               use_blackbody_atm=self.use_blackbody_atm,
                                               use_compact_object=self.model_compact,
+                                              irrad_frac_refl=self.irrad_frac_refl,
                                               num_triangles=self.model_numTriangles)
         if (binary_mags_Kp[0] == -1.) or (binary_mags_H[0] == -1.):
             return err_out
