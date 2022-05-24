@@ -351,6 +351,9 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
             
             return err_out
     
+    if print_diagnostics:
+        print('Contact envelope parameters:')
+        print(b.filter('contact_envelope@detailed@compute'))
     
     # Set the number of triangles in the mesh
     # Detached stars
@@ -432,14 +435,24 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
                                  '*@mod_lc_Kp', '*@mod_lc_H']
         
     # Set the passband luminosities for the stars
-    b.set_value('pblum_mode@mod_lc_Kp', 'decoupled')
-    b.set_value('pblum_mode@mod_lc_H', 'decoupled')
-    
-    b.set_value('pblum@primary@mod_lc_Kp', star1_pblum_Kp)
-    b.set_value('pblum@primary@mod_lc_H', star1_pblum_H)
-    
-    b.set_value('pblum@secondary@mod_lc_Kp', star2_pblum_Kp)
-    b.set_value('pblum@secondary@mod_lc_H', star2_pblum_H)
+    if (not star1_overflow) and (not star2_overflow):
+        # Detached / semidetached case
+        b.set_value('pblum_mode@mod_lc_Kp', 'decoupled')
+        b.set_value('pblum_mode@mod_lc_H', 'decoupled')
+        
+        b.set_value('pblum@primary@mod_lc_Kp', star1_pblum_Kp)
+        b.set_value('pblum@primary@mod_lc_H', star1_pblum_H)
+        
+        b.set_value('pblum@secondary@mod_lc_Kp', star2_pblum_Kp)
+        b.set_value('pblum@secondary@mod_lc_H', star2_pblum_H)
+    else:
+        if star1_overflow:
+            b.set_value('pblum@primary@mod_lc_Kp', star1_pblum_Kp)
+            b.set_value('pblum@primary@mod_lc_H', star1_pblum_H)
+        elif star2_overflow:
+            b.set_value('pblum@secondary@mod_lc_Kp', star2_pblum_Kp)
+            b.set_value('pblum@secondary@mod_lc_H', star2_pblum_H)
+        
     
     # Run compute
     # Determine eclipse method
@@ -704,7 +717,8 @@ def binary_mags_calc(star1_params_lcfit, star2_params_lcfit,
         num_triangles=num_triangles,
         print_diagnostics=print_diagnostics)
     
-    print(binary_star_lc_out)
+    if print_diagnostics:
+        print(binary_star_lc_out)
     
     if make_mesh_plots:
         (binary_mags_Kp, binary_mags_H, mesh_plot_out) = binary_star_lc_out

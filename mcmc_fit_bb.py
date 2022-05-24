@@ -82,6 +82,8 @@ class mcmc_fitter_bb(object):
     model_star2_teff = True
     default_star2_teff = 8000. * u.K
     
+    model_compact_object = False
+    
     # Default prior bounds
     # Extinction prior bounds
     lo_Kp_ext_prior_bound = 2.0
@@ -570,13 +572,16 @@ class mcmc_fitter_bb(object):
         
         # Run binary star model to get binary mags
         (binary_mags_Kp, binary_mags_H) = lc_calc.binary_star_lc(
-                                              star1_params_lcfit,
-                                              star2_params_lcfit,
-                                              binary_params,
-                                              self.observation_times,
-                                              use_blackbody_atm=self.use_blackbody_atm,
-                                              use_compact_object=True,
-                                              num_triangles=self.model_numTriangles)
+            star1_params_lcfit,
+            star2_params_lcfit,
+            binary_params,
+            self.observation_times,
+            use_blackbody_atm=self.use_blackbody_atm,
+            use_compact_object=self.model_compact_object,
+            num_triangles=self.model_numTriangles,
+            # print_diagnostics=True,
+        )
+        
         if (binary_mags_Kp[0] == -1.) or (binary_mags_H[0] == -1.):
             return err_out
         
