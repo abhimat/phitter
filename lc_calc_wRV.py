@@ -220,6 +220,14 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     b.set_value('sma@binary@component', binary_sma)
     b.set_value('q@binary@component', binary_q)
     
+    print(b.get_value('period@secondary@star@component'))
+    print(b.get_value('period@secondary@star@constraint'))
+    b.remove_constraint('period@secondary@star@constraint')
+    b.set_value('period@secondary@star@component', 3 * u.d)
+    print(b.get_value('period@secondary'))
+    print(b.get_value('period@orbit'))
+    # print(hi)
+    
     ## Inclination
     b.set_value('incl@orbit', binary_inc)
     
@@ -326,7 +334,7 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     # Set up compute
     if use_blackbody_atm:
         b.add_compute('phoebe', compute='detailed',
-                      irrad_method='horvat', atm='blackbody')
+                      irrad_method='horvat', atm='blackbody', distortion_method='rotstar')
         
         b.set_value('atm@primary@detailed', 'blackbody')
         b.set_value('atm@secondary@detailed', 'blackbody')
@@ -457,8 +465,10 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     if make_mesh_plots:
         b.add_dataset('mesh', times=[(binary_period/4.).to(u.d).value],
                       dataset='mod_mesh')
+        b.set_value('coordinates@mesh', ['uvw'])
         if mesh_temp:
-            b['columns@mesh'] = ['teffs', 'loggs', 'areas',
+            b['columns@mesh'] = ['us', 'vs', 'ws', 'rprojs',
+                                 'teffs', 'loggs', 'rs', 'areas',
                                  '*@mod_lc_Kp', '*@mod_lc_H']
     
     # Set the passband luminosities for the stars
@@ -491,6 +501,28 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
                 print("Error during primary binary compute: {0}".format(sys.exc_info()[0]))
             return err_out
     
+    r_pri_diff = b.get_value('rs@primary').max() - b.get_value('rs@primary').min()
+    r_sec_diff = b.get_value('rs@secondary').max() - b.get_value('rs@secondary').min()
+    
+    requiv_pri = b.get_value('requiv@primary')
+    requiv_sec = b.get_value('requiv@secondary')
+    
+    print('r_pri_diff / requiv_pri = {}'.format(r_pri_diff / requiv_pri))
+    print('r_sec_diff / requiv_sec = {}'.format(r_sec_diff / requiv_sec))
+    
+    
+    print("rmin_primary (pole): {} ({})".format(b.get_value('rs@primary').min(), 
+                                 b.get_value('requiv@primary')))
+    
+    print("rmin_primary (equator): {} ({})".format(b.get_value('rs@primary').max(), 
+                                 b.get_value('requiv@primary')))
+    
+    
+    print("rmin_secondary (pole): {} ({})".format(b.get_value('rs@secondary').min(), 
+                                 b.get_value('requiv@secondary')))
+    
+    print("rmin_secondary (equator): {} ({})".format(b.get_value('rs@secondary').max(), 
+                                 b.get_value('requiv@secondary')))
     
     # Save out mesh plot
     if make_mesh_plots:
@@ -519,13 +551,20 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
             # print(mesh_plot_out.axs)
             
             # Extract and output mesh quantities
-            mesh_quant_names = ['teffs', 'loggs', 'areas', 'abs_intensities']
-            mesh_quant_do_filt = [False, False, False, True]
-            mesh_quant_units = [u.K, 1.0, u.solRad**2, u.W / (u.m**3)]
+            mesh_quant_names = ['us', 'vs', 'ws', 'rprojs',
+                                'teffs', 'loggs', 'rs', 'areas',
+                                'abs_intensities']
+            mesh_quant_do_filt = [False, False, False, False,
+                                  False, False, False, False,
+                                  True]
+            mesh_quant_units = [u.solRad, u.solRad, u.solRad, u.solRad,
+                                u.K, 1.0, u.solRad, u.solRad**2,
+                                u.W / (u.m**3)]
             
             mesh_quant_filts = ['mod_lc_Kp', 'mod_lc_H']            
             mesh_quants_pri = {}
             mesh_quants_sec = {}
+            
             
             for (quant, do_filt,
                  quant_unit) in zip(mesh_quant_names, mesh_quant_do_filt,
@@ -546,9 +585,47 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
                     mesh_quants_pri[quant] = quant_pri
                     mesh_quants_sec[quant] = quant_sec
             
+            # Get uvw coordinates of each vertix of triangle in mesh
+            uvw_elements_pri = b.get_parameter(qualifier='uvw_elements', 
+                                  component='primary', 
+                                  dataset='mod_mesh',
+                                  kind='mesh', 
+                                  context='model').value * u.solRad
+            uvw_elements_sec = b.get_parameter(qualifier='uvw_elements', 
+                                  component='secondary', 
+                                  dataset='mod_mesh',
+                                  kind='mesh', 
+                                  context='model').value * u.solRad
+            
+            mesh_quants_pri['v1_us'] = uvw_elements_pri[:,0,0]
+            mesh_quants_pri['v1_vs'] = uvw_elements_pri[:,0,1]
+            mesh_quants_pri['v1_ws'] = uvw_elements_pri[:,0,2]
+            
+            mesh_quants_pri['v2_us'] = uvw_elements_pri[:,1,0]
+            mesh_quants_pri['v2_vs'] = uvw_elements_pri[:,1,1]
+            mesh_quants_pri['v2_ws'] = uvw_elements_pri[:,1,2]
+            
+            mesh_quants_pri['v3_us'] = uvw_elements_pri[:,2,0]
+            mesh_quants_pri['v3_vs'] = uvw_elements_pri[:,2,1]
+            mesh_quants_pri['v3_ws'] = uvw_elements_pri[:,2,2]
+            
+            
+            mesh_quants_sec['v1_us'] = uvw_elements_sec[:,0,0]
+            mesh_quants_sec['v1_vs'] = uvw_elements_sec[:,0,1]
+            mesh_quants_sec['v1_ws'] = uvw_elements_sec[:,0,2]
+            
+            mesh_quants_sec['v2_us'] = uvw_elements_sec[:,1,0]
+            mesh_quants_sec['v2_vs'] = uvw_elements_sec[:,1,1]
+            mesh_quants_sec['v2_ws'] = uvw_elements_sec[:,1,2]
+            
+            mesh_quants_sec['v3_us'] = uvw_elements_sec[:,2,0]
+            mesh_quants_sec['v3_vs'] = uvw_elements_sec[:,2,1]
+            mesh_quants_sec['v3_ws'] = uvw_elements_sec[:,2,2]
+            
+            
             # Construct mesh tables for each star and output
             mesh_pri_table = Table(mesh_quants_pri)
-            mesh_pri_table.sort(['teffs'], reverse=True)
+            mesh_pri_table.sort(['us'], reverse=True)
             with open('mesh_pri.txt', 'w') as out_file:
                 for line in mesh_pri_table.pformat_all():
                     out_file.write(line + '\n')
@@ -559,7 +636,7 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
                                  overwrite=True)
             
             mesh_sec_table = Table(mesh_quants_sec)
-            mesh_sec_table.sort(['teffs'], reverse=True)
+            mesh_sec_table.sort(['us'], reverse=True)
             with open('mesh_sec.txt', 'w') as out_file:
                 for line in mesh_sec_table.pformat_all():
                     out_file.write(line + '\n')

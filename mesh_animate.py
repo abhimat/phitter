@@ -121,7 +121,7 @@ def binary_star_mesh(star1_params, star2_params, binary_params, observation_time
         (kp_MJDs, h_MJDs, mesh_MJDs) = observation_times
     use_blackbody_atm -- Use blackbody atmosphere
         instead of default Castelli & Kurucz (default False)
-    make_mesh_plots -- Make a mesh plot of the binary system (default False)
+    make_mesh_plots -- Make a mesh plot of the binary system (default True)
     plot_name
     print_diagnostics
     par_compute
