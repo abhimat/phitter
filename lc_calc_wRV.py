@@ -220,13 +220,14 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     b.set_value('sma@binary@component', binary_sma)
     b.set_value('q@binary@component', binary_q)
     
-    print(b.get_value('period@secondary@star@component'))
-    print(b.get_value('period@secondary@star@constraint'))
-    b.remove_constraint('period@secondary@star@constraint')
-    b.set_value('period@secondary@star@component', 3 * u.d)
-    print(b.get_value('period@secondary'))
-    print(b.get_value('period@orbit'))
-    # print(hi)
+    # Star rotation support tests
+    # print(b.get_value('period@secondary@star@component'))
+    # print(b.get_value('period@secondary@star@constraint'))
+    # b.remove_constraint('period@secondary@star@constraint')
+    # b.set_value('period@secondary@star@component', 3 * u.d)
+    # print(b.get_value('period@secondary'))
+    # print(b.get_value('period@orbit'))
+    # # print(hi)
     
     ## Inclination
     b.set_value('incl@orbit', binary_inc)
@@ -334,12 +335,15 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     # Set up compute
     if use_blackbody_atm:
         b.add_compute('phoebe', compute='detailed',
-                      irrad_method='horvat', atm='blackbody', distortion_method='rotstar')
+                      irrad_method='wilson', atm='blackbody')
+        
+        # b.add_compute('phoebe', compute='detailed',
+        #               irrad_method='horvat', atm='blackbody', distortion_method='rotstar')
         
         b.set_value('atm@primary@detailed', 'blackbody')
         b.set_value('atm@secondary@detailed', 'blackbody')
     else:
-        b.add_compute('phoebe', compute='detailed', irrad_method='horvat')
+        b.add_compute('phoebe', compute='detailed', irrad_method='wilson')
     
     # Set the parameters of the component stars of the system
     ## Primary
@@ -500,29 +504,6 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
             if print_diagnostics:
                 print("Error during primary binary compute: {0}".format(sys.exc_info()[0]))
             return err_out
-    
-    r_pri_diff = b.get_value('rs@primary').max() - b.get_value('rs@primary').min()
-    r_sec_diff = b.get_value('rs@secondary').max() - b.get_value('rs@secondary').min()
-    
-    requiv_pri = b.get_value('requiv@primary')
-    requiv_sec = b.get_value('requiv@secondary')
-    
-    print('r_pri_diff / requiv_pri = {}'.format(r_pri_diff / requiv_pri))
-    print('r_sec_diff / requiv_sec = {}'.format(r_sec_diff / requiv_sec))
-    
-    
-    print("rmin_primary (pole): {} ({})".format(b.get_value('rs@primary').min(), 
-                                 b.get_value('requiv@primary')))
-    
-    print("rmin_primary (equator): {} ({})".format(b.get_value('rs@primary').max(), 
-                                 b.get_value('requiv@primary')))
-    
-    
-    print("rmin_secondary (pole): {} ({})".format(b.get_value('rs@secondary').min(), 
-                                 b.get_value('requiv@secondary')))
-    
-    print("rmin_secondary (equator): {} ({})".format(b.get_value('rs@secondary').max(), 
-                                 b.get_value('requiv@secondary')))
     
     # Save out mesh plot
     if make_mesh_plots:
