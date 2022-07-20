@@ -7,7 +7,7 @@
 
 from spisea import synthetic, evolution, atmospheres, reddening
 from pysynphot import spectrum
-# from spisea.imf import imf, multiplicity
+from . import filters
 from phoebe import u
 from phoebe import c as const
 import numpy as np
@@ -27,11 +27,14 @@ v_filt_info = synthetic.get_filter_info('ubv,V')
 flux_ref_Ks = ks_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
 flux_ref_V = v_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
 
+# Filters for default filter list
+kp_filt = filters.nirc2_kp_filt()
+h_filt = filters.nirc2_h_filt()
 
 # Object to get synthetic magnitudes for blackbody objects
 class bb_stellar_params(object):
     def __init__(self, ext=2.63, dist=7.971e3,
-                 filts_list=['nirc2,Kp', 'nirc2,H']):
+                 filts_list=[kp_filt, h_filt]):
         # Define extinction and distance
         self.A_Ks = ext
         self.dist = dist * u.pc
@@ -46,10 +49,10 @@ class bb_stellar_params(object):
         for cur_filt_index in range(self.num_filts):
             cur_filt = self.filts_list[cur_filt_index]
             
-            cur_filt_info = synthetic.get_filter_info(cur_filt)
+            cur_filt_info = cur_filt.filt_info
             self.filts_info.append(cur_filt_info)
             
-            cur_filt_flux_ref = cur_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
+            cur_filt_flux_ref = cur_filt.flux_ref_filt
             self.filts_flux_ref[cur_filt_index] = cur_filt_flux_ref
         
         # Define atmosphere and reddening functions
