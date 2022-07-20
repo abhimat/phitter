@@ -24,4 +24,4 @@
 **/*.fits
 
 # Ignore IDEA files
-.idea/*
+**/.idea/*
