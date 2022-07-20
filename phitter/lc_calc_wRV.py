@@ -8,7 +8,7 @@
 import phoebe
 from phoebe import u
 from phoebe import c as const
-
+from . import filters
 import numpy as np
 
 from spisea import synthetic
@@ -22,24 +22,6 @@ import matplotlib.font_manager as font_manager
 from matplotlib.ticker import MultipleLocator
 
 # Filter properties
-lambda_Ks = 2.18e-6 * u.m
-dlambda_Ks = 0.35e-6 * u.m
-
-lambda_Kp = 2.124e-6 * u.m
-dlambda_Kp = 0.351e-6 * u.m
-
-lambda_H = 1.633e-6 * u.m
-dlambda_H = 0.296e-6 * u.m
-
-# Reference fluxes, calculated with PopStar
-## Vega magnitudes (m_Vega = 0.03)
-ks_filt_info = synthetic.get_filter_info('naco,Ks')
-kp_filt_info = synthetic.get_filter_info('nirc2,Kp')
-h_filt_info = synthetic.get_filter_info('nirc2,H')
-
-flux_ref_Ks = ks_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
-flux_ref_Kp = kp_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
-flux_ref_H = h_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
 
 # Stellar Parameters
 # stellar_params = (mass, rad, teff, mag_Kp, mag_H, pblum_Kp, pblum_H)
@@ -785,12 +767,16 @@ def binary_mags_calc(star1_params_lcfit, star2_params_lcfit,
                      make_mesh_plots=False, mesh_temp=False, mesh_temp_cmap=None,
                      plot_name=None,
                      num_triangles=1500,
-                     print_diagnostics=False):
+                     print_diagnostics=False,
+                     filts_list=['nirc2,Kp', 'nirc2,H']):
     
     # Extinction law (using Nogueras-Lara+ 2018)
     ext_alpha = 2.30
     
     # Calculate extinctions implied by isochrone extinction
+    isoc_filt_ext = 
+    
+    
     isoc_Kp_ext = isoc_Ks_ext * (lambda_Ks / lambda_Kp)**ext_alpha
     isoc_H_ext = isoc_Ks_ext * (lambda_Ks / lambda_H)**ext_alpha
     

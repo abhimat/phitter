@@ -28,6 +28,9 @@ mist_phase_dict['WR'] = 9
 lambda_Ks = 2.18e-6 * u.m
 dlambda_Ks = 0.35e-6 * u.m
 
+lambda_Lp = 3.776e-6 * u.m
+dlambda_Lp = 0.700e-6 * u.m
+
 lambda_Kp = 2.124e-6 * u.m
 dlambda_Kp = 0.351e-6 * u.m
 
@@ -37,11 +40,13 @@ dlambda_H = 0.296e-6 * u.m
 # Reference fluxes, calculated with PopStar
 ## Vega magnitudes (m_Vega = 0.03)
 ks_filt_info = synthetic.get_filter_info('naco,Ks')
+lp_filt_info = synthetic.get_filter_info('nirc2,Lp')
 kp_filt_info = synthetic.get_filter_info('nirc2,Kp')
 h_filt_info = synthetic.get_filter_info('nirc2,H')
 
 v_filt_info = synthetic.get_filter_info('ubv,V')
 
+flux_ref_Lp = lp_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
 flux_ref_Ks = ks_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
 flux_ref_Kp = kp_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
 flux_ref_H = h_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
@@ -93,6 +98,7 @@ class isochrone_mist(object):
         self.ext_alpha = 2.30
     
         ## Calculate extinctions implied by isochrone extinction
+        self.A_Lp = self.A_Ks * (lambda_Ks / lambda_Lp)**self.ext_alpha
         self.A_Kp = self.A_Ks * (lambda_Ks / lambda_Kp)**self.ext_alpha
         self.A_H = self.A_Ks * (lambda_Ks / lambda_H)**self.ext_alpha
         

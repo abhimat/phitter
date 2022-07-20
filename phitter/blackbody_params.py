@@ -8,12 +8,11 @@
 from spisea import synthetic, evolution, atmospheres, reddening
 from pysynphot import spectrum
 # from spisea.imf import imf, multiplicity
-
 from phoebe import u
 from phoebe import c as const
-
 import numpy as np
-
+import matplotlib.pyplot as plt
+import matplotlib as mpl
 import time
 
 # Filter properties
@@ -28,39 +27,6 @@ v_filt_info = synthetic.get_filter_info('ubv,V')
 flux_ref_Ks = ks_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
 flux_ref_V = v_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
 
-# start_time = time.time()
-#
-# bb_temp = 25000 * u.K
-# bb_rad = 10.0 * u.solRad
-# bb_distance = 8000 * u.pc
-# bb_ext = 2.63  # A_Ks
-#
-# # Make spectrum and apply distance, reddening
-# bb_atm_func = atmospheres.get_bb_atmosphere
-# red_law = reddening.RedLawNoguerasLara18()
-#
-# bb_atm = bb_atm_func(temperature=bb_temp.to(u.K).value)
-#
-# # Trim wavelength range down to JHKL range (0.5 - 5.2 microns)
-# wave_range=[5000, 52000]
-# bb_atm = spectrum.trimSpectrum(bb_atm, wave_range[0], wave_range[1])
-#
-# # Convert into flux observed at Earth (unreddened)
-# bb_atm *= ((bb_rad / bb_distance).to(1).value)**2   # in erg s^-1 cm^-2 A^-1
-#
-# # Redden the spectrum. This doesn't take much time at all.
-# red = red_law.reddening(bb_ext).resample(bb_atm.wave)
-# bb_atm *= red
-#
-# # Make synthetic photometry
-# bb_mag_kp = synthetic.mag_in_filter(bb_atm, kp_filt_info)
-# bb_mag_h = synthetic.mag_in_filter(bb_atm, h_filt_info)
-#
-# print(bb_mag_kp)
-# print(bb_mag_h)
-#
-# end_time = time.time()
-# print('Time taken: {0:.2f} seconds'.format(end_time - start_time))
 
 # Object to get synthetic magnitudes for blackbody objects
 class bb_stellar_params(object):
@@ -117,12 +83,25 @@ class bb_stellar_params(object):
         
         return stellar_params_all, stellar_params_lcfit
     
-    def get_bb_mags(self, bb_temp, bb_rad):
+    def get_bb_mags(self, bb_temp, bb_rad, diagnostic_plot=False):
+        if diagnostic_plot:
+            fig = plt.figure(figsize=(8,4))
+            ax1 = fig.add_subplot(1, 1, 1)
+        
         bb_atm = self.bb_atm_func(temperature=bb_temp.to(u.K).value)
+        
+        if diagnostic_plot:
+            ax1.plot(bb_atm.wave, bb_atm.flux,
+                     lw=3, ls='--',
+                     color='C0', label='original bbatm')
         
         # Trim wavelength range down to JHKL range (0.5 - 5.2 microns)
         wave_range=[5000, 52000]
         bb_atm = spectrum.trimSpectrum(bb_atm, wave_range[0], wave_range[1])
+        
+        if diagnostic_plot:
+            ax1.plot(bb_atm.wave, bb_atm.flux,
+                     color='C0', label='trimmed, unreddened')
         
         # Convert into flux observed at Earth (unreddened)
         # (in erg s^-1 cm^-2 A^-1)
@@ -132,6 +111,24 @@ class bb_stellar_params(object):
         # Redden the spectrum
         red = self.red_law.reddening(self.A_Ks).resample(bb_atm.wave) 
         bb_atm *= red
+        
+        if diagnostic_plot:
+            ax1.plot(bb_atm.wave, bb_atm.flux,
+                     color='C1', label='trimmed, reddened')
+        
+        if diagnostic_plot:
+            ax1.legend()
+            ax1.set_xlabel(bb_atm.waveunits)
+            ax1.set_ylabel(bb_atm.fluxunits)
+            
+            ax1.set_yscale('log')
+            
+            fig.tight_layout()
+            fig.savefig('./diagnostic_bb_plot.pdf')
+            fig.savefig('./diagnostic_bb_plot.png',
+                        dpi=200)
+            plt.close(fig)
+        
         
         # Calculate mags and absolute Mags for each filter
         filt_bb_mags = np.empty(self.num_filts)
