@@ -8,20 +8,19 @@
 import phoebe
 from phoebe import u
 from phoebe import c as const
+from spisea import synthetic
 from . import filters
 import numpy as np
-
-from spisea import synthetic
-
 import sys
-
+import copy
 from astropy.table import Table
-
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as font_manager
 from matplotlib.ticker import MultipleLocator
 
-# Filter properties
+# Filters for default filter list
+kp_filt = filters.nirc2_kp_filt()
+h_filt = filters.nirc2_h_filt()
 
 # Stellar Parameters
 # stellar_params = (mass, rad, teff, mag_Kp, mag_H, pblum_Kp, pblum_H)
@@ -87,6 +86,7 @@ def single_star_lc(stellar_params,
     return (sing_star_mags_Kp, sing_star_mags_H)
 
 def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
+        filts_list=[kp_filt, h_filt],
         use_blackbody_atm=False,
         use_compact_object=False,
         irrad_frac_refl=1.0,
@@ -96,22 +96,33 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
         num_triangles=1500):
     """Compute the light curve for a binary system
     
-    Keyword arguments:
-    star1_params -- Tuple of parameters for the primary star
-    star2_params -- Tuple of parameters for the secondary star
-    binary_params -- Tuple of parameters for the binary system configuration
-    observation_times -- Tuple of observation times,
-        with numpy array of MJDs in each band and for the RVs
+    Parameters
+    ----------
+    star1_params : tuple
+        Tuple of parameters for the primary star
+    star2_params : tuple
+        Tuple of parameters for the secondary star
+    binary_params : tuple
+        Tuple of parameters for the binary system configuration
+    observation_times : tuple of numpy arrays
+        Tuple of observation times, with tuple length equal to [number of
+        photometric filters] + [1: for RV observation times].
+        Expects an iterable list or 1d numpy array of MJDs for each band
+        and for the RVs.
+        For example for photometry in Kp and H:
         (kp_MJDs, h_MJDs, rv_MJDs) = observation_times
-    use_blackbody_atm -- Use blackbody atmosphere
-        instead of default Castelli & Kurucz (default False)
-    use_compact_object -- Set eclipse_method to 'only_horizon',
-            necessary for compact companions without eclipses (default False)
-    make_mesh_plots -- Make a mesh plot of the binary system (default False)
-    plot_name
-    print_diagnostics
-    par_compute
-    num_par_processes
+    use_blackbody_atm : bool, default=False
+        Use blackbody atmosphere instead of default Castelli & Kurucz
+        atmosphere. Default: False (i.e.: using a C&K atm by default)
+    use_compact_object : bool, default=False
+        If true, sets eclipse_method to 'only_horizon', necessary for compact
+        companions without eclipses. Default: False
+    make_mesh_plots : bool, default=False
+        Make a mesh plot of the binary system (default False)
+    plot_name : str, default=None
+    print_diagnostics : bool, default=False
+    par_compute : bool, default=False
+    num_par_processes : int, default=8
     """
     
     if par_compute:
@@ -122,11 +133,9 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     
     # Read in the stellar parameters of the binary components
     (star1_mass, star1_rad, star1_teff, star1_logg,
-     [star1_mag_Kp, star1_mag_H],
-     [star1_pblum_Kp, star1_pblum_H]) = star1_params
+     star1_filt_mags, star1_filt_pblums) = star1_params
     (star2_mass, star2_rad, star2_teff, star2_logg,
-     [star2_mag_Kp, star2_mag_H],
-     [star2_pblum_Kp, star2_pblum_H]) = star2_params
+     star2_filt_mags, star2_filt_pblums) = star2_params
     
     # Read in the parameters of the binary system
     (binary_period, binary_ecc, binary_inc, t0) = binary_params
@@ -247,8 +256,6 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     if (star2_rad > star2_rad_max) and not star2_semidetached:
         star2_overflow = True
     
-    
-    
     ### Check for if both stars are overflowing; which star overflows more?
     ### Choose that star to be overflowing more
     if star1_overflow and star2_overflow:
@@ -277,6 +284,7 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
         return binary_star_lc(star2_params, star1_params,
                     redo_binary_params,
                     observation_times,
+                    filts_list=filts_list,
                     use_blackbody_atm=use_blackbody_atm,
                     make_mesh_plots=make_mesh_plots,
                     mesh_temp=mesh_temp, mesh_temp_cmap=mesh_temp_cmap,
@@ -371,15 +379,34 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
                    num_triangles * 2.)
     
     # Phase the observation times
-    ## Read in observation times
-    (kp_MJDs, h_MJDs, rv_MJDs) = observation_times
+    num_filts = len(filts_list)
     
-    ## Phase the observation times
-    kp_phased_days = ((kp_MJDs - t0) % binary_period.to(u.d).value) / binary_period.to(u.d).value
-    h_phased_days = ((h_MJDs - t0) % binary_period.to(u.d).value) / binary_period.to(u.d).value
-    rv_phased_days = ((rv_MJDs - t0) % binary_period.to(u.d).value) / binary_period.to(u.d).value
+    # Read in observation times, and separate photometry from RVs
+    filt_MJDs = observation_times[:num_filts]
+    rv_MJDs = observation_times[num_filts]
+    
+    # Phase the observation times
+    
+    # Phase photometric observation times
+    filt_phased_days = ()
+    for filt_index in range(num_filts):
+        # Phase the current filter's MJDs
+        cur_filt_MJDs = filt_MJDs[filt_index]
+        cur_filt_phased_days = (((cur_filt_MJDs - t0) %
+                                 binary_period.to(u.d).value) /
+                                binary_period.to(u.d).value)
+        
+        # Append to tuple of all filters' phased days
+        filt_phased_days = filt_phased_days + (cur_filt_phased_days, )
+    
+    # Phase RV observation times
+    rv_phased_days = (((rv_MJDs - t0) % binary_period.to(u.d).value) /
+                      binary_period.to(u.d).value)
+    
     
     # Add light curve datasets
+    
+    # Parameters to change when using a blackbody atmosphere
     if use_blackbody_atm:
         b.set_value_all('ld_mode_bol', 'manual')
         b.set_value_all('ld_func_bol', 'linear')
@@ -392,63 +419,42 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     if use_compact_object:
         b.set_value('irrad_method@detailed', 'none')
     
-    ## Kp
-    kp_phases_sorted_inds = np.argsort(kp_phased_days)
     
-    kp_model_times = (kp_phased_days) * binary_period.to(u.d).value
-    kp_model_times = kp_model_times[kp_phases_sorted_inds]
+    # Go through each filter and add a lightcurve dataset
+    for (filt_index, filt) in enumerate(filts_list):
+        filt_phases_sorted_inds = np.argsort(filt_phased_days[filt_index])
+        
+        filt_model_times = (filt_phased_days[filt_index] *
+                            binary_period.to(u.d).value)
+        filt_model_times = filt_model_times[filt_phases_sorted_inds]
+        
+        
+        b.add_dataset(phoebe.dataset.lc, time=filt_model_times,
+                      dataset=filt.phoebe_ds_name,
+                      passband=filt.phoebe_pb_name)
+        if use_blackbody_atm:
+            b.set_value_all('ld_mode@' + filt.phoebe_ds_name, 'manual')
     
-    if use_blackbody_atm:
-        b.add_dataset(phoebe.dataset.lc, time=kp_model_times,
-                      dataset='mod_lc_Kp', passband='Keck_NIRC2:Kp')
-        
-        b.set_value_all('ld_mode@mod_lc_Kp', 'manual')
-        
-        b.set_value_all('ld_func@mod_lc_Kp', 'linear')
-        
-        b.set_value_all('ld_coeffs@mod_lc_Kp', [0.0])
-    else:
-        b.add_dataset(phoebe.dataset.lc, time=kp_model_times,
-                      dataset='mod_lc_Kp', passband='Keck_NIRC2:Kp')
+            b.set_value_all('ld_func@' + filt.phoebe_ds_name, 'linear')
     
-    ## H
-    h_phases_sorted_inds = np.argsort(h_phased_days)
+            b.set_value_all('ld_coeffs@' + filt.phoebe_ds_name, [0.0])
     
-    h_model_times = (h_phased_days) * binary_period.to(u.d).value
-    h_model_times = h_model_times[h_phases_sorted_inds]
-    
-    if use_blackbody_atm:
-        b.add_dataset(phoebe.dataset.lc, times=h_model_times,
-                      dataset='mod_lc_H', passband='Keck_NIRC2:H')
-        
-        b.set_value_all('ld_mode@mod_lc_H', 'manual')
-        
-        b.set_value_all('ld_func@mod_lc_H', 'linear')
-        
-        b.set_value_all('ld_coeffs@mod_lc_H', [0.0])
-    else:
-        b.add_dataset(phoebe.dataset.lc, times=h_model_times,
-                      dataset='mod_lc_H', passband='Keck_NIRC2:H')
-    
-    ## RV
+    # Add RV dataset
     rv_phases_sorted_inds = np.argsort(rv_phased_days)
     
     rv_model_times = (rv_phased_days) * binary_period.to(u.d).value
     rv_model_times = rv_model_times[rv_phases_sorted_inds]
     
+    # Uses passband of first filter in filts_list for calculating RVs
+    b.add_dataset(phoebe.dataset.rv, time=rv_model_times,
+                  dataset='mod_rv',
+                  passband=filts_list[0].phoebe_pb_name)
     if use_blackbody_atm:
-        b.add_dataset(phoebe.dataset.rv, time=rv_model_times,
-                      dataset='mod_rv', passband='Keck_NIRC2:Kp')
-        
         b.set_value_all('ld_mode@mod_rv', 'manual')
         
         b.set_value_all('ld_func@mod_rv', 'linear')
         
-        b.set_value_all('ld_coeffs@mod_rv', [0.0])
-    else:
-        b.add_dataset(phoebe.dataset.rv, time=rv_model_times,
-                      dataset='mod_rv', passband='Keck_NIRC2:Kp')
-    
+        b.set_value_all('ld_coeffs@mod_rv', [0.0])    
     
     # Add mesh dataset if making mesh plot
     if make_mesh_plots:
@@ -456,28 +462,34 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
                       dataset='mod_mesh')
         b.set_value('coordinates@mesh', ['uvw'])
         if mesh_temp:
-            b['columns@mesh'] = ['us', 'vs', 'ws', 'rprojs',
-                                 'teffs', 'loggs', 'rs', 'areas',
-                                 '*@mod_lc_Kp', '*@mod_lc_H']
+            mesh_columns = ['us', 'vs', 'ws', 'rprojs',
+                            'teffs', 'loggs', 'rs', 'areas']
+            for filt in filts_list:
+                mesh_columns.append('*@' + filt.phoebe_ds_name)
+            
+            b['columns@mesh'] = mesh_columns
     
     # Set the passband luminosities for the stars
     if (not star1_overflow) and (not star2_overflow):
         # Detached / semidetached case
-        b.set_value('pblum_mode@mod_lc_Kp', 'decoupled')
-        b.set_value('pblum_mode@mod_lc_H', 'decoupled')
-        
-        b.set_value('pblum@primary@mod_lc_Kp', star1_pblum_Kp)
-        b.set_value('pblum@primary@mod_lc_H', star1_pblum_H)
-        
-        b.set_value('pblum@secondary@mod_lc_Kp', star2_pblum_Kp)
-        b.set_value('pblum@secondary@mod_lc_H', star2_pblum_H)
+        for (filt_index, filt) in enumerate(filts_list):
+            b.set_value('pblum_mode@' + filt.phoebe_ds_name,
+                        'decoupled')
+            
+            b.set_value('pblum@primary@' + filt.phoebe_ds_name,
+                        star1_filt_pblums[filt_index])
+            
+            b.set_value('pblum@secondary@' + filt.phoebe_ds_name,
+                        star2_filt_pblums[filt_index])
     else:
         if star1_overflow:
-            b.set_value('pblum@primary@mod_lc_Kp', star1_pblum_Kp)
-            b.set_value('pblum@primary@mod_lc_H', star1_pblum_H)
+            for (filt_index, filt) in enumerate(filts_list):
+                b.set_value('pblum@primary@' + filt.phoebe_ds_name,
+                            star1_filt_pblums[filt_index])
         elif star2_overflow:
-            b.set_value('pblum@secondary@mod_lc_Kp', star2_pblum_Kp)
-            b.set_value('pblum@secondary@mod_lc_H', star2_pblum_H)
+            for (filt_index, filt) in enumerate(filts_list):
+                b.set_value('pblum@secondary@' + filt.phoebe_ds_name,
+                            star2_filt_pblums[filt_index])
     
     # Run compute
     # Determine eclipse method
@@ -496,7 +508,9 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
                           progressbar=False, eclipse_method=eclipse_method)
         except:
             if print_diagnostics:
-                print("Error during primary binary compute: {0}".format(sys.exc_info()[0]))
+                print("Error during primary binary compute: {0}".format(
+                            sys.exc_info()[0])
+                     )
             return err_out
     
     # Save out mesh plot
@@ -518,10 +532,12 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
         
         ## Mesh plot
         if mesh_temp:
-            mesh_plot_out = b['mod_mesh@model'].plot(save='./binary_mesh{0}.pdf'.format(suffix_str),
-                                                     fc='teffs',
-                                                     fcmap=mesh_temp_cmap,
-                                                     ec='none')
+            mesh_plot_out = b['mod_mesh@model'].plot(
+                                save='./binary_mesh{0}.pdf'.format(suffix_str),
+                                fc='teffs',
+                                fcmap=mesh_temp_cmap,
+                                ec='none',
+                            )
                                                      
             # print(mesh_plot_out.axs)
             
@@ -536,26 +552,28 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
                                 u.K, 1.0, u.solRad, u.solRad**2,
                                 u.W / (u.m**3)]
             
-            mesh_quant_filts = ['mod_lc_Kp', 'mod_lc_H']            
+            mesh_quant_filts = []
+            for filt in filts_list:
+                mesh_quant_filts.append(filt.phoebe_ds_name)
+                        
             mesh_quants_pri = {}
             mesh_quants_sec = {}
-            
             
             for (quant, do_filt,
                  quant_unit) in zip(mesh_quant_names, mesh_quant_do_filt,
                                     mesh_quant_units):
                 if do_filt:
                     for filt in mesh_quant_filts:
-                        quant_pri = b['{0}@primary@{1}'.format(quant, filt)].value *\
+                        quant_pri = b[f'{quant}@primary@{filt}'].value *\
                                     quant_unit
-                        quant_sec = b['{0}@secondary@{1}'.format(quant, filt)].value *\
+                        quant_sec = b[f'{quant}@secondary@{filt}'].value *\
                                     quant_unit
                     
-                        mesh_quants_pri['{0}_{1}'.format(quant, filt)] = quant_pri
-                        mesh_quants_sec['{0}_{1}'.format(quant, filt)] = quant_sec
+                        mesh_quants_pri[f'{quant}_{filt}'] = quant_pri
+                        mesh_quants_sec[f'{quant}_{filt}'] = quant_sec
                 else:
-                    quant_pri = b['{0}@primary'.format(quant)].value * quant_unit
-                    quant_sec = b['{0}@secondary'.format(quant)].value * quant_unit
+                    quant_pri = b[f'{quant}@primary'].value * quant_unit
+                    quant_sec = b[f'{quant}@secondary'].value * quant_unit
                     
                     mesh_quants_pri[quant] = quant_pri
                     mesh_quants_sec[quant] = quant_sec
@@ -625,13 +643,19 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     
     
     # Get fluxes
-    ## Kp
-    model_fluxes_Kp = np.array(b['fluxes@lc@mod_lc_Kp@model'].value) * u.W / (u.m**2.)
-    model_mags_Kp = -2.5 * np.log10(model_fluxes_Kp / flux_ref_Kp) + 0.03
+    filt_model_fluxes = ()
+    filt_model_mags = ()
     
-    ## H
-    model_fluxes_H = np.array(b['fluxes@lc@mod_lc_H@model'].value) * u.W / (u.m**2.)
-    model_mags_H = -2.5 * np.log10(model_fluxes_H / flux_ref_H) + 0.03
+    # Go through each filter
+    for (filt_index, filt) in enumerate(filts_list):
+        cur_filt_model_fluxes =\
+            np.array(b[f'fluxes@lc@{filt.phoebe_ds_name}@model'].value) *\
+            u.W / (u.m**2.)
+        cur_filt_model_mags = -2.5 *\
+            np.log10(cur_filt_model_fluxes / filt.flux_ref_filt) + 0.03
+        
+        filt_model_fluxes = filt_model_fluxes + (cur_filt_model_fluxes, )
+        filt_model_mags = filt_model_mags + (cur_filt_model_mags, )
     
     # Get RVs
     model_RVs_pri = np.array(b['rvs@primary@run@rv@model'].value) * u.km / u.s
@@ -640,69 +664,89 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     
     if print_diagnostics:
         print("\nFlux Checks")
-        print("Fluxes, Kp: {0}".format(model_fluxes_Kp))
-        print("Mags, Kp: {0}".format(model_mags_Kp))
-        print("Fluxes, H: {0}".format(model_fluxes_H))
-        print("Mags, H: {0}".format(model_mags_H))
+        
+        for (filt_index, filt) in enumerate(filts_list):
+            print("Fluxes, {0}: {1}".format(
+                filt.filter_name,
+                filt_model_fluxes[filt_index]))
+            print("Mags, {0}: {1}".format(
+                filt.filter_name,
+                filt_model_mags[filt_index]))
         
         print("\nRV Checks")
         print("RVs, Primary: {0}".format(model_RVs_pri))
         print("RVs, Secondary: {0}".format(model_RVs_sec))
         
     if make_mesh_plots:
-        return (model_mags_Kp, model_mags_H,
+        return (filt_model_mags,
                 model_RVs_pri, model_RVs_sec,
                 mesh_plot_out)
     else:
-        return (model_mags_Kp, model_mags_H,
+        return (filt_model_mags,
                 model_RVs_pri, model_RVs_sec)
     
-def phased_obs(observation_times, binary_period, t0):
-    # Phase the observation times
-    ## Read in observation times
-    (kp_MJDs, h_MJDs, rv_MJDs) = observation_times
+def phased_obs(observation_times, binary_period, t0,
+               filts_list=[kp_filt, h_filt]):
+    """Phase observation times to a given binary period and t0
+    """
+    num_filts = len(filts_list)
     
-    ## Phase the observation times
-    kp_phased_days = ((kp_MJDs - t0) % binary_period.to(u.d).value) / binary_period.to(u.d).value
-    h_phased_days = ((h_MJDs - t0) % binary_period.to(u.d).value) / binary_period.to(u.d).value
-    rv_phased_days = ((rv_MJDs - t0) % binary_period.to(u.d).value) / binary_period.to(u.d).value
+    # Read in observation times, and separate photometry from RVs
+    filt_MJDs = observation_times[:num_filts]
+    rv_MJDs = observation_times[num_filts]
     
-    ## Kp
-    kp_phases_sorted_inds = np.argsort(kp_phased_days)
+    out_phased_obs = ()
+    # Phase photometric observation times
+    for filt_index in range(num_filts):
+        # Phase the current filter's MJDs
+        cur_filt_MJDs = filt_MJDs[filt_index]
+        cur_filt_phased_days = (((cur_filt_MJDs - t0) %
+                                 binary_period.to(u.d).value) /
+                                binary_period.to(u.d).value)
+        
+        # Compute phase sorted inds
+        cur_filt_phases_sorted_inds = np.argsort(cur_filt_phased_days)
+        
+        # Compute model times sorted to phase sorted inds
+        cur_filt_model_times = cur_filt_phased_days *\
+                               binary_period.to(u.d).value
+        cur_filt_model_times = cur_filt_model_times[cur_filt_phases_sorted_inds]
+        
+        # Append calculated values to output tuple
+        out_phased_obs = out_phased_obs + \
+                         ((cur_filt_phased_days, cur_filt_phases_sorted_inds,
+                           cur_filt_model_times), )
     
-    kp_model_times = (kp_phased_days) * binary_period.to(u.d).value
-    kp_model_times = kp_model_times[kp_phases_sorted_inds]
+    # Phase RV observation times
+    rv_phased_days = (((rv_MJDs - t0) % binary_period.to(u.d).value) /
+                      binary_period.to(u.d).value)
     
-    ## H
-    h_phases_sorted_inds = np.argsort(h_phased_days)
-    
-    h_model_times = (h_phased_days) * binary_period.to(u.d).value
-    h_model_times = h_model_times[h_phases_sorted_inds]
-    
-    ## RV
     rv_phases_sorted_inds = np.argsort(rv_phased_days)
     
     rv_model_times = (rv_phased_days) * binary_period.to(u.d).value
     rv_model_times = rv_model_times[rv_phases_sorted_inds]
     
-    return ((kp_phased_days, kp_phases_sorted_inds, kp_model_times),
-            (h_phased_days, h_phases_sorted_inds, h_model_times),
-            (rv_phased_days, rv_phases_sorted_inds, rv_model_times))
+    # Append RV values to output tuple
+    out_phased_obs = out_phased_obs + \
+                     ((rv_phased_days, rv_phases_sorted_inds,
+                       rv_model_times), )
+    
+    return out_phased_obs
 
-
-def dist_ext_mag_calc(input_mags, target_dist, Kp_ext, H_ext):
-    (mags_Kp, mags_H) = input_mags
+def dist_ext_mag_calc(input_mags, target_dist, filt_exts):
+    binary_mags_filts = ()
     
-    # App mag at target distance (default system dist = 10 pc)
-    mags_Kp = mags_Kp + 5. * np.log10(target_dist / (10. * u.pc))
-    mags_H = mags_H + 5. * np.log10(target_dist / (10. * u.pc))
+    # Calculate distance modulus
+    dist_mod = 5. * np.log10(target_dist / (10. * u.pc))
     
-    # Add extinction
-    mags_Kp = mags_Kp + Kp_ext
-    mags_H = mags_H + H_ext
+    # Adjust magnitudes in each filter
+    for (filt_index, filt_ext) in enumerate(filt_exts):
+        # Add mag distance modulus and extinction
+         adjusted_mags = input_mags[filt_index] + dist_mod + filt_ext
+         binary_mags_filts = binary_mags_filts + (adjusted_mags, )
     
-    # Return mags at target distance and extinction
-    return (mags_Kp, mags_H)
+    # Return mags adjusted for target distance and extinction
+    return binary_mags_filts
     
 
 def flux_adj(mags_pri, mags_ref_pri, mags_sec, mags_ref_sec, mags_bin):
@@ -759,42 +803,41 @@ def flux_adj(mags_pri, mags_ref_pri, mags_sec, mags_ref_sec, mags_bin):
 def binary_mags_calc(star1_params_lcfit, star2_params_lcfit,
                      binary_params,
                      observation_times,
-                     isoc_Ks_ext, Kp_ext, H_ext, ext_alpha,
+                     isoc_Ks_ext, filt_exts, ext_alpha,
                      isoc_dist, bin_dist,
+                     filts_list=[kp_filt, h_filt],
                      use_blackbody_atm=False,
                      use_compact_object=False,
                      irrad_frac_refl=1.0,
-                     make_mesh_plots=False, mesh_temp=False, mesh_temp_cmap=None,
+                     make_mesh_plots=False, mesh_temp=False,
+                     mesh_temp_cmap=None,
                      plot_name=None,
                      num_triangles=1500,
                      print_diagnostics=False,
-                     filts_list=['nirc2,Kp', 'nirc2,H']):
+                    ):
+    # Filter calculations
+    num_filts = len(filts_list)
     
-    # Extinction law (using Nogueras-Lara+ 2018)
-    ext_alpha = 2.30
+    isoc_filt_exts = np.empty(num_filts)
+    filt_ext_adjs = np.empty(num_filts)
     
-    # Calculate extinctions implied by isochrone extinction
-    isoc_filt_ext = 
-    
-    
-    isoc_Kp_ext = isoc_Ks_ext * (lambda_Ks / lambda_Kp)**ext_alpha
-    isoc_H_ext = isoc_Ks_ext * (lambda_Ks / lambda_H)**ext_alpha
-    
-    # Calculate extinction adjustments
-    Kp_ext_adj = (Kp_ext - isoc_Kp_ext)
-    H_ext_adj = (H_ext - isoc_H_ext)
+    for filt_index, cur_filt in enumerate(filts_list):
+        # Calculate extinctions implied by isochrone extinction
+        isoc_filt_exts[filt_index] = cur_filt.calc_isoc_filt_ext(
+                                         isoc_Ks_ext, ext_alpha)
+        
+        # Calculate extinction adjustments
+        filt_ext_adjs[filt_index] = (filt_exts[filt_index] -
+                                     isoc_filt_exts[filt_index])
     
     # Calculate distance modulus adjustments
     dist_mod_mag_adj = 5. * np.log10(bin_dist / (isoc_dist.to(u.pc)).value)
     
     # Extract stellar parameters from input
     (star1_mass, star1_rad, star1_teff, star1_logg,
-     [star1_mag_Kp, star1_mag_H],
-     [star1_pblum_Kp, star1_pblum_H]) = star1_params_lcfit
+     star1_filt_mags, star1_filt_pblums) = star1_params_lcfit
     (star2_mass, star2_rad, star2_teff, star2_logg,
-     [star2_mag_Kp, star2_mag_H],
-     [star2_pblum_Kp, star2_pblum_H]) = star2_params_lcfit
-    
+     star2_filt_mags, star2_filt_pblums) = star2_params_lcfit
     
     # Run binary star model to get binary mags
     binary_star_lc_out = binary_star_lc(
@@ -802,6 +845,7 @@ def binary_mags_calc(star1_params_lcfit, star2_params_lcfit,
         star2_params_lcfit,
         binary_params,
         observation_times,
+        filts_list=filts_list,
         use_blackbody_atm=use_blackbody_atm,
         use_compact_object=use_compact_object,
         irrad_frac_refl=irrad_frac_refl,
@@ -813,36 +857,44 @@ def binary_mags_calc(star1_params_lcfit, star2_params_lcfit,
         print_diagnostics=print_diagnostics)
     
     if make_mesh_plots:
-        (binary_mags_Kp, binary_mags_H,
+        (binary_mags_filts,
          binary_RVs_pri, binary_RVs_sec,
          mesh_plot_out) = binary_star_lc_out
     else:
-        (binary_mags_Kp, binary_mags_H,
+        (binary_mags_filts,
          binary_RVs_pri, binary_RVs_sec) = binary_star_lc_out
     
-    if (binary_mags_Kp[0] == -1.) or (binary_mags_H[0] == -1.):
+    # Test failure of binary mag calculation
+    if ((binary_mags_filts[0])[0] == -1.):
         return -np.inf
     
     ## Apply distance modulus and isoc. extinction to binary magnitudes
-    (binary_mags_Kp, binary_mags_H) = dist_ext_mag_calc(
-                                          (binary_mags_Kp, binary_mags_H),
-                                          isoc_dist,
-                                          isoc_Kp_ext, isoc_H_ext)
+    binary_mags_filts = dist_ext_mag_calc(
+                            binary_mags_filts,
+                            isoc_dist,
+                            isoc_filt_exts,
+                        )
     
-    # Apply the extinction difference between model and the isochrone values
-    binary_mags_Kp += Kp_ext_adj
-    binary_mags_H += H_ext_adj
+    # Go through the mag adjustments, filter by filter
+    binary_mags_filts_list = list(binary_mags_filts)
     
-    # Apply the distance modulus for difference between isoc. distance and bin. distance
-    # (Same for each filter)
-    binary_mags_Kp += dist_mod_mag_adj
-    binary_mags_H += dist_mod_mag_adj
+    for filt_index, cur_filt in enumerate(filts_list):
+        # Apply the extinction difference between model and isochrone values
+        # for each filter
+        binary_mags_filts_list[filt_index] += filt_ext_adjs[filt_index]
+        
+        # Apply the distance modulus for difference between isoc. distance
+        # and binary distance
+        # (Same for each filter)
+        binary_mags_filts_list[filt_index] += dist_mod_mag_adj
+    
+    binary_mags_filts = tuple(binary_mags_filts_list)
     
     # Return final light curve
     if make_mesh_plots:
-        return (binary_mags_Kp, binary_mags_H,
+        return (binary_mags_filts,
                 binary_RVs_pri, binary_RVs_sec,
                 mesh_plot_out)
     else:
-        return (binary_mags_Kp, binary_mags_H,
+        return (binary_mags_filts,
                 binary_RVs_pri, binary_RVs_sec)
