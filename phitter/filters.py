@@ -93,3 +93,51 @@ class nirc2_h_filt(filter):
         self.flux_ref_filt = self.filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
         
         return
+
+class jwst_115w_filt(filter):
+    def __init__(self):
+        self.filter_name = 'jwst,F115W'
+        self.phoebe_ds_name = 'mod_lc_115W'
+        self.phoebe_pb_name = 'JWST_NIRCam:115W'
+        
+        # Filter properties
+        self.lambda_filt = 1.154e-6 * u.m
+        self.dlambda_filt = 0.225e-6 * u.m
+        
+        self.filt_info = synthetic.get_filter_info(self.filter_name)
+        
+        self.flux_ref_filt = self.filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
+        
+        return
+
+class jwst_212n_filt(filter):
+    def __init__(self):
+        self.filter_name = 'jwst,F212N'
+        self.phoebe_ds_name = 'mod_lc_212N'
+        self.phoebe_pb_name = 'JWST_NIRCam:212N'
+        
+        # Filter properties
+        self.lambda_filt = 2.120e-6 * u.m
+        self.dlambda_filt = 0.027e-6 * u.m
+        
+        self.filt_info = synthetic.get_filter_info(self.filter_name)
+        
+        self.flux_ref_filt = self.filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
+        
+        return
+
+class jwst_323n_filt(filter):
+    def __init__(self):
+        self.filter_name = 'jwst,F323N'
+        self.phoebe_ds_name = 'mod_lc_323N'
+        self.phoebe_pb_name = 'JWST_NIRCam:323N'
+        
+        # Filter properties
+        self.lambda_filt = 3.237e-6 * u.m
+        self.dlambda_filt = 0.038e-6 * u.m
+        
+        self.filt_info = synthetic.get_filter_info(self.filter_name)
+        
+        self.flux_ref_filt = self.filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
+        
+        return
