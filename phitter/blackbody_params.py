@@ -34,7 +34,8 @@ h_filt = filters.nirc2_h_filt()
 # Object to get synthetic magnitudes for blackbody objects
 class bb_stellar_params(object):
     def __init__(self, ext=2.63, dist=7.971e3,
-                 filts_list=[kp_filt, h_filt]):
+                 filts_list=[kp_filt, h_filt],
+                 ext_law='NL18'):
         # Define extinction and distance
         self.A_Ks = ext
         self.dist = dist * u.pc
@@ -57,7 +58,11 @@ class bb_stellar_params(object):
         
         # Define atmosphere and reddening functions
         self.bb_atm_func = atmospheres.get_bb_atmosphere
-        self.red_law = reddening.RedLawNoguerasLara18()
+        
+        if ext_law == 'NL18':
+            self.red_law = reddening.RedLawNoguerasLara18()
+        elif ext_law == 'F11':
+            self.red_law = reddening.RedLawFritz11()
     
     def calc_stellar_params(self, mass, rad, teff):
         # Calculate surface gravity
@@ -112,7 +117,7 @@ class bb_stellar_params(object):
         bb_atm = bb_atm * ((bb_rad / self.dist).to(1).value)**2
         
         # Redden the spectrum
-        red = self.red_law.reddening(self.A_Ks).resample(bb_atm.wave) 
+        red = self.red_law.reddening(self.A_Ks).resample(bb_atm.wave)
         bb_atm *= red
         
         if diagnostic_plot:
