@@ -107,7 +107,9 @@ def single_star_lc(stellar_params,
 def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
         use_blackbody_atm=False,
         use_compact_object=False,
-        make_mesh_plots=False, mesh_temp=False, mesh_temp_cmap=None,
+        make_mesh_plots=False,
+        mesh_temp=False, mesh_temp_cmap=None,
+        mesh_plt_styles=['ticks_outtie', 'tex_paper'],
         plot_name=None,
         print_diagnostics=False, par_compute=False, num_par_processes=8,
         num_triangles=1500):
@@ -232,6 +234,11 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     ## Check for semidetached cases
     if print_diagnostics:
         print('\nSemidetached checks')
+        print(f'Star 1 rad: {star1_rad}')
+        print(f'Star 1 rad max: {star1_rad_max}')
+        print(f'Star 2 rad: {star2_rad}')
+        print(f'Star 2 rad max: {star2_rad_max}')
+        
         print('Star 1: {0}'.format(np.abs((star1_rad - star1_rad_max) / star1_rad_max)))
         print('Star 2: {0}'.format(np.abs((star2_rad - star2_rad_max) / star2_rad_max)))
     
@@ -302,6 +309,9 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     
     ## Change set up for contact or semidetached cases
     if star1_overflow or star2_overflow:
+        if print_diagnostics:
+            print('\nSetting up a contact binary system')
+        
         b = phoebe.default_binary(contact_binary=True)
         
         ### Reset all necessary binary properties for contact system
@@ -333,6 +343,11 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     # b.set_value('logg@primary@component', star1_logg)
     if (not star1_semidetached) and (not star2_overflow):
         b.set_value('requiv@primary@component', star1_rad)
+        
+        contact_max_star1_rad = b.get_value('requiv_max@primary@component') * u.solRad
+        
+        if star1_rad > contact_max_star1_rad:
+            b.set_value('requiv@primary@component', 0.999*contact_max_star1_rad)
     
     ## Secondary
     b.set_value('teff@secondary@component', star2_teff)
@@ -369,6 +384,34 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
            print('Setting number of triangles for contact envelope')
        b.set_value('ntriangles@contact_envelope@detailed@compute',
                    num_triangles * 2.)
+    
+    if print_diagnostics:
+        print('Contact envelope parameters:')
+        print(b.filter('contact_envelope@detailed@compute'))
+        
+        print('\nPrimary parameters:')
+        print(b.filter('primary@detailed@compute'))
+        
+        print('\nSecondary parameters:')
+        print(b.filter('secondary@detailed@compute'))
+        
+        print('\nBinary parameters:')
+        print(b.filter('binary@component'))
+        
+        if star1_overflow or star2_overflow:
+            print('\nContact components')
+            print(b.filter('contact_envelope@component'))
+        
+        print('\nBinary Hierarchy')
+        print(b.hierarchy)
+        
+        print(b.get_parameter('requiv_max@primary@component'))
+        print(b.get_parameter('requiv_max@secondary@component'))
+        
+        print(b.get_parameter('requiv@primary@component'))
+        print(b.get_parameter('requiv@secondary@component'))
+    
+    
     
     # Phase the observation times
     ## Read in observation times
@@ -463,8 +506,13 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     
     if print_diagnostics:
         print("Trying inital compute run")
-        b.run_compute(compute='detailed', model='run',
-                      progressbar=False, eclipse_method=eclipse_method)
+        # b.run_checks()
+        # b.run_failed_constraints()
+        b.run_compute(
+            compute='detailed', model='run',
+            # skip_checks=True,
+            progressbar=True, eclipse_method=eclipse_method,
+        )
     else:
         try:
             b.run_compute(compute='detailed', model='run',
@@ -478,15 +526,7 @@ def binary_star_lc(star1_params, star2_params, binary_params, observation_times,
     # Save out mesh plot
     if make_mesh_plots:
         ## Plot Nerdery
-        plt.rc('font', family='serif')
-        plt.rc('font', serif='Computer Modern Roman')
-        plt.rc('text', usetex=True)
-        plt.rc('text.latex', preamble=r"\usepackage{gensymb}")
-
-        plt.rc('xtick', direction = 'in')
-        plt.rc('ytick', direction = 'in')
-        # plt.rc('xtick', top = True)
-        # plt.rc('ytick', right = True)
+        plt.style.use(mesh_plt_styles)
         
         suffix_str = ''
         if plot_name is not None:
@@ -674,7 +714,9 @@ def binary_mags_calc(star1_params_lcfit, star2_params_lcfit,
                      isoc_dist, bin_dist,
                      use_blackbody_atm=False,
                      use_compact_object=False,
-                     make_mesh_plots=False, mesh_temp=False, mesh_temp_cmap=None,
+                     make_mesh_plots=False,
+                     mesh_temp=False, mesh_temp_cmap=None,
+                     mesh_plt_styles=['ticks_outtie', 'tex_paper'],
                      plot_name=None,
                      num_triangles=1500,
                      print_diagnostics=False):
@@ -713,6 +755,7 @@ def binary_mags_calc(star1_params_lcfit, star2_params_lcfit,
         make_mesh_plots=make_mesh_plots,
         mesh_temp=mesh_temp,
         mesh_temp_cmap=mesh_temp_cmap,
+        mesh_plt_styles=mesh_plt_styles,
         plot_name=plot_name,
         num_triangles=num_triangles,
         print_diagnostics=print_diagnostics)

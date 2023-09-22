@@ -13,7 +13,7 @@ import numpy as np
 
 from spisea import synthetic
 
-from phitter import lc_calc_wRV, blackbody_params, filters
+from phoebe_phitter import lc_calc_wRV, blackbody_params
 
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as font_manager
@@ -28,23 +28,15 @@ flux_ref_Ks = ks_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
 # Stellar Parameters
 # stellar_params = (mass, rad, teff, mag_Kp, mag_H)
 
-# Filters for default filter list
-kp_filt = filters.nirc2_kp_filt()
-h_filt = filters.nirc2_h_filt()
-h_filt = filters.nirc2_lp_filt()
-
 class mcmc_fitter_bb(object):
-    """Class for running MCMC fits with blackbody atmospheres
-    """
-    
     # Filter properties
     lambda_Ks = 2.18e-6 * u.m
     dlambda_Ks = 0.35e-6 * u.m
-    
-    # filts_lambda = {'nirc2,Kp': 2.124e-6 * u.m,
-    #                 'nirc2,H': 1.633e-6 * u.m}
-    # filts_dlambda = {'nirc2,Kp': 0.351e-6 * u.m,
-    #                  'nirc2,H': 0.296e-6 * u.m}
+        
+    filts_lambda = {'nirc2,Kp': 2.124e-6 * u.m,
+                    'nirc2,H': 1.633e-6 * u.m}
+    filts_dlambda = {'nirc2,Kp': 0.351e-6 * u.m,
+                     'nirc2,H': 0.296e-6 * u.m}
     
     ks_filt_info = synthetic.get_filter_info('naco,Ks')
     
@@ -163,24 +155,11 @@ class mcmc_fitter_bb(object):
     lo_t0_prior_bound = 51773.0
     hi_t0_prior_bound = 51774.0
     
-    # Weighting in log likelihood calculation
-    # ---
-    # Default weighting: every individual observation weighs same
-    #   log_like_weight = 'ind_obs'
-    # Alternate weighting: every dataset type (e.g.: photometry, RV) weighs same
-    #   log_like_weight = 'data_type'
-    # Alternate weighting: every dataset type and band (e.g.: Kp photometry,
-    # H photometry, K-band RV) weighs same
-    #   log_like_weight = 'data_type_and_band'
-    
-    log_like_weight = 'ind_obs'
-    
-    
     def __init__(self):
         return
     
     # Functions to make blackbody parameters object
-    def make_bb_params(self, Ks_ext, dist, filts_list=[kp_filt, h_filt]):
+    def make_bb_params(self, Ks_ext, dist, filts_list=['nirc2,Kp', 'nirc2,H']):
         self.Ks_ext = Ks_ext
         
         self.dist = dist*u.pc
@@ -202,16 +181,16 @@ class mcmc_fitter_bb(object):
         for cur_filt_index in range(self.num_filts):
             cur_filt = self.filts_list[cur_filt_index]
             
-            cur_filt_info = cur_filt.filt_info
+            cur_filt_info = synthetic.get_filter_info(cur_filt)
             self.filts_info.append(cur_filt_info)
             
-            cur_filt_flux_ref = cur_filt.flux_ref_filt
+            cur_filt_flux_ref = cur_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
             self.filts_flux_ref[cur_filt_index] = cur_filt_flux_ref
             
             # Convert from specified extinction in Ks to current filter
             cur_filt_ext = (Ks_ext *
                             (self.lambda_Ks /
-                             cur_filt.lambda_filt)**self.ext_alpha)
+                             self.filts_lambda[cur_filt])**self.ext_alpha)
             
             self.filts_ext[cur_filt] = cur_filt_ext
         
@@ -226,26 +205,13 @@ class mcmc_fitter_bb(object):
     def set_observation_filts(self, obs_filts):
         self.obs_filts = obs_filts
         
-        # Photometric observation search filters
         self.search_filt_kp = np.where(self.obs_filts == 'kp')
         self.search_filt_h = np.where(self.obs_filts == 'h')
         
-        self.phot_search_filts = [
-            self.search_filt_kp,
-            self.search_filt_h,
-        ]
-        
-        if 'nirc2,Lp' in self.filts_list:
-            self.search_filt_lp = np.where(self.obs_filts == 'lp')
-            self.phot_search_filts += [self.search_filt_lp]
-        
-        # RV observation search filters
         self.search_filt_rv_pri = np.where(self.obs_filts == 'rv_pri')
         self.search_filt_rv_sec = np.where(self.obs_filts == 'rv_sec')
-        self.search_filt_rv = np.append(
-            self.search_filt_rv_pri,
-            self.search_filt_rv_sec,
-        )
+        self.search_filt_rv = np.append(self.search_filt_rv_pri,
+                                        self.search_filt_rv_sec)
         
         self.obs_filts_rv = obs_filts[self.search_filt_rv]
     
@@ -253,23 +219,9 @@ class mcmc_fitter_bb(object):
     def set_observation_times(self, obs_times):
         self.obs_times = obs_times
         
-        observation_times = ()  # A tuple for the different bands' observation times
-        num_phot_obs_filt = np.empty(self.num_filts, dtype=np.int)
-        
-        # Go through the photometric filters
-        for cur_filt_index in range(self.num_filts):
-            cur_filt_search = self.phot_search_filts[cur_filt_index]
-            
-            observation_times += (obs_times[cur_filt_search],)
-            num_phot_obs_filt[cur_filt_index] = len(obs_times[cur_filt_search])
-        
-        # Add the RV observation times
-        observation_times += (np.unique(obs_times[self.search_filt_rv]),)
-        
-        self.observation_times = observation_times
-        self.num_phot_obs_filt = num_phot_obs_filt
-        self.num_phot_obs_total = np.sum(num_phot_obs_filt)
-        self.num_rv_obs_total = len(np.unique(obs_times[self.search_filt_rv]))
+        self.observation_times = (obs_times[self.search_filt_kp],
+                                  obs_times[self.search_filt_h],
+                                  np.unique(obs_times[self.search_filt_rv]))
     
     # Function to set observation mags
     def set_observations(self, obs, obs_errors):
@@ -448,11 +400,11 @@ class mcmc_fitter_bb(object):
                                self.hi_H_ext_mod_prior_bound)
         else:
             ### H extinction expected by Kp extinction
-            H_ext = Kp_ext * ((kp_filt.lambda_filt/h_filt.lambda_filt)**(self.ext_alpha))
+            H_ext = Kp_ext * ((self.filts_lambda['nirc2,Kp']/self.filts_lambda['nirc2,H'])**(self.ext_alpha))
             
             ### Bounds given by current extinction and uncertainty on extinction law
-            H_ext_mod_bound_hi = Kp_ext * ((kp_filt.lambda_filt/h_filt.lambda_filt)**(self.ext_alpha + self.ext_alpha_unc))
-            H_ext_mod_bound_lo = Kp_ext * ((kp_filt.lambda_filt/h_filt.lambda_filt)**(self.ext_alpha - self.ext_alpha_unc))
+            H_ext_mod_bound_hi = Kp_ext * ((self.filts_lambda['nirc2,Kp']/self.filts_lambda['nirc2,H'])**(self.ext_alpha + self.ext_alpha_unc))
+            H_ext_mod_bound_lo = Kp_ext * ((self.filts_lambda['nirc2,Kp']/self.filts_lambda['nirc2,H'])**(self.ext_alpha - self.ext_alpha_unc))
             
             ### Subtract off the H extinction expected by the Kp extinction to get mod
             H_ext_mod_bound_hi = H_ext_mod_bound_hi - H_ext
@@ -516,19 +468,6 @@ class mcmc_fitter_bb(object):
         
         star1_checks = star1_mass_check and star1_rad_check and star1_teff_check
         star2_checks = star2_mass_check and star2_rad_check and star2_teff_check
-        
-        # print(star1_mass_check)
-        # print(star1_rad_check)
-        # print(star1_teff_check)
-        # print(self.lo_star1_teff_prior_bound)
-        # print(self.hi_star1_teff_prior_bound)
-        #
-        # print(star2_mass_check)
-        # print(star2_rad_check)
-        # print(star2_teff_check)
-        # print(self.lo_star2_teff_prior_bound)
-        # print(self.hi_star2_teff_prior_bound)
-        
         
         ## Binary system configuration checks
         inc_check = (self.lo_inc_prior_bound <= binary_inc <=
@@ -677,16 +616,10 @@ class mcmc_fitter_bb(object):
         # Calculate extinction adjustments
         filt_ext_adj = np.empty(self.num_filts)
         
-        Kp_ext_adj = (Kp_ext - self.filts_ext[kp_filt])
+        Kp_ext_adj = (Kp_ext - self.filts_ext['nirc2,Kp'])
+        H_ext_adj = (((Kp_ext * (self.filts_lambda['nirc2,Kp'] / self.filts_lambda['nirc2,H'])**self.ext_alpha)
+                      - self.filts_ext['nirc2,H']) + H_ext_mod)
         
-        H_ext_adj = (\
-            ((Kp_ext * (kp_filt.lambda_filt / h_filt.lambda_filt)**self.ext_alpha)
-            - self.filts_ext[h_filt]) + H_ext_mod )
-        
-        Lp_ext_adj = 0
-        if 'nirc2,Lp' in self.filts_list:
-            Lp_ext_adj = 
-            
         filt_ext_adj = np.array([Kp_ext_adj, H_ext_adj])
         
         # Calculate distance modulus adjustments
@@ -708,30 +641,25 @@ class mcmc_fitter_bb(object):
             [star2_pblum_Kp, star2_pblum_H]) = star2_params_all
         
         # Run binary star model to get binary observables
-        lc_calc_out = lc_calc_wRV.binary_star_lc(
-            star1_params_lcfit,
-            star2_params_lcfit,
-            binary_params,
-            self.observation_times,
-            use_blackbody_atm=self.use_blackbody_atm,
-            use_compact_object=self.model_compact,
-            irrad_frac_refl=self.irrad_frac_refl,
-            num_triangles=self.model_numTriangles,
-        )
-        
-        ((binary_mags_Kp, binary_mags_H),
-         binary_RVs_pri, binary_RVs_sec,
-        ) = lc_calc_out
-        
+        (binary_mags_Kp, binary_mags_H,
+         binary_RVs_pri, binary_RVs_sec) = lc_calc_wRV.binary_star_lc(
+                                              star1_params_lcfit,
+                                              star2_params_lcfit,
+                                              binary_params,
+                                              self.observation_times,
+                                              use_blackbody_atm=self.use_blackbody_atm,
+                                              use_compact_object=self.model_compact,
+                                              irrad_frac_refl=self.irrad_frac_refl,
+                                              num_triangles=self.model_numTriangles)
         if (binary_mags_Kp[0] == -1.) or (binary_mags_H[0] == -1.):
             return err_out
         
         # Apply isoc. distance modulus and isoc. extinction to binary magnitudes
         (binary_mags_Kp, binary_mags_H) = lc_calc_wRV.dist_ext_mag_calc(
-            (binary_mags_Kp, binary_mags_H),
-            self.dist,
-            (self.filts_ext[kp_filt], self.filts_ext[h_filt]),
-        )
+                                              (binary_mags_Kp, binary_mags_H),
+                                              self.dist,
+                                              self.filts_ext['nirc2,Kp'],
+                                              self.filts_ext['nirc2,H'])
         
         # Apply the extinction difference between model and the isochrone values
         binary_mags_Kp += Kp_ext_adj
@@ -835,12 +763,10 @@ class mcmc_fitter_bb(object):
             return -np.inf
         
         # Phase the observation times
-        phased_obs_out = lc_calc_wRV.phased_obs(
-            self.observation_times,
-            binary_period, t0,
-        )
-        
-        (kp_phase_out, h_phase_out, rv_phase_out) = phased_obs_out
+        (kp_phase_out, h_phase_out,
+         rv_phase_out) = lc_calc_wRV.phased_obs(
+                            self.observation_times,
+                            binary_period, t0)
         
         (kp_phased_days, kp_phases_sorted_inds, kp_model_times) = kp_phase_out
         (h_phased_days, h_phases_sorted_inds, h_model_times) = h_phase_out
@@ -848,28 +774,15 @@ class mcmc_fitter_bb(object):
         (rv_pri_phased_days, rv_pri_phases_sorted_inds, rv_pri_model_times) = rv_phase_out
         (rv_sec_phased_days, rv_sec_phases_sorted_inds, rv_sec_model_times) = rv_phase_out
         
+        
         # Calculate log likelihood and return
-        log_likelihood = 0
-        
         # log likelihood for mags
-        
-        log_like_mags_kp = np.sum(
-            (self.kp_obs_mags[kp_phases_sorted_inds] - binary_model_mags_Kp)**2. /
-            (self.kp_obs_mag_errors[kp_phases_sorted_inds])**2.
-        )
-        
-        log_like_mags_h = np.sum(
-            (self.h_obs_mags[h_phases_sorted_inds] - binary_model_mags_H)**2. /
-            (self.h_obs_mag_errors[h_phases_sorted_inds])**2.
-        )
-        
-        if log_like_weight == 'ind_obs':
-            log_likelihood += log_like_mags_kp + log_like_mags_h
-        elif log_like_weight == 'data_type':
-            log_likelihood += (log_like_mags_kp + log_like_mags_h) / self.num_phot_obs_total
-        elif log_like_weight == 'data_type_and_band':
-            log_likelihood += (log_like_mags_kp / self.num_phot_obs_filt[0]) +\
-                (log_like_mags_h / self.num_phot_obs_filt[1])
+        log_likelihood = np.sum((self.kp_obs_mags[kp_phases_sorted_inds] -
+                             binary_model_mags_Kp)**2. /
+                             (self.kp_obs_mag_errors[kp_phases_sorted_inds])**2.)
+        log_likelihood += np.sum((self.h_obs_mags[h_phases_sorted_inds] -
+                              binary_model_mags_H)**2. /
+                              (self.h_obs_mag_errors[h_phases_sorted_inds])**2.)
         
         # log likelihood for RVs
         # Go through each RV model point, and match to primary or secondary
@@ -879,9 +792,6 @@ class mcmc_fitter_bb(object):
         # binary_model_RVs_pri = binary_model_RVs_pri[pri_filt]
         # binary_model_RVs_sec = binary_model_RVs_sec[sec_filt]
         
-        log_likelihood_pri = 0
-        log_likelihood_sec = 0
-        
         if len(pri_filt) > 0:
             obs_rv_pri = self.obs_rv_pri[rv_pri_phases_sorted_inds]
             obs_rv_pri_errors = self.obs_rv_pri_errors[rv_pri_phases_sorted_inds]
@@ -889,10 +799,9 @@ class mcmc_fitter_bb(object):
             # Filter out NAN observations
             nan_filt = np.where(np.logical_not(np.isnan(obs_rv_pri)))
             
-            log_likelihood_pri = np.sum(
-                (obs_rv_pri[nan_filt] - binary_model_RVs_pri[nan_filt])**2. /
-                (obs_rv_pri_errors[nan_filt])**2.
-            )
+            log_likelihood += np.sum((obs_rv_pri[nan_filt] -
+                                  binary_model_RVs_pri[nan_filt])**2. /
+                                  (obs_rv_pri_errors[nan_filt])**2.)
         
         if len(sec_filt) > 0:
             obs_rv_sec = self.obs_rv_sec[rv_sec_phases_sorted_inds]
@@ -901,15 +810,10 @@ class mcmc_fitter_bb(object):
             # Filter out NAN observations
             nan_filt = np.where(np.logical_not(np.isnan(obs_rv_sec)))
             
-            log_likelihood_sec = np.sum(
-                (obs_rv_sec[nan_filt] - binary_model_RVs_sec[nan_filt])**2. /
-                (obs_rv_sec_errors[nan_filt])**2.
-            )
+            log_likelihood += np.sum((obs_rv_sec[nan_filt] -
+                                  binary_model_RVs_sec[nan_filt])**2. /
+                                  (obs_rv_sec_errors[nan_filt])**2.)
         
-        if log_like_weight == 'ind_obs':
-            log_likelihood += log_like_mags_pri + log_like_mags_sec
-        elif log_like_weight == 'data_type' or log_like_weight == 'data_type_and_band':
-            log_likelihood += (log_like_mags_pri + log_like_mags_sec) / self.num_rv_obs_total
         
         # Finalize log likelihood and return
         
@@ -920,13 +824,6 @@ class mcmc_fitter_bb(object):
     # Posterior Probability Function
     def lnprob(self, theta):
         lp = self.lnprior(theta)
-        
         if not np.isfinite(lp):
             return -np.inf
-        
-        ll = self.lnlike(theta)
-        
-        if not np.isfinite(ll):
-            return -np.inf
-        
-        return lp + ll
+        return lp + self.lnlike(theta)

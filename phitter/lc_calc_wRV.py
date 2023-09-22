@@ -800,21 +800,23 @@ def flux_adj(mags_pri, mags_ref_pri, mags_sec, mags_ref_sec, mags_bin):
     return (adj_mags_bin_Kp, adj_mags_bin_H)
 
 
-def binary_mags_calc(star1_params_lcfit, star2_params_lcfit,
-                     binary_params,
-                     observation_times,
-                     isoc_Ks_ext, filt_exts, ext_alpha,
-                     isoc_dist, bin_dist,
-                     filts_list=[kp_filt, h_filt],
-                     use_blackbody_atm=False,
-                     use_compact_object=False,
-                     irrad_frac_refl=1.0,
-                     make_mesh_plots=False, mesh_temp=False,
-                     mesh_temp_cmap=None,
-                     plot_name=None,
-                     num_triangles=1500,
-                     print_diagnostics=False,
-                    ):
+def binary_mags_calc(
+        star1_params_lcfit, star2_params_lcfit,
+        binary_params,
+        observation_times,
+        isoc_Ks_ext, filt_exts, ext_alpha,
+        isoc_dist, bin_dist,
+        filts_list=[kp_filt, h_filt],
+        use_blackbody_atm=False,
+        use_compact_object=False,
+        irrad_frac_refl=1.0,
+        make_mesh_plots=False, mesh_temp=False,
+        mesh_temp_cmap=None,
+        plot_name=None,
+        par_compute=False, num_par_processes=8,
+        num_triangles=1500,
+        print_diagnostics=False,
+    ):
     # Filter calculations
     num_filts = len(filts_list)
     
@@ -853,8 +855,10 @@ def binary_mags_calc(star1_params_lcfit, star2_params_lcfit,
         mesh_temp=mesh_temp,
         mesh_temp_cmap=mesh_temp_cmap,
         plot_name=plot_name,
+        par_compute=par_compute, num_par_processes=num_par_processes,
         num_triangles=num_triangles,
-        print_diagnostics=print_diagnostics)
+        print_diagnostics=print_diagnostics,
+    )
     
     if make_mesh_plots:
         (binary_mags_filts,

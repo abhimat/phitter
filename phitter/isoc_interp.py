@@ -144,6 +144,7 @@ class isochrone_mist(object):
         self.iso_absMag_mass_init = (self.iso_absMag.points['mass'][phase_check]).to(u.solMass)
         self.iso_absMag_mass = (self.iso_absMag.points['mass_current'][phase_check]).to(u.solMass)
         self.iso_absMag_rad = (self.iso_absMag.points['R'][phase_check]).to(u.solRad)
+        self.iso_absMag_teff = (self.iso_absMag.points['Teff'][phase_check]).to(u.K)
         
         self.iso_absMag_mag = {}
         for filt in self.filts_list:
@@ -195,6 +196,58 @@ class isochrone_mist(object):
             star_absMags[cur_filt_index] = np.interp(star_rad,
                                                      self.iso_absMag_rad,
                                                      self.iso_absMag_mag[cur_filt])
+        
+        # Passband luminosities
+        star_pblums = self.calc_pblums(star_absMags)
+        
+        # Export tuple with all parameters and tuple with only parameters needed for lc fit
+        stellar_params_all = (star_mass_init, star_mass,
+                              star_rad, star_lum,
+                              star_teff, star_logg,
+                              star_mags, star_pblums)
+        stellar_params_lcfit = (star_mass, star_rad,
+                                star_teff, star_logg,
+                                star_mags, star_pblums)
+        
+        return stellar_params_all, stellar_params_lcfit
+    
+    def teff_interp(self, star_teff_interp):
+        # # Reverse isochrones, if teff not increasing, for numpy interpolation to work
+        # if self.iso_teff[-1] < self.iso_teff[0]:
+        #     self.iso_mass_init = self.iso_mass_init[::-1]
+        #     self.iso_mass = self.iso_mass[::-1]
+        #     self.iso_rad = self.iso_rad[::-1]
+        #     self.iso_lum = self.iso_lum[::-1]
+        #     self.iso_teff = self.iso_teff[::-1]
+        #     self.iso_logg = self.iso_logg[::-1]
+        #
+        #     for filt in self.filts_list:
+        #         self.iso_mag[filt] = (self.iso_mag[filt])[::-1]
+        #         self.iso_absMag_mag[filt] = (self.iso_absMag[filt])[::-1]
+        
+        star_teff = star_teff_interp * u.K
+        
+        star_mass_init = np.interp(star_teff, self.iso_teff, self.iso_mass_init)
+        star_mass = np.interp(star_teff, self.iso_teff, self.iso_mass)
+        star_rad = np.interp(star_teff, self.iso_teff, self.iso_rad)
+        star_lum = np.interp(star_teff, self.iso_teff, self.iso_lum)
+        star_logg = np.interp(star_teff, self.iso_teff, self.iso_logg)
+        
+        star_mags = np.empty(self.num_filts)
+        star_absMags = np.empty(self.num_filts)
+        
+        for cur_filt_index in range(self.num_filts):
+            cur_filt = self.filts_list[cur_filt_index]
+            cur_filt_flux_ref = self.filts_flux_ref[cur_filt_index]
+            
+            star_mags[cur_filt_index] = np.interp(
+                star_teff, self.iso_teff,
+                self.iso_mag[cur_filt],
+            )
+            
+            star_absMags[cur_filt_index] = np.interp(
+                star_teff, self.iso_absMag_teff,
+                self.iso_absMag_mag[cur_filt])
         
         # Passband luminosities
         star_pblums = self.calc_pblums(star_absMags)
