@@ -7,7 +7,7 @@
 
 from spisea import synthetic, evolution, atmospheres, reddening
 from pysynphot import spectrum
-from . import filters
+from phitter import filters
 from phoebe import u
 from phoebe import c as const
 import numpy as np

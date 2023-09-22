@@ -4,7 +4,7 @@ from phoebe import u
 from phoebe import c as const
 
 import numpy as np
-from spisea import synthetic
+from spisea import synthetic, reddening
 
 lambda_Ks = 2.18e-6 * u.m
 
@@ -60,7 +60,22 @@ class nirc2_lp_filt(filter):
         
         self.flux_ref_filt = self.filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
         
+        # Use Fritz+ 11 extinction law for Lp filter,
+        # with scale_lambda set to Ks
+        self.RedLawFritz11 = reddening.RedLawFritz11(
+            scale_lambda = lambda_Ks.to(u.micron).value
+        )
+        
         return
+    
+    # Redefine isochrone extinction calculation function to use Fritz+11 law
+    def calc_isoc_filt_ext(self, isoc_Ks_ext, ext_alpha):
+        isoc_filt_ext = self.RedLawFritz11.Fritz11(
+            (self.lambda_filt).to(u.micron).value,
+            isoc_Ks_ext,
+        )
+        
+        return isoc_filt_ext
 
 class nirc2_kp_filt(filter):
     def __init__(self):
