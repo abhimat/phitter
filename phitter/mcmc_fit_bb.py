@@ -13,7 +13,7 @@ import numpy as np
 
 from spisea import synthetic
 
-from phoebe_phitter import lc_calc, blackbody_params
+from phitter import lc_calc, blackbody_params, filters
 
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as font_manager
@@ -27,6 +27,11 @@ flux_ref_Ks = ks_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
 
 # Stellar Parameters
 # stellar_params = (mass, rad, teff, mag_Kp, mag_H)
+
+# Filters for default filter list
+kp_filt = filters.nirc2_kp_filt()
+h_filt = filters.nirc2_h_filt()
+h_filt = filters.nirc2_lp_filt()
 
 class mcmc_fitter_bb(object):
     # Filter properties
@@ -138,7 +143,7 @@ class mcmc_fitter_bb(object):
         return
     
     # Functions to make blackbody parameters object
-    def make_bb_params(self, Ks_ext, dist, filts_list=['nirc2,Kp', 'nirc2,H']):
+    def make_bb_params(self, Ks_ext, dist, filts_list=[kp_filt, h_filt]):
         self.Ks_ext = Ks_ext
         
         self.dist = dist*u.pc
@@ -160,16 +165,16 @@ class mcmc_fitter_bb(object):
         for cur_filt_index in range(self.num_filts):
             cur_filt = self.filts_list[cur_filt_index]
             
-            cur_filt_info = synthetic.get_filter_info(cur_filt)
+            cur_filt_info = cur_filt.filt_info
             self.filts_info.append(cur_filt_info)
             
-            cur_filt_flux_ref = cur_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
+            cur_filt_flux_ref = cur_filt.flux_ref_filt
             self.filts_flux_ref[cur_filt_index] = cur_filt_flux_ref
             
             # Convert from specified extinction in Ks to current filter
             cur_filt_ext = (Ks_ext *
                             (self.lambda_Ks /
-                             self.filts_lambda[cur_filt])**self.ext_alpha)
+                             cur_filt.lambda_filt)**self.ext_alpha)
             
             self.filts_ext[cur_filt] = cur_filt_ext
         
@@ -546,9 +551,11 @@ class mcmc_fitter_bb(object):
         # Calculate extinction adjustments
         filt_ext_adj = np.empty(self.num_filts)
         
-        Kp_ext_adj = (Kp_ext - self.filts_ext['nirc2,Kp'])
-        H_ext_adj = (((Kp_ext * (self.filts_lambda['nirc2,Kp'] / self.filts_lambda['nirc2,H'])**self.ext_alpha)
-                      - self.filts_ext['nirc2,H']) + H_ext_mod)
+        Kp_ext_adj = (Kp_ext - self.filts_ext[kp_filt])
+        
+        H_ext_adj = (\
+            ((Kp_ext * (kp_filt.lambda_filt / h_filt.lambda_filt)**self.ext_alpha)
+            - self.filts_ext[h_filt]) + H_ext_mod )
         
         filt_ext_adj = np.array([Kp_ext_adj, H_ext_adj])
         
@@ -587,10 +594,11 @@ class mcmc_fitter_bb(object):
         
         ## Apply isoc. distance modulus and isoc. extinction to binary magnitudes
         (binary_mags_Kp, binary_mags_H) = lc_calc.dist_ext_mag_calc(
-                                              (binary_mags_Kp, binary_mags_H),
-                                              self.dist,
-                                              self.filts_ext['nirc2,Kp'],
-                                              self.filts_ext['nirc2,H'])
+            (binary_mags_Kp, binary_mags_H),
+            self.dist,
+            self.filts_ext[kp_filt],
+            self.filts_ext[h_filt],
+        )
         
         # Apply the extinction difference between model and the isochrone values
         binary_mags_Kp += Kp_ext_adj
