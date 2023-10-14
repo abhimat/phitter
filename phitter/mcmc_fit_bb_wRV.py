@@ -685,7 +685,7 @@ class mcmc_fitter_bb(object):
         
         Lp_ext_adj = 0
         if 'nirc2,Lp' in self.filts_list:
-            Lp_ext_adj = 
+            Lp_ext_adj = -1 # Need to fix
             
         filt_ext_adj = np.array([Kp_ext_adj, H_ext_adj])
         
