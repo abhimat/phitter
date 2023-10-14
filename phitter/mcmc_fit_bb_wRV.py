@@ -254,7 +254,7 @@ class mcmc_fitter_bb(object):
         self.obs_times = obs_times
         
         observation_times = ()  # A tuple for the different bands' observation times
-        num_phot_obs_filt = np.empty(self.num_filts, dtype=np.int)
+        num_phot_obs_filt = np.empty(self.num_filts, dtype=int)
         
         # Go through the photometric filters
         for cur_filt_index in range(self.num_filts):
