@@ -909,9 +909,9 @@ class mcmc_fitter_bb(object):
             )
         
         if log_like_weight == 'ind_obs':
-            log_likelihood += log_like_mags_pri + log_like_mags_sec
+            log_likelihood += log_likelihood_pri + log_likelihood_sec
         elif log_like_weight == 'data_type' or log_like_weight == 'data_type_and_band':
-            log_likelihood += (log_like_mags_pri + log_like_mags_sec) / self.num_rv_obs_total
+            log_likelihood += (log_likelihood_pri + log_likelihood_sec) / self.num_rv_obs_total
         
         # Finalize log likelihood and return
         
