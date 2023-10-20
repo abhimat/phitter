@@ -31,7 +31,7 @@ flux_ref_Ks = ks_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
 # Filters for default filter list
 kp_filt = filters.nirc2_kp_filt()
 h_filt = filters.nirc2_h_filt()
-h_filt = filters.nirc2_lp_filt()
+lp_filt = filters.nirc2_lp_filt()
 
 class mcmc_fitter_bb(object):
     """Class for running MCMC fits with blackbody atmospheres

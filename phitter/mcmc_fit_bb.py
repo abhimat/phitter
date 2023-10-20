@@ -31,7 +31,7 @@ flux_ref_Ks = ks_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
 # Filters for default filter list
 kp_filt = filters.nirc2_kp_filt()
 h_filt = filters.nirc2_h_filt()
-h_filt = filters.nirc2_lp_filt()
+lp_filt = filters.nirc2_lp_filt()
 
 class mcmc_fitter_bb(object):
     # Filter properties
@@ -173,8 +173,7 @@ class mcmc_fitter_bb(object):
             
             # Convert from specified extinction in Ks to current filter
             cur_filt_ext = (Ks_ext *
-                            (self.lambda_Ks /
-                             cur_filt.lambda_filt)**self.ext_alpha)
+                            (self.lambda_Ks / cur_filt.lambda_filt)**self.ext_alpha)
             
             self.filts_ext[cur_filt] = cur_filt_ext
         
@@ -185,22 +184,23 @@ class mcmc_fitter_bb(object):
                                  filts_list=self.filts_list)
         
     
-    # Function to set observation filters
     def set_observation_filts(self, obs_filts):
+        """Function to set observation filters"""
         self.obs_filts = obs_filts
         
         self.search_filt_kp = np.where(self.obs_filts == 'kp')
         self.search_filt_h = np.where(self.obs_filts == 'h')
     
-    # Function to set observation times
+    
     def set_observation_times(self, obs_times):
+        """Function to set observation times"""
         self.obs_times = obs_times
         
         self.observation_times = (obs_times[self.search_filt_kp],
                                   obs_times[self.search_filt_h])
     
-    # Function to set observation mags
     def set_observation_mags(self, obs_mags, obs_mag_errors):
+        """Function to set observation mags"""
         self.obs_mags = obs_mags
         self.obs_mag_errors = obs_mag_errors
         
@@ -448,7 +448,7 @@ class mcmc_fitter_bb(object):
                 log_prior = 0.0
                 
                 # Return gaussian prior for H_ext_mod parameter
-                if self.H_ext_mod_alpha_sig_bound is not -1.0:
+                if self.H_ext_mod_alpha_sig_bound != -1.0:
                     log_prior_add = np.log(1.0/(np.sqrt(2*np.pi)*H_ext_mod_bound_oneSig))
                     log_prior_add += (-0.5 * (H_ext_mod**2) /
                                       (H_ext_mod_bound_oneSig**2))
