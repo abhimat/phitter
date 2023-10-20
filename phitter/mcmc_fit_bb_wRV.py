@@ -863,6 +863,8 @@ class mcmc_fitter_bb(object):
             (self.h_obs_mag_errors[h_phases_sorted_inds])**2.
         )
         
+        log_like_weight = 'ind_obs'
+        
         if log_like_weight == 'ind_obs':
             log_likelihood += log_like_mags_kp + log_like_mags_h
         elif log_like_weight == 'data_type':
