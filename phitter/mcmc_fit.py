@@ -13,7 +13,7 @@ import numpy as np
 
 from spisea import synthetic
 
-from phoebe_phitter import lc_calc, isoc_interp
+from phitter import lc_calc, isoc_interp, filters
 
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as font_manager
@@ -22,34 +22,38 @@ from matplotlib.ticker import MultipleLocator
 # Reference fluxes, calculated with PopStar
 ## Vega magnitudes (m_Vega = 0.03)
 ks_filt_info = synthetic.get_filter_info('naco,Ks')
-kp_filt_info = synthetic.get_filter_info('nirc2,Kp')
-h_filt_info = synthetic.get_filter_info('nirc2,H')
 
 flux_ref_Ks = ks_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
-flux_ref_Kp = kp_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
-flux_ref_H = h_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
 
 # Stellar Parameters
 # stellar_params = (mass, rad, teff, mag_Kp, mag_H)
 
-class mcmc_fitter_base_interp(object):
+# Filters for default filter list
+kp_filt = filters.nirc2_kp_filt()
+h_filt = filters.nirc2_h_filt()
+lp_filt = filters.nirc2_lp_filt()
+
+class mcmc_fitter(object):
+    """
+    Base object to use for MCMC fitting of binary systems
+    """
+    
     # Filter properties
     lambda_Ks = 2.18e-6 * u.m
     dlambda_Ks = 0.35e-6 * u.m
 
-    lambda_Kp = 2.124e-6 * u.m
-    dlambda_Kp = 0.351e-6 * u.m
-
-    lambda_H = 1.633e-6 * u.m
-    dlambda_H = 0.296e-6 * u.m
+    filts_lambda = {
+        'nirc2,Kp': 2.124e-6 * u.m,
+        'nirc2,H': 1.633e-6 * u.m,
+    }
+    filts_dlambda = {
+        'nirc2,Kp': 0.351e-6 * u.m,
+        'nirc2,H': 0.296e-6 * u.m,
+    }
     
     ks_filt_info = synthetic.get_filter_info('naco,Ks')
-    kp_filt_info = synthetic.get_filter_info('nirc2,Kp')
-    h_filt_info = synthetic.get_filter_info('nirc2,H')
-
+    
     flux_ref_Ks = ks_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
-    flux_ref_Kp = kp_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
-    flux_ref_H = h_filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
     
     # Extinction law (using Nogueras-Lara+ 2018)
     ext_alpha = 2.30
@@ -72,6 +76,7 @@ class mcmc_fitter_base_interp(object):
     model_distance = True
     
     # Default prior bounds
+    # Extinction prior bounds
     lo_Kp_ext_prior_bound = 2.0
     hi_Kp_ext_prior_bound = 4.0
     
@@ -98,94 +103,41 @@ class mcmc_fitter_base_interp(object):
     def __init__(self):
         return
     
-    # Functions to make and store isochrones
-    def make_isochrone(self, age, Ks_ext, dist, phase, met, use_atm_func='merged'):
-        self.Ks_ext = Ks_ext
+    def set_observation_filts(self, obs_filts):
+        """Function to set observation filters"""
+        self.obs_filts = obs_filts
         
-        self.dist = dist*u.pc
-        self.default_dist = dist
-        ## Revise prior bounds for distance
-        self.lo_dist_prior_bound = 0.8 * dist
-        self.hi_dist_prior_bound = 1.2 * dist
+        self.search_filt_kp = np.where(self.obs_filts == 'kp')
+        self.search_filt_h = np.where(self.obs_filts == 'h')
+            
+    def set_observation_times(self, obs_times):
+        """Function to set observation times"""
+        self.obs_times = obs_times
         
-        self.age = age
-        self.met = met
-        
-        self.star1_isochrone = isoc_interp.isochrone_mist(age=age,
-                                   ext=Ks_ext, dist=dist, phase=phase, met=met,
-                                   use_atm_func=use_atm_func)
-        self.star2_isochrone = self.star1_isochrone
-        
-        ## Convert from specified extinction in Ks to Kp and H
-        self.Kp_ext = Ks_ext * (self.lambda_Ks / self.lambda_Kp)**self.ext_alpha
-        self.H_ext = Ks_ext * (self.lambda_Ks / self.lambda_H)**self.ext_alpha
+        self.observation_times = (obs_times[self.search_filt_kp],
+                                  obs_times[self.search_filt_h])
     
-    def make_star1_isochrone(self, age, Ks_ext, dist, phase, met, use_atm_func='merged'):
-        self.Ks_ext = Ks_ext
+    def set_observation_mags(self, obs_mags, obs_mag_errors):
+        """Function to set observation mags"""
+        self.obs_mags = obs_mags
+        self.obs_mag_errors = obs_mag_errors
         
-        self.dist = dist*u.pc
-        self.default_dist = dist
-        ## Revise prior bounds for distance
-        self.lo_dist_prior_bound = 0.8 * dist
-        self.hi_dist_prior_bound = 1.2 * dist
+        self.kp_obs_mags = obs_mags[self.search_filt_kp]
+        self.kp_obs_mag_errors = obs_mag_errors[self.search_filt_kp]
         
-        self.age = age
-        self.met = met
-        
-        self.star1_isochrone = isoc_interp.isochrone_mist(age=age,
-                                   ext=Ks_ext, dist=dist, phase=phase, met=met,
-                                   use_atm_func=use_atm_func)
-        
-        ## Convert from specified extinction in Ks to Kp and H
-        self.Kp_ext = Ks_ext * (self.lambda_Ks / self.lambda_Kp)**self.ext_alpha
-        self.H_ext = Ks_ext * (self.lambda_Ks / self.lambda_H)**self.ext_alpha
+        self.h_obs_mags = obs_mags[self.search_filt_h]
+        self.h_obs_mag_errors = obs_mag_errors[self.search_filt_h]
     
-    def make_star2_isochrone(self, age, Ks_ext, dist, phase, met, use_atm_func='merged'):
-        self.Ks_ext = Ks_ext
-        
-        self.dist = dist*u.pc
-        self.default_dist = dist
-        ## Revise prior bounds for distance
-        self.lo_dist_prior_bound = 0.8 * dist
-        self.hi_dist_prior_bound = 1.2 * dist
-        
-        self.age = age
-        self.met = met
-        
-        self.star2_isochrone = isoc_interp.isochrone_mist(age=age,
-                                   ext=Ks_ext, dist=dist, phase=phase, met=met,
-                                   use_atm_func=use_atm_func)
-        
-        ## Convert from specified extinction in Ks to Kp and H
-        self.Kp_ext = Ks_ext * (self.lambda_Ks / self.lambda_Kp)**self.ext_alpha
-        self.H_ext = Ks_ext * (self.lambda_Ks / self.lambda_H)**self.ext_alpha
-    
-    # Function to set observation times
-    def set_observation_times(self, Kp_observation_times, H_observation_times):
-        self.Kp_observation_times = Kp_observation_times
-        self.H_observation_times = H_observation_times
-        
-        self.observation_times = (self.Kp_observation_times, self.H_observation_times)
-    
-    # Function to set observation mags
-    def set_observation_mags(self, kp_obs_mags, kp_obs_mag_errors,
-            h_obs_mags, h_obs_mag_errors):
-        self.kp_obs_mags = kp_obs_mags
-        self.h_obs_mags = h_obs_mags
-        
-        self.kp_obs_mag_errors = kp_obs_mag_errors
-        self.h_obs_mag_errors = h_obs_mag_errors
-    
-    # Function to set model mesh number of triangles
     def set_model_numTriangles(self, model_numTriangles):
+        """Function to set model mesh number of triangles"""
         self.model_numTriangles = model_numTriangles
     
-    # Function to set if using blackbody atmosphere
     def set_model_use_blackbody_atm(self, use_blackbody_atm):
+        """Function to set model mesh number of triangles"""
         self.use_blackbody_atm = use_blackbody_atm
     
-    # Function to set for modelling H extinction modifier
     def set_model_H_ext_mod(self, model_H_ext_mod):
+        """Function to set for modelling H extinction modifier"""
         self.model_H_ext_mod = model_H_ext_mod
     
     # Function to set for modelling eccentricity
@@ -197,6 +149,7 @@ class mcmc_fitter_base_interp(object):
         self.model_distance = model_distance
     
     # Functions to define prior bounds
+    # Extinction priors
     def set_Kp_ext_prior_bounds(self, lo_bound, hi_bound):
         self.lo_Kp_ext_prior_bound = lo_bound
         self.hi_Kp_ext_prior_bound = hi_bound
@@ -208,6 +161,7 @@ class mcmc_fitter_base_interp(object):
     def set_H_ext_mod_extLaw_sig_prior_bounds(self, sigma_bound):
         self.H_ext_mod_alpha_sig_bound = sigma_bound
     
+    # Binary system parameter priors
     def set_inc_prior_bounds(self, lo_bound, hi_bound):
         self.lo_inc_prior_bound = lo_bound
         self.hi_inc_prior_bound = hi_bound
@@ -1020,3 +974,123 @@ class mcmc_fitter_mass_init_and_rad_interp(mcmc_fitter_base_interp):
         if not np.isfinite(lp):
             return -np.inf
         return lp + self.lnlike(theta)
+
+
+
+class mcmc_fitter_isoc_interp(mcmc_fitter):
+    """
+    Expands MCMC fitter object to work with
+    isochrone interpolation of stellar parameters
+    """
+    
+    # Functions to make and store isochrones
+    def make_isochrone(
+            self, age, Ks_ext, dist, phase, met,
+            filts_list=[kp_filt, h_filt],
+            use_atm_func='merged',
+        ):
+        self.Ks_ext = Ks_ext
+        
+        self.dist = dist*u.pc
+        self.default_dist = dist
+        ## Revise prior bounds for distance
+        self.lo_dist_prior_bound = 0.8 * dist
+        self.hi_dist_prior_bound = 1.2 * dist
+        
+        self.age = age
+        self.met = met
+        
+        # Filter info and convert extinction to fit filters
+        self.filts_list = filts_list
+        self.num_filts = len(self.filts_list)
+        
+        self.filts_info = []
+        self.filts_flux_ref = np.empty(self.num_filts) *\
+                                  (u.erg / u.s) / (u.cm**2.)
+        
+        self.filts_ext = {}
+        
+        for cur_filt_index in range(self.num_filts):
+            cur_filt = self.filts_list[cur_filt_index]
+            
+            cur_filt_info = cur_filt.filt_info
+            self.filts_info.append(cur_filt_info)
+            
+            cur_filt_flux_ref = cur_filt.flux_ref_filt
+            self.filts_flux_ref[cur_filt_index] = cur_filt_flux_ref
+            
+            # Convert from specified extinction in Ks to current filter
+            cur_filt_ext = (Ks_ext *
+                            (self.lambda_Ks / cur_filt.lambda_filt)**self.ext_alpha)
+            
+            self.filts_ext[cur_filt] = cur_filt_ext
+        
+        self.star1_isochrone = isoc_interp.isochrone_mist(age=age,
+                                   ext=Ks_ext, dist=dist, phase=phase, met=met,
+                                   use_atm_func=use_atm_func)
+        self.star2_isochrone = self.star1_isochrone
+            
+    def make_star1_isochrone(
+            self, age, Ks_ext, dist, phase, met,
+            filts_list=[kp_filt, h_filt],
+            use_atm_func='merged',
+        ):
+        self.Ks_ext = Ks_ext
+        
+        self.dist = dist*u.pc
+        self.default_dist = dist
+        ## Revise prior bounds for distance
+        self.lo_dist_prior_bound = 0.8 * dist
+        self.hi_dist_prior_bound = 1.2 * dist
+        
+        self.age = age
+        self.met = met
+        
+        # Filter info and convert extinction to fit filters
+        self.filts_list = filts_list
+        self.num_filts = len(self.filts_list)
+        
+        self.filts_info = []
+        self.filts_flux_ref = np.empty(self.num_filts) *\
+                                  (u.erg / u.s) / (u.cm**2.)
+        
+        self.filts_ext = {}
+        
+        for cur_filt_index in range(self.num_filts):
+            cur_filt = self.filts_list[cur_filt_index]
+            
+            cur_filt_info = cur_filt.filt_info
+            self.filts_info.append(cur_filt_info)
+            
+            cur_filt_flux_ref = cur_filt.flux_ref_filt
+            self.filts_flux_ref[cur_filt_index] = cur_filt_flux_ref
+            
+            # Convert from specified extinction in Ks to current filter
+            cur_filt_ext = (Ks_ext *
+                            (self.lambda_Ks / cur_filt.lambda_filt)**self.ext_alpha)
+            
+            self.filts_ext[cur_filt] = cur_filt_ext
+        
+        self.star1_isochrone = isoc_interp.isochrone_mist(age=age,
+                                   ext=Ks_ext, dist=dist, phase=phase, met=met,
+                                   use_atm_func=use_atm_func)
+            
+    def make_star2_isochrone(
+            self, age, Ks_ext, dist, phase, met,
+            filts_list=[kp_filt, h_filt],
+            use_atm_func='merged',
+        ):
+        self.Ks_ext = Ks_ext
+        
+        self.dist = dist*u.pc
+        self.default_dist = dist
+        ## Revise prior bounds for distance
+        self.lo_dist_prior_bound = 0.8 * dist
+        self.hi_dist_prior_bound = 1.2 * dist
+        
+        self.age = age
+        self.met = met
+        
+        self.star2_isochrone = isoc_interp.isochrone_mist(age=age,
+                                   ext=Ks_ext, dist=dist, phase=phase, met=met,
+                                   use_atm_func=use_atm_func)
