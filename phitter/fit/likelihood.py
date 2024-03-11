@@ -16,10 +16,7 @@ class log_likelihood_chisq(Model):
     """
     
     inputs = (
-        'model_obs_time',
-        'model_obs',
-        'model_filt',
-        'model_obs_type',
+        'model_observation',
     )
     
     outputs = (
@@ -29,4 +26,20 @@ class log_likelihood_chisq(Model):
     def __init__(self, observations, *args, **kwargs):
         super(log_likelihood_chisq, self).__init__(*args, **kwargs)
         
-        # observations is going to be an observations object
+        # Save observations to the object
+        self.observations = observations
+        
+        if self.observations.obs_uncs == None:
+           self.observations.obs_uncs = np.ones_like(self.observations.obs)
+        
+    
+    def evaluate(model_observation):
+        log_likelihood = -0.5 * np.sum(
+            ((self.observations.obs - model_observation.obs) / \
+             self.observations.obs_uncs)**2.
+        )
+        
+        if np.isnan(log_likelihood):
+            return -1e300
+        else:
+            return log_likelihood
