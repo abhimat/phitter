@@ -103,6 +103,9 @@ class observations(object):
         self.obs_times_phot = self.obs_times[self.obs_phot_filter]
         self.obs_times_rv = self.obs_times[self.obs_rv_filter]
         
+        self.num_obs_phot = len(self.obs_times_phot)
+        self.num_obs_rv = len(self.obs_times_rv)
+        
         self.obs_phot = self.obs[self.obs_phot_filter]
         self.obs_rv = self.obs[self.obs_rv_filter]
         
