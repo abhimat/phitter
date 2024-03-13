@@ -30,6 +30,18 @@ class filter(object):
         
         return isoc_filt_ext
     
+    # Defining following comparison magic methods to allow numpy functionality
+    def __eq__(self, other):
+        return self.filter_name == other.filter_name
+    
+    def __lt__(self, other):
+        sorted_order = np.argsort([self.filter_name, other.filter_name])
+        return sorted_order[0] < sorted_order[1]
+    
+    def __gt__(self, other):
+        sorted_order = np.argsort([self.filter_name, other.filter_name])
+        return sorted_order[0] > sorted_order[1]
+    
 class naco_ks_filt(filter):
     def __init__(self):
         self.filter_name = 'naco,Ks'
