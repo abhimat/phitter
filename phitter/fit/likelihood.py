@@ -7,17 +7,16 @@ from phoebe import u
 from phoebe import c as const
 import numpy as np
 from astropy.modeling import Model
-from phitter import observations
 
 class log_likelihood_chisq(Model):
     """
     log_likelihood_chisq is an object to obtain chi squared log likelihood.
-    Instantiate this object with an observations object to indicate the observed
+    Instantiate this object with an observables object to indicate the observed
     observables.
     """
     
     inputs = (
-        'model_observation',
+        'model_observables',
     )
     
     outputs = (
@@ -34,9 +33,9 @@ class log_likelihood_chisq(Model):
            self.observations.obs_uncs = np.ones_like(self.observations.obs)
         
     
-    def evaluate(self, model_observation):
+    def evaluate(self, model_observables):
         log_likelihood = -0.5 * np.sum(
-            ((self.observations.obs - model_observation.obs) / \
+            ((self.observations.obs - model_observables.obs) / \
              self.observations.obs_uncs)**2.
         )
         
@@ -56,30 +55,30 @@ class log_likelihood_chisq_weighted_obs_type(log_likelihood_chisq):
     log_like_total = (log_like_t1)/(n_t1) + (log_like_t2)/(n_t2) + ...
     (see e.g., Lam+ 2022)
     
-    Instantiate this object with an observations object to indicate the observed
+    Instantiate this object with an observables object to indicate the observed
     observables.
     """
     
     inputs = (
-        'model_observation',
+        'model_observables',
     )
     
     outputs = (
         'log_likelihood',
     )
     
-    def evaluate(self, model_observation):
+    def evaluate(self, model_observables):
         log_likelihood = 0
         
         if self.observations.num_obs_phot > 0:
             log_likelihood += (-0.5 * np.sum(
-                ((self.observations.obs_phot - model_observation.obs_phot) / \
+                ((self.observations.obs_phot - model_observables.obs_phot) / \
                  self.observations.obs_uncs_phot)**2.
             )) / self.observations.num_obs_phot
         
         if self.observations.num_obs_rv > 0:
             log_likelihood += (-0.5 * np.sum(
-                ((self.observations.obs_rv - model_observation.obs_rv) / \
+                ((self.observations.obs_rv - model_observables.obs_rv) / \
                  self.observations.obs_uncs_rv)**2.
             )) / self.observations.num_obs_rv
         

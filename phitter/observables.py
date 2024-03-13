@@ -1,4 +1,4 @@
-# Observations object for phitter
+# Observables object for phitter
 # ---
 # Abhimat Gautam
 
@@ -6,9 +6,9 @@ from phoebe import u
 from phoebe import c as const
 import numpy as np
 
-class observations(object):
+class observables(object):
     """
-    observations is an object to store observables, either observed or modeled.
+    observables is an object to store observables, either observed or modeled.
     Observed observables will typically have uncertainties associated, but
     modeled observables will typically not.
     
