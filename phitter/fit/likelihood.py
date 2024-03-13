@@ -13,6 +13,11 @@ class log_likelihood_chisq(Model):
     log_likelihood_chisq is an object to obtain chi squared log likelihood.
     Instantiate this object with an observables object to indicate the observed
     observables.
+    
+    Parameters
+    ----------
+    observations : observables
+        observables object, specified with the observations to be fit.
     """
     
     inputs = (
@@ -57,6 +62,11 @@ class log_likelihood_chisq_weighted_obs_type(log_likelihood_chisq):
     
     Instantiate this object with an observables object to indicate the observed
     observables.
+    
+    Parameters
+    ----------
+    observations : observables
+        observables object, specified with the observations to be fit.
     """
     
     inputs = (
