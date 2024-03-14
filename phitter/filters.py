@@ -34,6 +34,9 @@ class filter(object):
     def __eq__(self, other):
         return self.filter_name == other.filter_name
     
+    def __hash__(self):
+        return hash(self.filter_name)
+    
     def __lt__(self, other):
         sorted_order = np.argsort([self.filter_name, other.filter_name])
         return sorted_order[0] < sorted_order[1]

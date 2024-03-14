@@ -54,9 +54,11 @@ class observables(object):
     
     obs_times = np.array([])
     obs = np.array([])
-    obs_uncs = None
+    obs_uncs = np.array([])
     obs_filts = np.array([])
     obs_types = np.array([])
+    
+    num_obs = 0
     
     def __init__(
         self,
@@ -74,6 +76,9 @@ class observables(object):
         
         if obs_types is not None:
             self.set_obs_types(obs_types)
+        
+        if obs_filts is not None and obs_types is not None:
+            self._make_filt_search_filters()
         
     def set_obs_times(self, obs_times):
         self.obs_times = obs_times
@@ -97,7 +102,7 @@ class observables(object):
             self.obs_types == 'phot'
         )
         
-        self.obs_rv_filter = np.where(np.logical_and(
+        self.obs_rv_filter = np.where(np.logical_or(
             self.obs_types == 'rv_pri',
             self.obs_types == 'rv_sec',
         ))
@@ -109,29 +114,66 @@ class observables(object):
             self.obs_types == 'rv_sec',
         )
         
-        self.obs_times_phot = self.obs_times[self.obs_phot_filter]
-        self.obs_times_rv = self.obs_times[self.obs_rv_filter]
-        self.obs_times_rv_pri = self.obs_times[self.obs_rv_pri_filter]
-        self.obs_times_rv_sec = self.obs_times[self.obs_rv_sec_filter]
-        self.obs_times_rv_unique = np.unique(self.obs_times_rv)
+        if len(self.obs_times) > 0:
+            self.obs_times_phot = self.obs_times[self.obs_phot_filter]
+            self.obs_times_rv = self.obs_times[self.obs_rv_filter]
+            self.obs_times_rv_pri = self.obs_times[self.obs_rv_pri_filter]
+            self.obs_times_rv_sec = self.obs_times[self.obs_rv_sec_filter]
+            self.obs_times_rv_unique = np.unique(self.obs_times_rv)
+                    
+            self.num_obs_phot = len(self.obs_times_phot)
+            self.num_obs_rv = len(self.obs_times_rv)
+            self.num_obs_rv_pri = len(self.obs_times_rv_pri)
+            self.num_obs_rv_sec = len(self.obs_times_rv_sec)
         
-        self.num_obs_phot = len(self.obs_times_phot)
-        self.num_obs_rv = len(self.obs_times_rv)
-        self.num_obs_rv_pri = len(self.obs_times_rv_pri)
-        self.num_obs_rv_sec = len(self.obs_times_rv_sec)
+        if len(self.obs) > 0:
+            self.obs_phot = self.obs[self.obs_phot_filter]
+            self.obs_rv = self.obs[self.obs_rv_filter]
+            self.obs_rv_pri = self.obs[self.obs_rv_pri_filter]
+            self.obs_rv_sec = self.obs[self.obs_rv_sec_filter]
         
-        self.obs_phot = self.obs[self.obs_phot_filter]
-        self.obs_rv = self.obs[self.obs_rv_filter]
-        self.obs_rv_pri = self.obs[self.obs_rv_pri_filter]
-        self.obs_rv_sec = self.obs[self.obs_rv_sec_filter]
-        
-        if self.obs_uncs is not None:
+        if len(self.obs_uncs) > 0:
             self.obs_uncs_phot = self.obs_uncs[self.obs_phot_filter]
             self.obs_uncs_rv = self.obs_uncs[self.obs_rv_filter]
             self.obs_uncs_rv_pri = self.obs_uncs[self.obs_rv_pri_filter]
             self.obs_uncs_rv_sec = self.obs_uncs[self.obs_rv_sec_filter]
         
-        self.obs_filts_phot = self.obs_filts[self.obs_phot_filter]
-        self.obs_filts_rv = self.obs_filts[self.obs_rv_filter]
+        if len(self.obs_filts) > 0:
+            self.obs_filts_phot = self.obs_filts[self.obs_phot_filter]
+            self.obs_filts_rv = self.obs_filts[self.obs_rv_filter]
+            
+            self.unique_filts_phot = np.unique(self.obs_filts_phot)
+            self.unique_filts_rv = np.unique(self.obs_filts_rv)
+            
+            self.num_filts_phot = len(self.unique_filts_phot)
+            self.num_filts_rv = len(self.unique_filts_rv)
     
-    
+    def _make_filt_search_filters(self):
+        """Private function to make search filters for every filter
+        """
+        
+        self.phot_filt_filters = {}
+        self.rv_filt_filters = {}
+        
+        if self.num_filts_phot > 0:
+            for filt in self.unique_filts_phot:
+                search_filter = np.where(np.logical_and(
+                    self.obs_types == 'phot',
+                    self.obs_filts == filt,
+                ))
+                
+                self.phot_filt_filters[filt] = search_filter
+        
+        if self.num_filts_rv > 0:
+            for filt in self.unique_filts_rv:
+                search_filter = np.where(np.logical_and(
+                    np.logical_or(
+                        self.obs_types == 'rv_pri',
+                        self.obs_types == 'rv_sec',
+                    ),
+                    self.obs_filts == filt,
+                ))
+                
+                self.rv_filt_filters[filt] = search_filter
+        
+        return

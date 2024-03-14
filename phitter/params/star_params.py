@@ -47,9 +47,9 @@ class star_params(object):
     logg = 0.
     
     filts = []
-    mags = np.empty()
-    mags_abs = np.empty()
-    pblums = np.empty() * u.solLum
+    mags = np.array([])
+    mags_abs = np.array([])
+    pblums = np.array([]) * u.solLum
     
     def __init__(self):
         return
