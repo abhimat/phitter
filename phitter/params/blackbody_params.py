@@ -5,7 +5,7 @@
 # ---
 # Abhimat Gautam
 
-from spisea import synthetic, evolution, atmospheres, reddening
+from spisea import synthetic, atmospheres
 from pysynphot import spectrum
 from phitter import filters
 from phitter.params.star_params import star_params, stellar_params_obj
@@ -13,11 +13,6 @@ from phoebe import u
 from phoebe import c as const
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib as mpl
-import time
-from astropy import modeling
-from astropy.modeling.models import custom_model
-from astropy.modeling import Model
 
 # Filter properties
 lambda_Ks = 2.18e-6 * u.m
@@ -36,10 +31,23 @@ kp_filt = filters.nirc2_kp_filt()
 h_filt = filters.nirc2_h_filt()
 
 # Object to get synthetic magnitudes for blackbody objects
-class bb_stellar_params(stellar_params_obj):
-    mass = modeling.Parameter(default=10.*u.solMass)
-    rad = modeling.Parameter(default=10.*u.solRad)
-    teff = modeling.Parameter(default=10_000*u.K)
+class bb_stellar_params(stellar_params_obj):    
+    """
+    stellar_params class, to derive stellar parameters from a blackbody atmosphere
+    
+    Parameters
+    ----------
+    ext_Ks : float, default=2.63
+        Extinction of stellar parameters object in Ks band.
+    dist : Astropy Quantity, length units, default=7.971e3*u.pc
+        Distance to 
+    teff : Astropy Quantity, unit:K
+        Stellar effective temperature in Kelvin
+    
+    ext_Ks=2.63, dist=7.971e3*u.pc,
+    filts_list=[kp_filt, h_filt],
+    ext_law='NL18'
+    """
     
     def __init__(
         self, *args, **kwargs,
@@ -49,12 +57,32 @@ class bb_stellar_params(stellar_params_obj):
             *args, **kwargs,
         )
         
-        # Define atmosphere
+        # Define atmosphere function
         self.bb_atm_func = atmospheres.get_bb_atmosphere
         
         return
     
-    def evaluate(self, ext_Ks, dist, mass, rad, teff):
+    def calc_star_params(self, mass, rad, teff):
+        """
+        Calculate stellar parameters from a blackbody, returned as a star_params
+        object
+        
+        Parameters
+        ----------
+        mass : Astropy Quantity, unit:solMass
+            Stellar mass in solar masses
+        rad : Astropy Quantity, unit:solRad
+            Stellar radius in solar radii
+        teff : Astropy Quantity, unit:K
+            Stellar effective temperature in Kelvin
+        
+        Returns
+        -------
+        star_params
+            star_params object returned, with stellar parameters based on a
+            blackbody atmosphere and input stellar parameters.
+        """ 
+        
         # Calculate surface gravity
         grav = (const.G * mass) / (rad**2)
         logg = np.log10(grav.cgs.value)
@@ -63,17 +91,6 @@ class bb_stellar_params(stellar_params_obj):
         bb_flux = const.sigma_sb * (teff ** 4.)
         bb_surf_area = 4. * np.pi * (rad ** 2.)
         bb_lum = bb_flux * bb_surf_area
-        
-        # Check if Parameters in keywords are numpy arrays,
-        # pull out first value if so
-        if type(mass.value) == np.ndarray:
-            mass = mass[0]
-        
-        if type(rad.value) == np.ndarray:
-            rad = rad[0]
-        
-        if type(teff.value) == np.ndarray:
-            teff = teff[0]
         
         # Calculate magnitudes
         filt_mags, filt_absMags = self.get_bb_mags(teff, rad)
@@ -95,7 +112,7 @@ class bb_stellar_params(stellar_params_obj):
         star_params_obj.mags_abs = filt_absMags
         star_params_obj.pblums = filt_pblums
         
-        return star_params_obj,
+        return star_params_obj
 
     def get_bb_mags(self, bb_temp, bb_rad, diagnostic_plot=False):
         if diagnostic_plot:
@@ -149,16 +166,18 @@ class bb_stellar_params(stellar_params_obj):
         filt_bb_absMags = np.empty(self.num_filts)
         
         for cur_filt_index in range(self.num_filts):
-            cur_filt = self.filts_list[cur_filt_index]
+            # cur_filt = self.filts_list[cur_filt_index]
             cur_filt_info = self.filts_info[cur_filt_index]
             
             # Make synthetic photometry
-            cur_filt_mag = synthetic.mag_in_filter(bb_atm,
-                                                   cur_filt_info)
+            cur_filt_mag = synthetic.mag_in_filter(
+                bb_atm, cur_filt_info,
+            )
             filt_bb_mags[cur_filt_index] = cur_filt_mag
             
-            cur_filt_absMag = synthetic.mag_in_filter(bb_absMag_atm,
-                                                      cur_filt_info)
+            cur_filt_absMag = synthetic.mag_in_filter(
+                bb_absMag_atm, cur_filt_info,
+            )
             filt_bb_absMags[cur_filt_index] = cur_filt_absMag
         
         return filt_bb_mags, filt_bb_absMags
