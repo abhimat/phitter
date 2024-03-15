@@ -3,6 +3,7 @@
 from phoebe import u
 import numpy as np
 from astropy.modeling import Model
+from astropy import modeling
 
 class binary_params(object):
     """
@@ -41,6 +42,8 @@ class binary_params_model(Model):
     inc = modeling.Parameter(unit=u.deg, min=0.0, max=180.0)
     t0 = modeling.Parameter()
     rv_com = modeling.Parameter(unit=u.km / u.s)
+    
+    outputs = ('binary_params',)
     
     @staticmethod
     def evaluate(period, ecc, inc, t0, rv_com):
