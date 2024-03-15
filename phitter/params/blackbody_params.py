@@ -15,6 +15,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import time
+from astropy import modeling
+from astropy.modeling.models import custom_model
+from astropy.modeling import Model
 
 # Filter properties
 lambda_Ks = 2.18e-6 * u.m
@@ -34,16 +37,16 @@ h_filt = filters.nirc2_h_filt()
 
 # Object to get synthetic magnitudes for blackbody objects
 class bb_stellar_params(stellar_params_obj):
+    mass = modeling.Parameter(default=10.*u.solMass)
+    rad = modeling.Parameter(default=10.*u.solRad)
+    teff = modeling.Parameter(default=10_000*u.K)
+    
     def __init__(
-        self, ext_Ks=2.63, dist=7.971e3,
-        filts_list=[kp_filt, h_filt],
-        ext_law='NL18',
+        self, *args, **kwargs,
     ):
         # Call parent stellar_params_obj to initialize
-        super().__init__(
-            ext_Ks=ext_Ks, dist=dist,
-            filts_list=filts_list,
-            ext_law=ext_law,
+        super(bb_stellar_params, self).__init__(
+            *args, **kwargs,
         )
         
         # Define atmosphere
@@ -51,7 +54,7 @@ class bb_stellar_params(stellar_params_obj):
         
         return
     
-    def calc_stellar_params(self, mass, rad, teff):
+    def evaluate(self, ext_Ks, dist, mass, rad, teff):
         # Calculate surface gravity
         grav = (const.G * mass) / (rad**2)
         logg = np.log10(grav.cgs.value)
@@ -60,6 +63,17 @@ class bb_stellar_params(stellar_params_obj):
         bb_flux = const.sigma_sb * (teff ** 4.)
         bb_surf_area = 4. * np.pi * (rad ** 2.)
         bb_lum = bb_flux * bb_surf_area
+        
+        # Check if Parameters in keywords are numpy arrays,
+        # pull out first value if so
+        if type(mass.value) == np.ndarray:
+            mass = mass[0]
+        
+        if type(rad.value) == np.ndarray:
+            rad = rad[0]
+        
+        if type(teff.value) == np.ndarray:
+            teff = teff[0]
         
         # Calculate magnitudes
         filt_mags, filt_absMags = self.get_bb_mags(teff, rad)
@@ -81,8 +95,8 @@ class bb_stellar_params(stellar_params_obj):
         star_params_obj.mags_abs = filt_absMags
         star_params_obj.pblums = filt_pblums
         
-        return star_params_obj
-    
+        return star_params_obj,
+
     def get_bb_mags(self, bb_temp, bb_rad, diagnostic_plot=False):
         if diagnostic_plot:
             fig = plt.figure(figsize=(8,4))

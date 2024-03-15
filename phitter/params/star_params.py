@@ -5,6 +5,8 @@ from phoebe import c as const
 import numpy as np
 from spisea import synthetic, reddening
 from phitter import filters
+from astropy import modeling
+from astropy.modeling import Model
 
 class star_params(object):
     """
@@ -69,20 +71,29 @@ red_law_options = {
     'F11': reddening.RedLawFritz11(),
 }
 
-class stellar_params_obj(object):
+class stellar_params_obj(Model):
     """
     Base stellar parameters object. Provides common functionality across objects
     used for obtaining star parameters.
     """
     
+    ext_Ks = modeling.Parameter(fixed=True, default=2.63,)
+    dist = modeling.Parameter(fixed=True, default=7.971e3*u.pc,)
+    
+    outputs = ('star_params')
+    
     def __init__(
-        self, ext_Ks=2.63, dist=7.971e3,
+        self, ext_Ks=2.63, dist=7.971e3*u.pc,
         filts_list=[kp_filt, h_filt],
-        ext_law='NL18',
+        ext_law='NL18', *args, **kwargs,
     ):
-        # Define extinction and distance
+        super().__init__(
+            ext_Ks=ext_Ks, dist=dist*u.pc,
+            *args, **kwargs,
+        )
+        
+        # # Define extinction and distance
         self.A_Ks = ext_Ks
-        self.dist = dist * u.pc
         
         # Specify filters and get filter information
         self.filts_list = filts_list
@@ -127,4 +138,8 @@ class stellar_params_obj(object):
             filt_pblums[cur_filt_index] = cur_filt_pblum.to(u.solLum)
         
         return filt_pblums
+    
+    def evaluate(self, ext_Ks=2.63, dist=7.971e3*u.pc):
+        out_star_params = star_params()
         
+        return out_star_params,
