@@ -87,7 +87,6 @@ class observables(object):
     
     def set_obs(self, obs, obs_uncs=None):
         self.obs = obs
-        
         self.obs_uncs = obs_uncs
         
     def set_obs_filts(self, obs_filts):
@@ -132,7 +131,7 @@ class observables(object):
             self.obs_rv_pri = self.obs[self.obs_rv_pri_filter]
             self.obs_rv_sec = self.obs[self.obs_rv_sec_filter]
         
-        if len(self.obs_uncs) > 0:
+        if self.obs_uncs is not None and len(self.obs_uncs) > 0:
             self.obs_uncs_phot = self.obs_uncs[self.obs_phot_filter]
             self.obs_uncs_rv = self.obs_uncs[self.obs_rv_filter]
             self.obs_uncs_rv_pri = self.obs_uncs[self.obs_rv_pri_filter]
