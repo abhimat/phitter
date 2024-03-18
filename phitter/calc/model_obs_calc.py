@@ -476,6 +476,10 @@ class binary_star_model_obs(object):
                     rv_filt_phase[filt] * binary_period.to(u.d).value
                 filt_model_times = filt_model_times[filt_phases_sorted_inds]
                 
+                # Only add unique times (e.g. if pri and sec RVs are modeled for
+                # a given time)
+                filt_model_times = np.unique(filt_model_times)
+                
                 rv_model_times = np.append(rv_model_times, filt_model_times)
             
                 
@@ -566,8 +570,6 @@ class binary_star_model_obs(object):
                                 sys.exc_info()[0])
                          )
                 return err_out
-        
-        bin_observables_out = copy.deepcopy(self.bin_observables)
         
         # Save out mesh plot
         if make_mesh_plots:
@@ -714,9 +716,23 @@ class binary_star_model_obs(object):
             phot_model_mags[filt] = cur_filt_model_mags
         
         # Get RVs
-        model_RVs_pri = np.array(b['rvs@primary@run@rv@model'].value) * u.km / u.s
-        model_RVs_sec = np.array(b['rvs@secondary@run@rv@model'].value) * u.km / u.s
+        model_RVs_pri = np.array(b['rvs@primary@run@rv@model'].value)
+        model_RVs_sec = np.array(b['rvs@secondary@run@rv@model'].value)
         
+        if self.print_diagnostics:
+            print("\nFlux Checks")
+            
+            for (filt_index, filt) in enumerate(self.bin_observables.unique_filts_phot):
+                print("Fluxes, {0}: {1}".format(
+                    filt.filter_name,
+                    phot_model_fluxes[filt]))
+                print("Mags, {0}: {1}".format(
+                    filt.filter_name,
+                    phot_model_mags[filt]))
+            
+            print("\nRV Checks")
+            print("RVs, Primary: {0}".format(model_RVs_pri))
+            print("RVs, Secondary: {0}".format(model_RVs_sec))
         
         if self.print_diagnostics:
             print("\nFlux Checks")
@@ -733,28 +749,89 @@ class binary_star_model_obs(object):
             print("RVs, Primary: {0}".format(model_RVs_pri))
             print("RVs, Secondary: {0}".format(model_RVs_sec))
         
-        if self.print_diagnostics:
-            print("\nFlux Checks")
-            
+        # Set up output observables object
+        bin_observables_out = copy.deepcopy(self.bin_observables)
+    
+        bin_observables_out.set_obs(
+            np.empty(len(bin_observables_out.obs_times))
+        )
+        
+        # Set photometric modeled observations back in original input order
+        if bin_observables_out.num_obs_phot > 0:
             for (filt_index, filt) in enumerate(self.bin_observables.unique_filts_phot):
-                print("Fluxes, {0}: {1}".format(
-                    filt.filter_name,
-                    phot_model_fluxes[filt]))
-                print("Mags, {0}: {1}".format(
-                    filt.filter_name,
-                    phot_model_mags[filt]))
-            
-            print("\nRV Checks")
-            print("RVs, Primary: {0}".format(model_RVs_pri))
-            print("RVs, Secondary: {0}".format(model_RVs_sec))
-            
+                # Set up filter for observations in correct passband
+                obs_filt_filter = np.where(np.logical_and(
+                    bin_observables_out.obs_types == 'phot',
+                    bin_observables_out.obs_filts == filt,
+                ))
+                
+                modeled_fluxes_filt = bin_observables_out.obs[obs_filt_filter]
+                
+                # Determine how the original observations were sorted
+                filt_phases_sorted_inds = np.argsort(
+                    phot_filt_phase[filt]
+                )
+                
+                # Go through each model observation and put that thing back
+                # where it came from (, or so help me!)
+                for obs_index, sorted_index in enumerate(filt_phases_sorted_inds):
+                    modeled_fluxes_filt[obs_index] = phot_model_mags[filt][sorted_index]
+                
+                # Save back out into output observables object
+                bin_observables_out.obs[obs_filt_filter] = modeled_fluxes_filt
+                
+        # Set RV modeled observations back in original input order
+        if bin_observables_out.num_obs_rv > 0:
+            for (filt_index, filt) in enumerate(self.bin_observables.unique_filts_rv):
+                # Set up filter for observations for correct star
+                modeled_RVs_pri = bin_observables_out.obs[
+                    bin_observables_out.obs_rv_pri_filter
+                ]
+                modeled_RVs_sec = bin_observables_out.obs[
+                    bin_observables_out.obs_rv_sec_filter
+                ]
+                
+                rv_pri_phases = ((bin_observables_out.obs_times_rv_pri - t0) %
+                    binary_period.to(u.d).value) / binary_period.to(u.d).value
+                
+                rv_sec_phases = ((bin_observables_out.obs_times_rv_pri - t0) %
+                    binary_period.to(u.d).value) / binary_period.to(u.d).value
+                
+                # Get phases of the times that were modeled in model order
+                rv_filt_phase[filt] =\
+                    ((rv_filt_MJDs[filt] - t0) %
+                    binary_period.to(u.d).value) / binary_period.to(u.d).value
+                
+                # Determine the original observation times
+                RV_phases_sorted = np.sort(
+                    np.unique(rv_filt_phase[filt])
+                )
+                
+                # Go through each model observation and put that thing back
+                # where it came from (, or so help me!)
+                for cur_model_index, cur_phase in enumerate(
+                    np.unique(RV_phases_sorted)
+                ):
+                    if cur_phase in rv_pri_phases:
+                        modeled_RVs_pri[np.argwhere(rv_pri_phases == cur_phase)] =\
+                            model_RVs_pri[cur_model_index]
+                    if cur_phase in rv_sec_phases:
+                        modeled_RVs_sec[np.argwhere(rv_sec_phases == cur_phase)] =\
+                            model_RVs_sec[cur_model_index]
+                
+                # Save back out into output observables object
+                bin_observables_out.obs[
+                    bin_observables_out.obs_rv_pri_filter
+                ] = modeled_RVs_pri
+                bin_observables_out.obs[
+                    bin_observables_out.obs_rv_sec_filter
+                ] = modeled_RVs_sec
+        
+        # Return modeled observables, and mesh plot if being made
         if make_mesh_plots:
-            return (phot_model_mags,
-                    model_RVs_pri, model_RVs_sec,
-                    mesh_plot_out)
+            return bin_observables_out, mesh_plot_out
         else:
-            return (phot_model_mags,
-                    model_RVs_pri, model_RVs_sec)
+            return bin_observables_out
 
 def single_star_model_obs(
         stellar_params,
