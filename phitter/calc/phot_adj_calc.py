@@ -85,7 +85,7 @@ def apply_extinction(
     isoc_filts_ext = {}
     filts_ext_adj = {}
     
-    for cur_filt in bin_observables.obs_filts_phot:
+    for cur_filt in bin_observables.unique_filts_phot:
         isoc_filts_ext[cur_filt] = red_law_funcs_ks[isoc_red_law](
             cur_filt.lambda_filt.to(u.micron).value,
             isoc_Ks_ext,
