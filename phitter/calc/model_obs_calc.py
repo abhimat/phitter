@@ -21,6 +21,7 @@ from astropy.modeling import Model
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as font_manager
 from matplotlib.ticker import MultipleLocator
+import autofig
 
 # Filters for default filter list
 kp_filt = filters.nirc2_kp_filt()
@@ -85,8 +86,15 @@ class binary_star_model_obs(object):
             binary_params,
             irrad_frac_refl=1.0,
             num_triangles=1500,
-            make_mesh_plots=False, mesh_temp=False, mesh_temp_cmap=None,
+            make_mesh_plots=False,
+            mesh_plot_phases=np.array([0.25]),
+            animate=False,
+            mesh_plot_fig=None,
+            mesh_plot_subplot_grid=None,
+            mesh_plot_subplot_grid_indexes=None,
+            mesh_temp=False, mesh_temp_cmap=None,
             plot_name=None,
+            mesh_plot_kwargs={},
     ):
         """
         Function to compute observables with the specified star and binary
@@ -497,11 +505,11 @@ class binary_star_model_obs(object):
                 b.set_value_all('ld_coeffs@mod_rv', [0.0])
         
         # Add mesh dataset if making mesh plot
+        mesh_plot_times = mesh_plot_phases * binary_period.to(u.d).value
         if make_mesh_plots:
-            # Only generating mesh at phase of 0.25
             b.add_dataset(
                 'mesh',
-                times=[(binary_period/4.).to(u.d).value],
+                times=mesh_plot_times,
                 dataset='mod_mesh',
             )
             b.set_value('coordinates@mesh', ['uvw'])
@@ -572,132 +580,220 @@ class binary_star_model_obs(object):
                 return err_out
         
         # Save out mesh plot
+        mesh_plot_out = []
         if make_mesh_plots:
             ## Plot Nerdery
             plt.rc('font', family='serif')
             plt.rc('font', serif='Computer Modern Roman')
             plt.rc('text', usetex=True)
             plt.rc('text.latex', preamble=r"\usepackage{gensymb}")
-    
-            plt.rc('xtick', direction = 'in')
-            plt.rc('ytick', direction = 'in')
+            
+            plt.rc('xtick', direction = 'out')
+            plt.rc('ytick', direction = 'out')
             # plt.rc('xtick', top = True)
             # plt.rc('ytick', right = True)
             
-            suffix_str = ''
+            plot_name_suffix = ''
             if plot_name is not None:
-                suffix_str = '_' + self.plot_name
+                plot_name_suffix = f'_{plot_name}'
+            
+            if animate:
+                # Save out animation
+                b['mod_mesh@model'].plot(
+                    animate=True,
+                    save='./binary_mesh{0}.gif'.format(plot_name_suffix),
+                    save_kwargs={'writer': 'imagemagick'},
+                )
+                        
+            calls_list = []
+            
+            # Go through each mesh model time and save
+            for mesh_index, mesh_plot_time in enumerate(mesh_plot_times):
+                plot_phase_suffix = '_{0}'.format(
+                    f'{mesh_plot_phases[mesh_index]:.3f}'.replace('.', 'p')
+                )
+                
+                additional_kwargs = {}
+                
+                if mesh_temp:
+                    plt.clf()
+                    new_fig = plt.figure()
+                    (mesh_af_fig, mesh_plt_fig) = b['mod_mesh@model'].plot(
+                        fig=new_fig,
+                        time=mesh_plot_time,
+                        fc='teffs',
+                        fcmap=mesh_temp_cmap,
+                        ec='face',
+                        save='./binary_mesh{0}{1}.pdf'.format(
+                            plot_name_suffix, plot_phase_suffix,
+                        ),
+                        **additional_kwargs,
+                    )
+                    mesh_plot_out.append(mesh_plt_fig)
+                    plt.close(new_fig)
+                else:
+                    if mesh_plot_fig is not None:
+                        additional_kwargs['fig'] = mesh_plot_fig
+                    else:
+                        additional_kwargs['save'] =\
+                            './binary_mesh{0}{1}.pdf'.format(
+                                plot_name_suffix, plot_phase_suffix,
+                            )
+                    
+                    if (mesh_plot_subplot_grid is not None and
+                        mesh_plot_subplot_grid_indexes is not None):
+                        additional_kwargs['axpos'] = (
+                            mesh_plot_subplot_grid[0],
+                            mesh_plot_subplot_grid[1],
+                            mesh_plot_subplot_grid_indexes[mesh_index],
+                        )
+                        
+                        # ax = mesh_plot_fig.add_subplot(
+                        #     mesh_plot_subplot_grid[0],
+                        #     mesh_plot_subplot_grid[1],
+                        #     mesh_plot_subplot_grid_indexes[mesh_index],
+                        # )
+                        # 
+                        # additional_kwargs['ax'] = ax
+                        # 
+                        # additional_kwargs['axorder'] = \
+                        #     int(mesh_plot_subplot_grid_indexes[mesh_index])
+                    
+                    (mesh_af_fig, mesh_plt_fig) = b['mod_mesh@model'].plot(
+                        time=mesh_plot_time,
+                        **additional_kwargs,
+                        **mesh_plot_kwargs,
+                    )
+                    
+                    # if mesh_plot_fig is not None:
+                    #     calls_list.append(mesh_af_fig.calls._items)
+                    
+                    # mesh_plot_fig = mesh_plt_fig
+                    mesh_plot_out.append(mesh_plt_fig)
+            
+            if mesh_plot_fig is not None:
+                additional_kwargs = {}
+                (mesh_af_fig, mesh_plt_fig) = b['mod_mesh@model'].show(
+                    save='./binary_mesh{0}{1}.pdf'.format(
+                        plot_name_suffix, plot_phase_suffix,
+                    ),
+                    show=False,
+                    **additional_kwargs,
+                    **mesh_plot_kwargs,
+                )
+            
+            # mesh_plot_fig = mesh_plt_fig
             
             ## Mesh plot
-            if mesh_temp:
-                mesh_plot_out = b['mod_mesh@model'].plot(
-                                    save='./binary_mesh{0}.pdf'.format(suffix_str),
-                                    fc='teffs',
-                                    fcmap=self.mesh_temp_cmap,
-                                    ec='none',
-                                )
-                                                         
-                # print(mesh_plot_out.axs)
-                
-                # Extract and output mesh quantities
-                mesh_quant_names = ['us', 'vs', 'ws', 'rprojs',
-                                    'teffs', 'loggs', 'rs', 'areas',
-                                    'abs_intensities']
-                mesh_quant_do_filt = [False, False, False, False,
-                                      False, False, False, False,
-                                      True]
-                mesh_quant_units = [u.solRad, u.solRad, u.solRad, u.solRad,
-                                    u.K, 1.0, u.solRad, u.solRad**2,
-                                    u.W / (u.m**3)]
-                
-                mesh_quant_filts = []
-                for filt in self.bin_observables.unique_filts_phot:
-                    mesh_quant_filts.append(filt.phoebe_ds_name)
-                            
-                mesh_quants_pri = {}
-                mesh_quants_sec = {}
-                
-                for (quant, do_filt,
-                     quant_unit) in zip(mesh_quant_names, mesh_quant_do_filt,
-                                        mesh_quant_units):
-                    if do_filt:
-                        for filt in mesh_quant_filts:
-                            quant_pri = b[f'{quant}@primary@{filt}'].value *\
-                                        quant_unit
-                            quant_sec = b[f'{quant}@secondary@{filt}'].value *\
-                                        quant_unit
-                        
-                            mesh_quants_pri[f'{quant}_{filt}'] = quant_pri
-                            mesh_quants_sec[f'{quant}_{filt}'] = quant_sec
-                    else:
-                        quant_pri = b[f'{quant}@primary'].value * quant_unit
-                        quant_sec = b[f'{quant}@secondary'].value * quant_unit
-                        
-                        mesh_quants_pri[quant] = quant_pri
-                        mesh_quants_sec[quant] = quant_sec
-                
-                # Get uvw coordinates of each vertix of triangle in mesh
-                uvw_elements_pri = b.get_parameter(qualifier='uvw_elements', 
-                                      component='primary', 
-                                      dataset='mod_mesh',
-                                      kind='mesh', 
-                                      context='model').value * u.solRad
-                uvw_elements_sec = b.get_parameter(qualifier='uvw_elements', 
-                                      component='secondary', 
-                                      dataset='mod_mesh',
-                                      kind='mesh', 
-                                      context='model').value * u.solRad
-                
-                mesh_quants_pri['v1_us'] = uvw_elements_pri[:,0,0]
-                mesh_quants_pri['v1_vs'] = uvw_elements_pri[:,0,1]
-                mesh_quants_pri['v1_ws'] = uvw_elements_pri[:,0,2]
-                
-                mesh_quants_pri['v2_us'] = uvw_elements_pri[:,1,0]
-                mesh_quants_pri['v2_vs'] = uvw_elements_pri[:,1,1]
-                mesh_quants_pri['v2_ws'] = uvw_elements_pri[:,1,2]
-                
-                mesh_quants_pri['v3_us'] = uvw_elements_pri[:,2,0]
-                mesh_quants_pri['v3_vs'] = uvw_elements_pri[:,2,1]
-                mesh_quants_pri['v3_ws'] = uvw_elements_pri[:,2,2]
-                
-                
-                mesh_quants_sec['v1_us'] = uvw_elements_sec[:,0,0]
-                mesh_quants_sec['v1_vs'] = uvw_elements_sec[:,0,1]
-                mesh_quants_sec['v1_ws'] = uvw_elements_sec[:,0,2]
-                
-                mesh_quants_sec['v2_us'] = uvw_elements_sec[:,1,0]
-                mesh_quants_sec['v2_vs'] = uvw_elements_sec[:,1,1]
-                mesh_quants_sec['v2_ws'] = uvw_elements_sec[:,1,2]
-                
-                mesh_quants_sec['v3_us'] = uvw_elements_sec[:,2,0]
-                mesh_quants_sec['v3_vs'] = uvw_elements_sec[:,2,1]
-                mesh_quants_sec['v3_ws'] = uvw_elements_sec[:,2,2]
-                
-                
-                # Construct mesh tables for each star and output
-                mesh_pri_table = Table(mesh_quants_pri)
-                mesh_pri_table.sort(['us'], reverse=True)
-                with open('mesh_pri.txt', 'w') as out_file:
-                    for line in mesh_pri_table.pformat_all():
-                        out_file.write(line + '\n')
-                mesh_pri_table.write('mesh_pri.h5', format='hdf5',
-                                     path='data', serialize_meta=True,
-                                     overwrite=True)
-                mesh_pri_table.write('mesh_pri.fits', format='fits',
-                                     overwrite=True)
-                
-                mesh_sec_table = Table(mesh_quants_sec)
-                mesh_sec_table.sort(['us'], reverse=True)
-                with open('mesh_sec.txt', 'w') as out_file:
-                    for line in mesh_sec_table.pformat_all():
-                        out_file.write(line + '\n')
-                mesh_sec_table.write('mesh_sec.h5', format='hdf5',
-                                     path='data', serialize_meta=True,
-                                     overwrite=True)
-                mesh_sec_table.write('mesh_sec.fits', format='fits',
-                                     overwrite=True)
-            else:
-                mesh_plot_out = b['mod_mesh@model'].plot(save='./binary_mesh{0}.pdf'.format(suffix_str))
+            # if mesh_temp:
+            #     mesh_plot_out = b['mod_mesh@model'].plot(
+            #                         save='./binary_mesh{0}.pdf'.format(suffix_str),
+            #                         fc='teffs',
+            #                         fcmap=self.mesh_temp_cmap,
+            #                         ec='none',
+            #                     )
+            #                                              
+            #     # print(mesh_plot_out.axs)
+            #     
+            #     # Extract and output mesh quantities
+            #     mesh_quant_names = ['us', 'vs', 'ws', 'rprojs',
+            #                         'teffs', 'loggs', 'rs', 'areas',
+            #                         'abs_intensities']
+            #     mesh_quant_do_filt = [False, False, False, False,
+            #                           False, False, False, False,
+            #                           True]
+            #     mesh_quant_units = [u.solRad, u.solRad, u.solRad, u.solRad,
+            #                         u.K, 1.0, u.solRad, u.solRad**2,
+            #                         u.W / (u.m**3)]
+            #     
+            #     mesh_quant_filts = []
+            #     for filt in self.bin_observables.unique_filts_phot:
+            #         mesh_quant_filts.append(filt.phoebe_ds_name)
+            #                 
+            #     mesh_quants_pri = {}
+            #     mesh_quants_sec = {}
+            #     
+            #     for (quant, do_filt,
+            #          quant_unit) in zip(mesh_quant_names, mesh_quant_do_filt,
+            #                             mesh_quant_units):
+            #         if do_filt:
+            #             for filt in mesh_quant_filts:
+            #                 quant_pri = b[f'{quant}@primary@{filt}'].value *\
+            #                             quant_unit
+            #                 quant_sec = b[f'{quant}@secondary@{filt}'].value *\
+            #                             quant_unit
+            #             
+            #                 mesh_quants_pri[f'{quant}_{filt}'] = quant_pri
+            #                 mesh_quants_sec[f'{quant}_{filt}'] = quant_sec
+            #         else:
+            #             quant_pri = b[f'{quant}@primary'].value * quant_unit
+            #             quant_sec = b[f'{quant}@secondary'].value * quant_unit
+            #             
+            #             mesh_quants_pri[quant] = quant_pri
+            #             mesh_quants_sec[quant] = quant_sec
+            #     
+            #     # Get uvw coordinates of each vertix of triangle in mesh
+            #     uvw_elements_pri = b.get_parameter(qualifier='uvw_elements', 
+            #                           component='primary', 
+            #                           dataset='mod_mesh',
+            #                           kind='mesh', 
+            #                           context='model').value * u.solRad
+            #     uvw_elements_sec = b.get_parameter(qualifier='uvw_elements', 
+            #                           component='secondary', 
+            #                           dataset='mod_mesh',
+            #                           kind='mesh', 
+            #                           context='model').value * u.solRad
+            #     
+            #     mesh_quants_pri['v1_us'] = uvw_elements_pri[:,0,0]
+            #     mesh_quants_pri['v1_vs'] = uvw_elements_pri[:,0,1]
+            #     mesh_quants_pri['v1_ws'] = uvw_elements_pri[:,0,2]
+            #     
+            #     mesh_quants_pri['v2_us'] = uvw_elements_pri[:,1,0]
+            #     mesh_quants_pri['v2_vs'] = uvw_elements_pri[:,1,1]
+            #     mesh_quants_pri['v2_ws'] = uvw_elements_pri[:,1,2]
+            #     
+            #     mesh_quants_pri['v3_us'] = uvw_elements_pri[:,2,0]
+            #     mesh_quants_pri['v3_vs'] = uvw_elements_pri[:,2,1]
+            #     mesh_quants_pri['v3_ws'] = uvw_elements_pri[:,2,2]
+            #     
+            #     
+            #     mesh_quants_sec['v1_us'] = uvw_elements_sec[:,0,0]
+            #     mesh_quants_sec['v1_vs'] = uvw_elements_sec[:,0,1]
+            #     mesh_quants_sec['v1_ws'] = uvw_elements_sec[:,0,2]
+            #     
+            #     mesh_quants_sec['v2_us'] = uvw_elements_sec[:,1,0]
+            #     mesh_quants_sec['v2_vs'] = uvw_elements_sec[:,1,1]
+            #     mesh_quants_sec['v2_ws'] = uvw_elements_sec[:,1,2]
+            #     
+            #     mesh_quants_sec['v3_us'] = uvw_elements_sec[:,2,0]
+            #     mesh_quants_sec['v3_vs'] = uvw_elements_sec[:,2,1]
+            #     mesh_quants_sec['v3_ws'] = uvw_elements_sec[:,2,2]
+            #     
+            #     
+            #     # Construct mesh tables for each star and output
+            #     mesh_pri_table = Table(mesh_quants_pri)
+            #     mesh_pri_table.sort(['us'], reverse=True)
+            #     with open('mesh_pri.txt', 'w') as out_file:
+            #         for line in mesh_pri_table.pformat_all():
+            #             out_file.write(line + '\n')
+            #     mesh_pri_table.write('mesh_pri.h5', format='hdf5',
+            #                          path='data', serialize_meta=True,
+            #                          overwrite=True)
+            #     mesh_pri_table.write('mesh_pri.fits', format='fits',
+            #                          overwrite=True)
+            #     
+            #     mesh_sec_table = Table(mesh_quants_sec)
+            #     mesh_sec_table.sort(['us'], reverse=True)
+            #     with open('mesh_sec.txt', 'w') as out_file:
+            #         for line in mesh_sec_table.pformat_all():
+            #             out_file.write(line + '\n')
+            #     mesh_sec_table.write('mesh_sec.h5', format='hdf5',
+            #                          path='data', serialize_meta=True,
+            #                          overwrite=True)
+            #     mesh_sec_table.write('mesh_sec.fits', format='fits',
+            #                          overwrite=True)
+            # else:
+            #     mesh_plot_out = b['mod_mesh@model'].plot(save='./binary_mesh{0}.pdf'.format(suffix_str))
         
         
         # Get fluxes
@@ -828,7 +924,9 @@ class binary_star_model_obs(object):
                 ] = modeled_RVs_sec
         
         # Return modeled observables, and mesh plot if being made
-        if make_mesh_plots:
+        if mesh_plot_fig is not None:
+            return bin_observables_out, mesh_plot_out, mesh_plot_fig
+        elif make_mesh_plots:
             return bin_observables_out, mesh_plot_out
         else:
             return bin_observables_out
