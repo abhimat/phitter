@@ -151,7 +151,10 @@ class binary_star_model_obs(object):
         binary_inc = binary_params.inc
         t0 = binary_params.t0
         
-        err_out = np.nan
+        err_out = observables.observables(
+            obs_times=np.array([np.nan]),
+            obs=np.array([np.nan]),
+        )
         if make_mesh_plots:
             err_out = ((np.array([-1.]), np.array([-1.])),
                        np.array([-1.]), np.array([-1.]),
