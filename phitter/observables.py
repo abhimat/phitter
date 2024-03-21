@@ -2,7 +2,10 @@
 # ---
 # Abhimat Gautam
 
-from phoebe import u
+try:
+    from phoebe import u
+except:
+    from phoebe import u
 from phoebe import c as const
 import numpy as np
 
