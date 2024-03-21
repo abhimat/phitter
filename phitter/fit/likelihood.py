@@ -8,7 +8,7 @@ from phoebe import c as const
 import numpy as np
 from astropy.modeling import Model
 
-class log_likelihood_chisq(Model):
+class log_likelihood_chisq(object):
     """
     log_likelihood_chisq is an object to obtain chi squared log likelihood.
     Instantiate this object with an observables object to indicate the observed
@@ -20,21 +20,13 @@ class log_likelihood_chisq(Model):
         observables object, specified with the observations to be fit.
     """
     
-    inputs = (
-        'model_observables',
-    )
-    
-    outputs = (
-        'log_likelihood',
-    )
-    
     def __init__(self, observations, *args, **kwargs):
         super(log_likelihood_chisq, self).__init__(*args, **kwargs)
         
         # Save observations to the object
         self.observations = observations
         
-        if self.observations.obs_uncs == None:
+        if self.observations.obs_uncs is None:
            self.observations.obs_uncs = np.ones_like(self.observations.obs)
         
     
@@ -68,14 +60,6 @@ class log_likelihood_chisq_weighted_obs_type(log_likelihood_chisq):
     observations : observables
         observables object, specified with the observations to be fit.
     """
-    
-    inputs = (
-        'model_observables',
-    )
-    
-    outputs = (
-        'log_likelihood',
-    )
     
     def evaluate(self, model_observables):
         log_likelihood = 0
