@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
-# Isochrone interpolation functions,
-# using isochrones generated with PopStar
+# Class to obtain stellar parameters, assuming that star is blackbody
 # ---
 # Abhimat Gautam
 
@@ -40,13 +39,11 @@ class bb_stellar_params(stellar_params_obj):
     ext_Ks : float, default=2.63
         Extinction of stellar parameters object in Ks band.
     dist : Astropy Quantity, length units, default=7.971e3*u.pc
-        Distance to 
-    teff : Astropy Quantity, unit:K
-        Stellar effective temperature in Kelvin
-    
-    ext_Ks=2.63, dist=7.971e3*u.pc,
-    filts_list=[kp_filt, h_filt],
-    ext_law='NL18'
+        Distance to object, specified during isochrone creation
+    filts_list : [filter], default=[filters.nirc2_kp_filt(), filters.nirc2_h_filt()]
+        List of filters to compute synthetic photometry.
+    ext_law : str, default='NL18'
+        Choice of extinction law to use when computing synthetic photometry.
     """
     
     def __init__(
