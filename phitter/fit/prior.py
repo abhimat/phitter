@@ -126,3 +126,16 @@ class prior_collection(object):
             params[i] = self.priors_list[i](cube[i])
         
         return params
+    
+    def prior_transform_dynesty(self, u):
+        """
+        Prior transform function for use with Ultreanest
+        """
+        
+        params = np.array(u)
+        
+        for i in range(self.num_params):
+            params[i] = self.priors_list[i](u[i])
+        
+        return params
+    
