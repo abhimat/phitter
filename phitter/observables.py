@@ -92,6 +92,9 @@ class observables(object):
         self.obs = obs
         self.obs_uncs = obs_uncs
         
+        if len(self.obs_types) > 0:
+            self.set_obs_types(self.obs_types)
+        
     def set_obs_filts(self, obs_filts):
         self.obs_filts = obs_filts
         self.unique_filts = np.unique(self.obs_filts)
