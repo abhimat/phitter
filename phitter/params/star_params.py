@@ -55,6 +55,30 @@ class star_params(object):
     
     def __init__(self):
         return
+    
+    def __str__(self):
+        """String representation function
+        """
+        out_str = ''
+        
+        out_str += f'mass_init = {self.mass_init.to(u.solMass):.3f}\n'
+        out_str += f'mass = {self.mass.to(u.solMass):.3f}\n'
+        out_str += f'rad = {self.rad.to(u.solRad):.3f}\n'
+        out_str += f'lum = {self.lum.to(u.solLum):.3f}\n'
+        out_str += f'teff = {self.teff.to(u.K):.1f}\n'
+        out_str += f'logg = {self.logg:.3f}\n'
+        
+        out_str += '---\n'
+        
+        # Add filter and mag info
+        for filt_index, filt in enumerate(self.filts):
+            out_str += f'filt {filt}:\n'
+            out_str += f'mag = {self.mags[filt_index]:.3f}\n'
+            out_str += f'mag_abs = {self.mags_abs[filt_index]:.3f}\n'
+            out_str += f'pblum = {self.pblums[filt_index].to(u.solLum):.3f}\n'
+        
+        return out_str    
+    
 
 # Filters for default filter list
 ks_filt_info = synthetic.get_filter_info('naco,Ks')
@@ -91,12 +115,17 @@ class stellar_params_obj(object):
         self.num_filts = len(self.filts_list)
         
         self._calc_filts_info()
+        self._create_spisea_filts_list()
         
         self.red_law = red_law_options[ext_law]
+        
+        if ext_law == 'NL18':
+            self.ext_alpha = 2.30
         
         return
         
     def _calc_filts_info(self):
+        """Gather information for all filters being used"""
         self.filts_info = []
         self.filts_flux_ref = np.empty(self.num_filts) *\
             (u.erg / u.s) / (u.cm**2.)
@@ -109,7 +138,18 @@ class stellar_params_obj(object):
             
             cur_filt_flux_ref = cur_filt.flux_ref_filt
             self.filts_flux_ref[cur_filt_index] = cur_filt_flux_ref
+        
+        return
     
+    def _create_spisea_filts_list(self):
+        """Create list of filter strings for use in SPISEA"""
+        self.spisea_filts_list = []
+        
+        for cur_filt in self.filts_list:
+            self.spisea_filts_list.append(cur_filt.filter_name)
+        
+        return
+            
     def calc_pblums(self, filt_absMags):
         # Calculate luminosities in each filter
         filt_pblums = np.empty(self.num_filts) * u.solLum
@@ -129,4 +169,3 @@ class stellar_params_obj(object):
             filt_pblums[cur_filt_index] = cur_filt_pblum.to(u.solLum)
         
         return filt_pblums
-    
