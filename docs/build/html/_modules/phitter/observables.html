@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>phitter.observables &#8212; phitter 0.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b3523f8e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=eafc0fe6" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=d7c963c3"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for phitter.observables</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Observables object for phitter</span>
+<span class="c1"># ---</span>
+<span class="c1"># Abhimat Gautam</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">phoebe</span> <span class="kn">import</span> <span class="n">u</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">phoebe</span> <span class="kn">import</span> <span class="n">u</span>
+<span class="kn">from</span> <span class="nn">phoebe</span> <span class="kn">import</span> <span class="n">c</span> <span class="k">as</span> <span class="n">const</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<div class="viewcode-block" id="observables"><a class="viewcode-back" href="../../autoapi/phitter/observables/index.html#phitter.observables.observables">[docs]</a><span class="k">class</span> <span class="nc">observables</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    observables is an object to store observables, either observed or modeled.</span>
+<span class="sd">    Observed observables will typically have uncertainties associated, but</span>
+<span class="sd">    modeled observables will typically not.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    obs_times : np.array(dtype=float), default=None</span>
+<span class="sd">        Observation times. Phitter assumes times are given in MJD.</span>
+<span class="sd">    obs : np.array(dtype=float), default=None</span>
+<span class="sd">        Observables. For photometry, phitter assumes values provided in mags.</span>
+<span class="sd">        For RV, phitter assumes values provided in km/s.</span>
+<span class="sd">    obs_uncs : np.array(dtype=float), default=None</span>
+<span class="sd">        Uncertainties on observables, with same units as observables. For</span>
+<span class="sd">        photometry, phitter assumes values provided in mags. For RV, phitter</span>
+<span class="sd">        assumes values provided in km/s.</span>
+<span class="sd">    obs_filts : list of filters, default=None</span>
+<span class="sd">        Filters of each observable, provided as a list of filter objects of same</span>
+<span class="sd">        length as obs.</span>
+<span class="sd">    obs_types : np.array(dtype=str), default=None</span>
+<span class="sd">        Observation type of each observable, provided as an array of same length</span>
+<span class="sd">        as obs. Possible types are &#39;phot&#39; or &#39;rv&#39;.</span>
+<span class="sd">    </span>
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    num_obs : int</span>
+<span class="sd">        Number of total observables in observations object.</span>
+<span class="sd">    unique_filts : list of filters</span>
+<span class="sd">        An array of all the unique filters of observables.</span>
+<span class="sd">    num_filts : int</span>
+<span class="sd">        Number of unique filters of observables.</span>
+<span class="sd">    obs_times_phot : np.array(dtype=float)</span>
+<span class="sd">        obs_times, but only for photometric observations.</span>
+<span class="sd">    obs_times_rv : np.array(dtype=float)</span>
+<span class="sd">        obs_times, but only for RV observations.</span>
+<span class="sd">    obs_phot : np.array(dtype=float)</span>
+<span class="sd">        obs, but only for photometric observations.</span>
+<span class="sd">    obs_rv : np.array(dtype=float)</span>
+<span class="sd">        obs, but only for RV observations.</span>
+<span class="sd">    obs_uncs_phot : np.array(dtype=float)</span>
+<span class="sd">        obs_uncs, but only for photometric observations.</span>
+<span class="sd">    obs_uncs_rv : np.array(dtype=float)</span>
+<span class="sd">        obs_uncs, but only for RV observations.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+<div class="viewcode-block" id="observables.obs_times"><a class="viewcode-back" href="../../autoapi/phitter/observables/index.html#phitter.observables.observables.obs_times">[docs]</a>    <span class="n">obs_times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span></div>
+<div class="viewcode-block" id="observables.obs"><a class="viewcode-back" href="../../autoapi/phitter/observables/index.html#phitter.observables.observables.obs">[docs]</a>    <span class="n">obs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span></div>
+<div class="viewcode-block" id="observables.obs_uncs"><a class="viewcode-back" href="../../autoapi/phitter/observables/index.html#phitter.observables.observables.obs_uncs">[docs]</a>    <span class="n">obs_uncs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span></div>
+<div class="viewcode-block" id="observables.obs_filts"><a class="viewcode-back" href="../../autoapi/phitter/observables/index.html#phitter.observables.observables.obs_filts">[docs]</a>    <span class="n">obs_filts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span></div>
+<div class="viewcode-block" id="observables.obs_types"><a class="viewcode-back" href="../../autoapi/phitter/observables/index.html#phitter.observables.observables.obs_types">[docs]</a>    <span class="n">obs_types</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span></div>
+    
+<div class="viewcode-block" id="observables.num_obs"><a class="viewcode-back" href="../../autoapi/phitter/observables/index.html#phitter.observables.observables.num_obs">[docs]</a>    <span class="n">num_obs</span> <span class="o">=</span> <span class="mi">0</span></div>
+    
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">obs_times</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">obs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">obs_uncs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">obs_filts</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">obs_types</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">obs_times</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_obs_times</span><span class="p">(</span><span class="n">obs_times</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">obs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_obs</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="n">obs_uncs</span><span class="o">=</span><span class="n">obs_uncs</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">obs_filts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_obs_filts</span><span class="p">(</span><span class="n">obs_filts</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">obs_types</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_obs_types</span><span class="p">(</span><span class="n">obs_types</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">obs_filts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">obs_types</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_make_filt_search_filters</span><span class="p">()</span>
+        
+<div class="viewcode-block" id="observables.set_obs_times"><a class="viewcode-back" href="../../autoapi/phitter/observables/index.html#phitter.observables.observables.set_obs_times">[docs]</a>    <span class="k">def</span> <span class="nf">set_obs_times</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs_times</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">obs_times</span> <span class="o">=</span> <span class="n">obs_times</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_obs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obs_times</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="observables.set_obs"><a class="viewcode-back" href="../../autoapi/phitter/observables/index.html#phitter.observables.observables.set_obs">[docs]</a>    <span class="k">def</span> <span class="nf">set_obs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">obs_uncs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">obs</span> <span class="o">=</span> <span class="n">obs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">obs_uncs</span> <span class="o">=</span> <span class="n">obs_uncs</span>
+        
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obs_types</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_obs_types</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obs_types</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="observables.set_obs_filts"><a class="viewcode-back" href="../../autoapi/phitter/observables/index.html#phitter.observables.observables.set_obs_filts">[docs]</a>    <span class="k">def</span> <span class="nf">set_obs_filts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs_filts</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">obs_filts</span> <span class="o">=</span> <span class="n">obs_filts</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unique_filts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obs_filts</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_filts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_filts</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="observables.set_obs_types"><a class="viewcode-back" href="../../autoapi/phitter/observables/index.html#phitter.observables.observables.set_obs_types">[docs]</a>    <span class="k">def</span> <span class="nf">set_obs_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs_types</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">obs_types</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">char</span><span class="o">.</span><span class="n">lower</span><span class="p">(</span><span class="n">obs_types</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">obs_phot_filter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">obs_types</span> <span class="o">==</span> <span class="s1">&#39;phot&#39;</span>
+        <span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">obs_rv_filter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">obs_types</span> <span class="o">==</span> <span class="s1">&#39;rv_pri&#39;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">obs_types</span> <span class="o">==</span> <span class="s1">&#39;rv_sec&#39;</span><span class="p">,</span>
+        <span class="p">))</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">obs_rv_pri_filter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">obs_types</span> <span class="o">==</span> <span class="s1">&#39;rv_pri&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">obs_rv_sec_filter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">obs_types</span> <span class="o">==</span> <span class="s1">&#39;rv_sec&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+        
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obs_times</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">obs_times_phot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs_times</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">obs_phot_filter</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">obs_times_rv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs_times</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">obs_rv_filter</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">obs_times_rv_pri</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs_times</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">obs_rv_pri_filter</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">obs_times_rv_sec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs_times</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">obs_rv_sec_filter</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">obs_times_rv_unique</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obs_times_rv</span><span class="p">)</span>
+                    
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_obs_phot</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obs_times_phot</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_obs_rv</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obs_times_rv</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_obs_rv_pri</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obs_times_rv_pri</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_obs_rv_sec</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obs_times_rv_sec</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">obs_phot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">obs_phot_filter</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">obs_rv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">obs_rv_filter</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">obs_rv_pri</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">obs_rv_pri_filter</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">obs_rv_sec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">obs_rv_sec_filter</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs_uncs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obs_uncs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">obs_uncs_phot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs_uncs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">obs_phot_filter</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">obs_uncs_rv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs_uncs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">obs_rv_filter</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">obs_uncs_rv_pri</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs_uncs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">obs_rv_pri_filter</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">obs_uncs_rv_sec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs_uncs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">obs_rv_sec_filter</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obs_filts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">obs_filts_phot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs_filts</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">obs_phot_filter</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">obs_filts_rv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs_filts</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">obs_rv_filter</span><span class="p">]</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">unique_filts_phot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obs_filts_phot</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">unique_filts_rv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obs_filts_rv</span><span class="p">)</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_filts_phot</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_filts_phot</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_filts_rv</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_filts_rv</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="observables._make_filt_search_filters"><a class="viewcode-back" href="../../autoapi/phitter/observables/index.html#phitter.observables.observables._make_filt_search_filters">[docs]</a>    <span class="k">def</span> <span class="nf">_make_filt_search_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Private function to make search filters for every filter</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">phot_filt_filters</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rv_filt_filters</span> <span class="o">=</span> <span class="p">{}</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_filts_phot</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">filt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">unique_filts_phot</span><span class="p">:</span>
+                <span class="n">search_filter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">obs_types</span> <span class="o">==</span> <span class="s1">&#39;phot&#39;</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">obs_filts</span> <span class="o">==</span> <span class="n">filt</span><span class="p">,</span>
+                <span class="p">))</span>
+                
+                <span class="bp">self</span><span class="o">.</span><span class="n">phot_filt_filters</span><span class="p">[</span><span class="n">filt</span><span class="p">]</span> <span class="o">=</span> <span class="n">search_filter</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_filts_rv</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">filt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">unique_filts_rv</span><span class="p">:</span>
+                <span class="n">search_filter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">obs_types</span> <span class="o">==</span> <span class="s1">&#39;rv_pri&#39;</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">obs_types</span> <span class="o">==</span> <span class="s1">&#39;rv_sec&#39;</span><span class="p">,</span>
+                    <span class="p">),</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">obs_filts</span> <span class="o">==</span> <span class="n">filt</span><span class="p">,</span>
+                <span class="p">))</span>
+                
+                <span class="bp">self</span><span class="o">.</span><span class="n">rv_filt_filters</span><span class="p">[</span><span class="n">filt</span><span class="p">]</span> <span class="o">=</span> <span class="n">search_filter</span>
+        
+        <span class="k">return</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">phitter</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2024, Abhimat K. Gautam.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

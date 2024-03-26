@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>phot_adj_calc &#8212; phitter 0.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b3523f8e" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=eafc0fe6" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=d7c963c3"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for phot_adj_calc</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Functions to perform adjustments to photometry</span>
+<span class="c1"># ---</span>
+<span class="c1"># Abhimat Gautam</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">phoebe</span> <span class="kn">import</span> <span class="n">u</span>
+<span class="kn">from</span> <span class="nn">spisea</span> <span class="kn">import</span> <span class="n">reddening</span>
+
+<div class="viewcode-block" id="red_law_funcs_ks"><a class="viewcode-back" href="../autoapi/phot_adj_calc/index.html#phot_adj_calc.red_law_funcs_ks">[docs]</a><span class="n">red_law_funcs_ks</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;NL18&#39;</span><span class="p">:</span> <span class="n">reddening</span><span class="o">.</span><span class="n">RedLawNoguerasLara18</span><span class="p">()</span><span class="o">.</span><span class="n">NoguerasLara18</span><span class="p">,</span>
+    <span class="s1">&#39;F11&#39;</span><span class="p">:</span> <span class="n">reddening</span><span class="o">.</span><span class="n">RedLawFritz11</span><span class="p">()</span><span class="o">.</span><span class="n">Fritz11</span><span class="p">,</span>
+<span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="apply_distance_modulus"><a class="viewcode-back" href="../autoapi/phot_adj_calc/index.html#phot_adj_calc.apply_distance_modulus">[docs]</a><span class="k">def</span> <span class="nf">apply_distance_modulus</span><span class="p">(</span><span class="n">bin_observables</span><span class="p">,</span> <span class="n">target_dist</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Modeled observables are calculated at a distance of 10 pc. Adds distance</span>
+<span class="sd">    modulus to modeled fluxes in observables object.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    bin_observables : observables</span>
+<span class="sd">        observables object containing photometry to which to apply distance</span>
+<span class="sd">        modulus.</span>
+<span class="sd">    target_dist : Astropy Quantity, length unit</span>
+<span class="sd">        Distance to modeled binary.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    observables</span>
+<span class="sd">        observables object, where photometry has distance modulus added.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Return if there are no photometry observations</span>
+    <span class="k">if</span> <span class="n">bin_observables</span><span class="o">.</span><span class="n">num_obs_phot</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">bin_observables</span>
+    
+    <span class="c1"># Calculate distance modulus</span>
+    <span class="n">dist_modulus</span> <span class="o">=</span> <span class="mf">5.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">target_dist</span> <span class="o">/</span> <span class="p">(</span><span class="mf">10.</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">pc</span><span class="p">))</span>
+    
+    <span class="n">bin_observables</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">bin_observables</span><span class="o">.</span><span class="n">obs_phot_filter</span><span class="p">]</span> <span class="o">+=</span> <span class="n">dist_modulus</span>
+    
+    <span class="k">return</span> <span class="n">bin_observables</span></div>
+
+    
+<div class="viewcode-block" id="apply_extinction"><a class="viewcode-back" href="../autoapi/phot_adj_calc/index.html#phot_adj_calc.apply_extinction">[docs]</a><span class="k">def</span> <span class="nf">apply_extinction</span><span class="p">(</span>
+        <span class="n">bin_observables</span><span class="p">,</span> <span class="n">isoc_Ks_ext</span><span class="p">,</span>
+        <span class="n">ref_filt</span><span class="p">,</span> <span class="n">target_ref_filt_ext</span><span class="p">,</span>
+        <span class="n">isoc_red_law</span><span class="o">=</span><span class="s1">&#39;NL18&#39;</span><span class="p">,</span> <span class="n">ext_alpha</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Modeled observables are calculated without extinction. Add extinction /</span>
+<span class="sd">    reddening to modeled fluxes in observables object.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    bin_observables : observables</span>
+<span class="sd">        observables object containing photometry to which to apply distance</span>
+<span class="sd">        modulus.</span>
+<span class="sd">    isoc_Ks_ext : float</span>
+<span class="sd">        Extinction, in Ks band, for the isochrone object used to generate</span>
+<span class="sd">        stellar parameters.</span>
+<span class="sd">    ref_filt : filter</span>
+<span class="sd">        filter object, corresponding to the reference filter / passband</span>
+<span class="sd">        from which all other extinctions are calculated.</span>
+<span class="sd">    target_ref_filt_ext : float</span>
+<span class="sd">        Extinction in the ref_filt, A_{ref_filt}, from which extinction in other</span>
+<span class="sd">        filters is calculated using a power law extinction law.</span>
+<span class="sd">    ext_alpha : float or None, default=None</span>
+<span class="sd">        If specified, the power law slope for an extinction law from which the</span>
+<span class="sd">        extinction at filters other than the ref_filt are calculated usin the</span>
+<span class="sd">        extinction in the ref_filt (target_ref_filt_ext). If none,</span>
+<span class="sd">        the extinction in other filters is just applied using the extinction</span>
+<span class="sd">        implied by the isochrone object&#39;s Ks-band extinction.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    observables</span>
+<span class="sd">        observables object, where photometry has distance modulus added.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Return if there are no photometry observations</span>
+    <span class="k">if</span> <span class="n">bin_observables</span><span class="o">.</span><span class="n">num_obs_phot</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">bin_observables</span>
+    
+    <span class="c1"># Determine isochrone extinctions and extinction adjustments for each filter</span>
+    <span class="n">isoc_filts_ext</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">filts_ext_adj</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">for</span> <span class="n">cur_filt</span> <span class="ow">in</span> <span class="n">bin_observables</span><span class="o">.</span><span class="n">unique_filts_phot</span><span class="p">:</span>
+        <span class="c1"># Determine extinction in current band from the extinction law used and</span>
+        <span class="c1"># the reference extinction from the isochrone object</span>
+        <span class="n">isoc_filts_ext</span><span class="p">[</span><span class="n">cur_filt</span><span class="p">]</span> <span class="o">=</span> <span class="n">red_law_funcs_ks</span><span class="p">[</span><span class="n">isoc_red_law</span><span class="p">](</span>
+            <span class="n">cur_filt</span><span class="o">.</span><span class="n">lambda_filt</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">micron</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">isoc_Ks_ext</span><span class="p">,</span>
+        <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        
+        <span class="c1"># Allow a tweaked to the extinction law, with a tweaked power law slope.</span>
+        <span class="c1"># Currently implemented as an extinction implied by a new power law</span>
+        <span class="c1"># slope.</span>
+        <span class="k">if</span> <span class="n">ext_alpha</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">filts_ext_adj</span><span class="p">[</span><span class="n">cur_filt</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>\
+                <span class="p">((</span><span class="n">target_ref_filt_ext</span> <span class="o">*</span>
+                    <span class="p">(</span><span class="n">ref_filt</span><span class="o">.</span><span class="n">lambda_filt</span> <span class="o">/</span> <span class="n">cur_filt</span><span class="o">.</span><span class="n">lambda_filt</span><span class="p">)</span><span class="o">**</span><span class="n">ext_alpha</span><span class="p">)</span>
+                 <span class="o">-</span> <span class="n">isoc_filts_ext</span><span class="p">[</span><span class="n">cur_filt</span><span class="p">])</span>
+            <span class="p">)</span>
+        
+        <span class="n">obs_filt_filter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span>
+            <span class="n">bin_observables</span><span class="o">.</span><span class="n">obs_types</span> <span class="o">==</span> <span class="s1">&#39;phot&#39;</span><span class="p">,</span>
+            <span class="n">bin_observables</span><span class="o">.</span><span class="n">obs_filts</span> <span class="o">==</span> <span class="n">cur_filt</span><span class="p">,</span>
+        <span class="p">))</span>
+        
+        <span class="n">bin_observables</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">obs_filt_filter</span><span class="p">]</span> <span class="o">+=</span> \
+            <span class="n">isoc_filts_ext</span><span class="p">[</span><span class="n">cur_filt</span><span class="p">]</span> <span class="o">+</span> <span class="n">filts_ext_adj</span><span class="p">[</span><span class="n">cur_filt</span><span class="p">]</span>
+        
+    <span class="k">return</span> <span class="n">bin_observables</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">phitter</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../autoapi/index.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2024, Abhimat K. Gautam.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

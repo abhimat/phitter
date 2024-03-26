@@ -1,0 +1,144 @@
+:py:mod:`phitter.isoc_interp_wLp`
+=================================
+
+.. py:module:: phitter.isoc_interp_wLp
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   phitter.isoc_interp_wLp.isochrone_mist
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   phitter.isoc_interp_wLp.mist_phase_dict
+   phitter.isoc_interp_wLp.lambda_Ks
+   phitter.isoc_interp_wLp.dlambda_Ks
+   phitter.isoc_interp_wLp.lambda_Lp
+   phitter.isoc_interp_wLp.dlambda_Lp
+   phitter.isoc_interp_wLp.lambda_Kp
+   phitter.isoc_interp_wLp.dlambda_Kp
+   phitter.isoc_interp_wLp.lambda_H
+   phitter.isoc_interp_wLp.dlambda_H
+   phitter.isoc_interp_wLp.ks_filt_info
+   phitter.isoc_interp_wLp.lp_filt_info
+   phitter.isoc_interp_wLp.kp_filt_info
+   phitter.isoc_interp_wLp.h_filt_info
+   phitter.isoc_interp_wLp.v_filt_info
+   phitter.isoc_interp_wLp.flux_ref_Ks
+   phitter.isoc_interp_wLp.flux_ref_Lp
+   phitter.isoc_interp_wLp.flux_ref_Kp
+   phitter.isoc_interp_wLp.flux_ref_H
+   phitter.isoc_interp_wLp.flux_ref_V
+
+
+.. py:data:: mist_phase_dict
+
+   
+
+.. py:data:: lambda_Ks
+
+   
+
+.. py:data:: dlambda_Ks
+
+   
+
+.. py:data:: lambda_Lp
+
+   
+
+.. py:data:: dlambda_Lp
+
+   
+
+.. py:data:: lambda_Kp
+
+   
+
+.. py:data:: dlambda_Kp
+
+   
+
+.. py:data:: lambda_H
+
+   
+
+.. py:data:: dlambda_H
+
+   
+
+.. py:data:: ks_filt_info
+
+   
+
+.. py:data:: lp_filt_info
+
+   
+
+.. py:data:: kp_filt_info
+
+   
+
+.. py:data:: h_filt_info
+
+   
+
+.. py:data:: v_filt_info
+
+   
+
+.. py:data:: flux_ref_Ks
+
+   
+
+.. py:data:: flux_ref_Lp
+
+   
+
+.. py:data:: flux_ref_Kp
+
+   
+
+.. py:data:: flux_ref_H
+
+   
+
+.. py:data:: flux_ref_V
+
+   
+
+.. py:class:: isochrone_mist(age=3900000.0, ext=2.63, dist=7971.0, met=0.0, phase=None, use_atm_func='merged')
+
+
+   Bases: :py:obj:`object`
+
+   .. py:attribute:: filt_list
+      :value: ['nirc2,Lp', 'nirc2,Kp', 'nirc2,H']
+
+      
+
+   .. py:method:: rad_interp(star_rad_interp)
+
+
+   .. py:method:: mass_init_interp(star_mass_init_interp)
+
+
+   .. py:method:: mass_interp(star_mass_interp)
+
+
+   .. py:method:: calc_pb_lums(absMag_Lp, absMag_Kp, absMag_H)
+
+
+

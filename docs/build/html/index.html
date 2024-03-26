@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Welcome to phitter’s documentation! &#8212; phitter 0.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b3523f8e" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=eafc0fe6" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=d7c963c3"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API Reference" href="autoapi/index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="welcome-to-phitter-s-documentation">
+<h1>Welcome to phitter’s documentation!<a class="headerlink" href="#welcome-to-phitter-s-documentation" title="Permalink to this heading">¶</a></h1>
+<p>phitter is an open-source python package to simulate and fit to data observables from stellar binary systems. At this time, observables that can be generated and fit with phitter include photometry (i.e., observed fluxes) and line-of-sight radial velocities (RVs).</p>
+<p>Modeling of binary systems and calculation of observables is primarily handled with <a class="reference external" href="http://www.phoebe-project.org">PHOEBE</a>. When computing flux from model binaries, synthetic photometry for stars is derived for a wide range of telescope and passbands using <a class="reference external" href="https://spisea.readthedocs.io/en/latest/">SPISEA</a>. Parameters for the binary system’s stellar components can be derived via interpolation of model stellar tracks (we currently implement <a class="reference external" href="http://waps.cfa.harvard.edu/MIST/">MIST</a>). Otherwise, arbitrary stellar parameters for one or both stars can also be specified.</p>
+<p>Fitting of observables to binary models is conducted with the use of MCMC sampling code. We provide support for sampling with nested sampling codes like <a class="reference external" href="https://github.com/farhanferoz/MultiNest">MultiNest</a> (via <a class="reference external" href="https://github.com/JohannesBuchner/PyMultiNest">PyMultiNest</a>), <a class="reference external" href="https://johannesbuchner.github.io/UltraNest/">UltraNest</a>, or <a class="reference external" href="https://dynesty.readthedocs.io/en/stable/index.html">dynesty</a>. Example scripts to demonstrate how to set up a fitter are provided.</p>
+<p>[Structure]</p>
+<p>[How to set up a model binary]</p>
+<p>[Including additional effects on photometric observables.]</p>
+<p>[Including additional effects on RV observables.]</p>
+<p>[How to derive own passbands and implement into PHOEBE]</p>
+<p>[How to fit observables with nested sampling.]</p>
+<section id="table-of-contents">
+<h2>Table of Contents<a class="headerlink" href="#table-of-contents" title="Permalink to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="autoapi/index.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/phitter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">phitter</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/prior/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">prior</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/likelihood/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">likelihood</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/rv_adj_calc/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">rv_adj_calc</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/model_obs_calc/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">model_obs_calc</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/phot_adj_calc/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">phot_adj_calc</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/isoc_interp_params/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">isoc_interp_params</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/blackbody_params/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">blackbody_params</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/binary_params/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">binary_params</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/star_params/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">star_params</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this heading">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">phitter</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="autoapi/index.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="autoapi/index.html" title="next chapter">API Reference</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2024, Abhimat K. Gautam.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

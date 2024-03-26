@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>rv_adj_calc &#8212; phitter 0.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b3523f8e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=eafc0fe6" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=d7c963c3"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="model_obs_calc" href="../model_obs_calc/index.html" />
+    <link rel="prev" title="likelihood" href="../likelihood/index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-rv_adj_calc">
+<span id="rv-adj-calc"></span><h1><a class="reference internal" href="#module-rv_adj_calc" title="rv_adj_calc"><code class="xref py py-mod docutils literal notranslate"><span class="pre">rv_adj_calc</span></code></a><a class="headerlink" href="#module-rv_adj_calc" title="Permalink to this heading">¶</a></h1>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this heading">¶</a></h2>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Permalink to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rv_adj_calc.apply_com_velocity" title="rv_adj_calc.apply_com_velocity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">apply_com_velocity</span></code></a>(bin_observables, com_velocity)</p></td>
+<td><p>Modeled observables are calculated with a center of mass velocity of 0 km/s.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py function">
+<dt class="sig sig-object py" id="rv_adj_calc.apply_com_velocity">
+<span class="sig-prename descclassname"><span class="pre">rv_adj_calc.</span></span><span class="sig-name descname"><span class="pre">apply_com_velocity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bin_observables</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">com_velocity</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rv_adj_calc.html#apply_com_velocity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rv_adj_calc.apply_com_velocity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Modeled observables are calculated with a center of mass velocity of 0 km/s.
+This function allows applying a constant center of mass velocity to RVs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>bin_observables</strong><span class="classifier">observables</span></dt><dd><p>observables object containing RVs to which to apply center of mass
+velocity.</p>
+</dd>
+<dt><strong>com_velocity</strong><span class="classifier">Astropy Quantity, velocity unit</span></dt><dd><p>Binary system’s center of mass velocity.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>observables</dt><dd><p>observables object, where RVs have center of mass velocity added.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">phitter</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../phitter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">phitter</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../prior/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">prior</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../likelihood/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">likelihood</span></code></a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">rv_adj_calc</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../model_obs_calc/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">model_obs_calc</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../phot_adj_calc/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">phot_adj_calc</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../isoc_interp_params/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">isoc_interp_params</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../blackbody_params/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">blackbody_params</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../binary_params/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">binary_params</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../star_params/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">star_params</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">API Reference</a><ul>
+      <li>Previous: <a href="../likelihood/index.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">likelihood</span></code></a></li>
+      <li>Next: <a href="../model_obs_calc/index.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">model_obs_calc</span></code></a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2024, Abhimat K. Gautam.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../../_sources/autoapi/rv_adj_calc/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>isoc_interp_params &#8212; phitter 0.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b3523f8e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=eafc0fe6" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=d7c963c3"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="blackbody_params" href="../blackbody_params/index.html" />
+    <link rel="prev" title="phot_adj_calc" href="../phot_adj_calc/index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-isoc_interp_params">
+<span id="isoc-interp-params"></span><h1><a class="reference internal" href="#module-isoc_interp_params" title="isoc_interp_params"><code class="xref py py-mod docutils literal notranslate"><span class="pre">isoc_interp_params</span></code></a><a class="headerlink" href="#module-isoc_interp_params" title="Permalink to this heading">¶</a></h1>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this heading">¶</a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Permalink to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#isoc_interp_params.isoc_mist_stellar_params" title="isoc_interp_params.isoc_mist_stellar_params"><code class="xref py py-obj docutils literal notranslate"><span class="pre">isoc_mist_stellar_params</span></code></a></p></td>
+<td><p>stellar_params class, to derive stellar parameters from a MIST isochrone.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="attributes">
+<h3>Attributes<a class="headerlink" href="#attributes" title="Permalink to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#isoc_interp_params.lambda_Ks" title="isoc_interp_params.lambda_Ks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lambda_Ks</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#isoc_interp_params.dlambda_Ks" title="isoc_interp_params.dlambda_Ks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dlambda_Ks</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#isoc_interp_params.ks_filt_info" title="isoc_interp_params.ks_filt_info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ks_filt_info</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#isoc_interp_params.v_filt_info" title="isoc_interp_params.v_filt_info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">v_filt_info</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#isoc_interp_params.flux_ref_Ks" title="isoc_interp_params.flux_ref_Ks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">flux_ref_Ks</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#isoc_interp_params.flux_ref_V" title="isoc_interp_params.flux_ref_V"><code class="xref py py-obj docutils literal notranslate"><span class="pre">flux_ref_V</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#isoc_interp_params.kp_filt" title="isoc_interp_params.kp_filt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">kp_filt</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#isoc_interp_params.h_filt" title="isoc_interp_params.h_filt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">h_filt</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#isoc_interp_params.atm_funcs" title="isoc_interp_params.atm_funcs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">atm_funcs</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#isoc_interp_params.mist_phase_dict" title="isoc_interp_params.mist_phase_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mist_phase_dict</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py data">
+<dt class="sig sig-object py" id="isoc_interp_params.lambda_Ks">
+<span class="sig-prename descclassname"><span class="pre">isoc_interp_params.</span></span><span class="sig-name descname"><span class="pre">lambda_Ks</span></span><a class="reference internal" href="../../_modules/isoc_interp_params.html#lambda_Ks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#isoc_interp_params.lambda_Ks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="isoc_interp_params.dlambda_Ks">
+<span class="sig-prename descclassname"><span class="pre">isoc_interp_params.</span></span><span class="sig-name descname"><span class="pre">dlambda_Ks</span></span><a class="reference internal" href="../../_modules/isoc_interp_params.html#dlambda_Ks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#isoc_interp_params.dlambda_Ks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="isoc_interp_params.ks_filt_info">
+<span class="sig-prename descclassname"><span class="pre">isoc_interp_params.</span></span><span class="sig-name descname"><span class="pre">ks_filt_info</span></span><a class="reference internal" href="../../_modules/isoc_interp_params.html#ks_filt_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#isoc_interp_params.ks_filt_info" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="isoc_interp_params.v_filt_info">
+<span class="sig-prename descclassname"><span class="pre">isoc_interp_params.</span></span><span class="sig-name descname"><span class="pre">v_filt_info</span></span><a class="reference internal" href="../../_modules/isoc_interp_params.html#v_filt_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#isoc_interp_params.v_filt_info" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="isoc_interp_params.flux_ref_Ks">
+<span class="sig-prename descclassname"><span class="pre">isoc_interp_params.</span></span><span class="sig-name descname"><span class="pre">flux_ref_Ks</span></span><a class="reference internal" href="../../_modules/isoc_interp_params.html#flux_ref_Ks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#isoc_interp_params.flux_ref_Ks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="isoc_interp_params.flux_ref_V">
+<span class="sig-prename descclassname"><span class="pre">isoc_interp_params.</span></span><span class="sig-name descname"><span class="pre">flux_ref_V</span></span><a class="reference internal" href="../../_modules/isoc_interp_params.html#flux_ref_V"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#isoc_interp_params.flux_ref_V" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="isoc_interp_params.kp_filt">
+<span class="sig-prename descclassname"><span class="pre">isoc_interp_params.</span></span><span class="sig-name descname"><span class="pre">kp_filt</span></span><a class="reference internal" href="../../_modules/isoc_interp_params.html#kp_filt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#isoc_interp_params.kp_filt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="isoc_interp_params.h_filt">
+<span class="sig-prename descclassname"><span class="pre">isoc_interp_params.</span></span><span class="sig-name descname"><span class="pre">h_filt</span></span><a class="reference internal" href="../../_modules/isoc_interp_params.html#h_filt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#isoc_interp_params.h_filt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="isoc_interp_params.atm_funcs">
+<span class="sig-prename descclassname"><span class="pre">isoc_interp_params.</span></span><span class="sig-name descname"><span class="pre">atm_funcs</span></span><a class="reference internal" href="../../_modules/isoc_interp_params.html#atm_funcs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#isoc_interp_params.atm_funcs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="isoc_interp_params.mist_phase_dict">
+<span class="sig-prename descclassname"><span class="pre">isoc_interp_params.</span></span><span class="sig-name descname"><span class="pre">mist_phase_dict</span></span><a class="reference internal" href="../../_modules/isoc_interp_params.html#mist_phase_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#isoc_interp_params.mist_phase_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="isoc_interp_params.isoc_mist_stellar_params">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoc_interp_params.</span></span><span class="sig-name descname"><span class="pre">isoc_mist_stellar_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">age</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4000000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_atm_func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'merged'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/isoc_interp_params.html#isoc_mist_stellar_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#isoc_interp_params.isoc_mist_stellar_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">phitter.params.star_params.stellar_params_obj</span></code></p>
+<p>stellar_params class, to derive stellar parameters from a MIST isochrone.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>age</strong><span class="classifier">float, default=4e6</span></dt><dd><p>Age of the isochrone, specified in years. Default: 4e6 (4 Myr old).</p>
+</dd>
+<dt><strong>met</strong><span class="classifier">float, default=0.0</span></dt><dd></dd>
+<dt><strong>ext_Ks</strong><span class="classifier">float, default=2.63</span></dt><dd><p>Extinction of stellar parameters object in Ks band. Used for calculating
+synthetic photometry.</p>
+</dd>
+<dt><strong>dist</strong><span class="classifier">Astropy Quantity, length units, default=7.971e3*u.pc</span></dt><dd><p>Distance to the isochrone, used for calculating synthetic photometry.</p>
+</dd>
+<dt><strong>filts_list</strong><span class="classifier">[filter], default=[filters.nirc2_kp_filt(), filters.nirc2_h_filt()]</span></dt><dd><p>List of filters to compute synthetic photometry.</p>
+</dd>
+<dt><strong>ext_law</strong><span class="classifier">str, default=’NL18’</span></dt><dd><p>Choice of extinction law to use when computing synthetic photometry.
+Default is ‘NL18’, corresponding to Nogueras-Lara+ 2018.</p>
+</dd>
+<dt><strong>use_atm_func</strong><span class="classifier">str, default=’merged’</span></dt><dd><p>Atmospheric function to use for calculating synthetic photometry.
+Options are ‘merged’ for merged atmospheres from SPISEA, ‘castelli’ for
+Castelli &amp; Kurucz (2004) atmospheres, or ‘phoenix’ for Phoenix v16
+(Husser et al., 2013) atmospheres.</p>
+</dd>
+<dt><strong>phase</strong><span class="classifier">str, default=None</span></dt><dd><p>If specified, only select stars from a specific stellar evolution phase.
+Options are ‘PMS’, ‘MS’, ‘RGB’, ‘CHeB’, ‘EAGB’, ‘TPAGB’, ‘postAGB’, or
+‘WR’. If phase is None, then all stellar evolution phases are included.
+Default: None (all stellar evolution phases).</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="isoc_interp_params.isoc_mist_stellar_params.interp_star_params_mass_init">
+<span class="sig-name descname"><span class="pre">interp_star_params_mass_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mass_init</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/isoc_interp_params.html#isoc_mist_stellar_params.interp_star_params_mass_init"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#isoc_interp_params.isoc_mist_stellar_params.interp_star_params_mass_init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolate stellar parameters from the isochrone, given an initial mass
+for the star.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>mass_init</strong><span class="classifier">float</span></dt><dd><p>Initial stellar mass as float, in units of solar masses.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>star_params</dt><dd><p>star_params object returned, with stellar parameters interpolated
+from the MIST isochrone.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="isoc_interp_params.isoc_mist_stellar_params.interp_star_params_rad">
+<span class="sig-name descname"><span class="pre">interp_star_params_rad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rad</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/isoc_interp_params.html#isoc_mist_stellar_params.interp_star_params_rad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#isoc_interp_params.isoc_mist_stellar_params.interp_star_params_rad" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolate stellar parameters from the isochrone, given a radius for
+the star.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>rad</strong><span class="classifier">float</span></dt><dd><p>Stellar radius as float, in units of solar radii.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>star_params</dt><dd><p>star_params object returned, with stellar parameters interpolated
+from the MIST isochrone.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="isoc_interp_params.isoc_mist_stellar_params.interp_star_params_mass">
+<span class="sig-name descname"><span class="pre">interp_star_params_mass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mass</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/isoc_interp_params.html#isoc_mist_stellar_params.interp_star_params_mass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#isoc_interp_params.isoc_mist_stellar_params.interp_star_params_mass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolate stellar parameters from the isochrone, given a mass for
+the star.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>mass</strong><span class="classifier">float</span></dt><dd><p>Stellar mass as float, in units of solar masses.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>star_params</dt><dd><p>star_params object returned, with stellar parameters interpolated
+from the MIST isochrone.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="isoc_interp_params.isoc_mist_stellar_params._flip_isochrone">
+<span class="sig-name descname"><span class="pre">_flip_isochrone</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/isoc_interp_params.html#isoc_mist_stellar_params._flip_isochrone"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#isoc_interp_params.isoc_mist_stellar_params._flip_isochrone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flip isochrone parameter lists, if needed for interpolation</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">phitter</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../phitter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">phitter</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../prior/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">prior</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../likelihood/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">likelihood</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rv_adj_calc/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">rv_adj_calc</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../model_obs_calc/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">model_obs_calc</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../phot_adj_calc/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">phot_adj_calc</span></code></a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">isoc_interp_params</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../blackbody_params/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">blackbody_params</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../binary_params/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">binary_params</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../star_params/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">star_params</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">API Reference</a><ul>
+      <li>Previous: <a href="../phot_adj_calc/index.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">phot_adj_calc</span></code></a></li>
+      <li>Next: <a href="../blackbody_params/index.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">blackbody_params</span></code></a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2024, Abhimat K. Gautam.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../../_sources/autoapi/isoc_interp_params/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

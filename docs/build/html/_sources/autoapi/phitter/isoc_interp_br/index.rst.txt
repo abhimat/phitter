@@ -1,0 +1,124 @@
+:py:mod:`phitter.isoc_interp_br`
+================================
+
+.. py:module:: phitter.isoc_interp_br
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   phitter.isoc_interp_br.isochrone_mist
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   phitter.isoc_interp_br.mist_phase_dict
+   phitter.isoc_interp_br.lambda_Ks
+   phitter.isoc_interp_br.dlambda_Ks
+   phitter.isoc_interp_br.lambda_B
+   phitter.isoc_interp_br.dlambda_B
+   phitter.isoc_interp_br.lambda_R
+   phitter.isoc_interp_br.dlambda_R
+   phitter.isoc_interp_br.ks_filt_info
+   phitter.isoc_interp_br.b_filt_info
+   phitter.isoc_interp_br.r_filt_info
+   phitter.isoc_interp_br.v_filt_info
+   phitter.isoc_interp_br.flux_ref_Ks
+   phitter.isoc_interp_br.flux_ref_B
+   phitter.isoc_interp_br.flux_ref_R
+   phitter.isoc_interp_br.flux_ref_V
+
+
+.. py:data:: mist_phase_dict
+
+   
+
+.. py:data:: lambda_Ks
+
+   
+
+.. py:data:: dlambda_Ks
+
+   
+
+.. py:data:: lambda_B
+
+   
+
+.. py:data:: dlambda_B
+
+   
+
+.. py:data:: lambda_R
+
+   
+
+.. py:data:: dlambda_R
+
+   
+
+.. py:data:: ks_filt_info
+
+   
+
+.. py:data:: b_filt_info
+
+   
+
+.. py:data:: r_filt_info
+
+   
+
+.. py:data:: v_filt_info
+
+   
+
+.. py:data:: flux_ref_Ks
+
+   
+
+.. py:data:: flux_ref_B
+
+   
+
+.. py:data:: flux_ref_R
+
+   
+
+.. py:data:: flux_ref_V
+
+   
+
+.. py:class:: isochrone_mist(age=3900000.0, ext=2.63, dist=7971.0, met=0.0, phase=None, use_atm_func='merged')
+
+
+   Bases: :py:obj:`object`
+
+   .. py:attribute:: filt_list
+      :value: ['ubv,B', 'ubv,R']
+
+      
+
+   .. py:method:: rad_interp(star_rad_interp)
+
+
+   .. py:method:: mass_init_interp(star_mass_init_interp)
+
+
+   .. py:method:: mass_interp(star_mass_interp)
+
+
+   .. py:method:: calc_pb_lums(mag_B, mag_R)
+
+
+

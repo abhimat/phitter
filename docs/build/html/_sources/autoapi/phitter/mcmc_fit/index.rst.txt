@@ -1,0 +1,485 @@
+:py:mod:`phitter.mcmc_fit`
+==========================
+
+.. py:module:: phitter.mcmc_fit
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   phitter.mcmc_fit.mcmc_fitter
+   phitter.mcmc_fit.mcmc_fitter_rad_interp
+   phitter.mcmc_fit.mcmc_fitter_mass_init_interp
+   phitter.mcmc_fit.mcmc_fitter_mass_init_and_rad_interp
+   phitter.mcmc_fit.mcmc_fitter_isoc_interp
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   phitter.mcmc_fit.ks_filt_info
+   phitter.mcmc_fit.flux_ref_Ks
+   phitter.mcmc_fit.kp_filt
+   phitter.mcmc_fit.h_filt
+   phitter.mcmc_fit.lp_filt
+
+
+.. py:data:: ks_filt_info
+
+   
+
+.. py:data:: flux_ref_Ks
+
+   
+
+.. py:data:: kp_filt
+
+   
+
+.. py:data:: h_filt
+
+   
+
+.. py:data:: lp_filt
+
+   
+
+.. py:class:: mcmc_fitter
+
+
+   Bases: :py:obj:`object`
+
+   
+   Base object to use for MCMC fitting of binary systems
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+   .. py:attribute:: lambda_Ks
+
+      
+
+   .. py:attribute:: dlambda_Ks
+
+      
+
+   .. py:attribute:: filts_lambda
+
+      
+
+   .. py:attribute:: filts_dlambda
+
+      
+
+   .. py:attribute:: ks_filt_info
+
+      
+
+   .. py:attribute:: flux_ref_Ks
+
+      
+
+   .. py:attribute:: ext_alpha
+      :value: 2.3
+
+      
+
+   .. py:attribute:: ext_alpha_unc
+      :value: 0.08
+
+      
+
+   .. py:attribute:: use_blackbody_atm
+      :value: False
+
+      
+
+   .. py:attribute:: model_numTriangles
+      :value: 1500
+
+      
+
+   .. py:attribute:: default_H_ext_mod
+      :value: 0.0
+
+      
+
+   .. py:attribute:: model_H_ext_mod
+      :value: True
+
+      
+
+   .. py:attribute:: default_ecc
+      :value: 0.0
+
+      
+
+   .. py:attribute:: model_eccentricity
+      :value: True
+
+      
+
+   .. py:attribute:: default_dist
+      :value: 7971.0
+
+      
+
+   .. py:attribute:: model_distance
+      :value: True
+
+      
+
+   .. py:attribute:: lo_Kp_ext_prior_bound
+      :value: 2.0
+
+      
+
+   .. py:attribute:: hi_Kp_ext_prior_bound
+      :value: 4.0
+
+      
+
+   .. py:attribute:: lo_H_ext_mod_prior_bound
+
+      
+
+   .. py:attribute:: hi_H_ext_mod_prior_bound
+      :value: 2.0
+
+      
+
+   .. py:attribute:: H_ext_mod_alpha_sig_bound
+
+      
+
+   .. py:attribute:: lo_inc_prior_bound
+      :value: 0.0
+
+      
+
+   .. py:attribute:: hi_inc_prior_bound
+      :value: 180.0
+
+      
+
+   .. py:attribute:: lo_period_prior_bound
+      :value: 79.0
+
+      
+
+   .. py:attribute:: hi_period_prior_bound
+      :value: 81.0
+
+      
+
+   .. py:attribute:: lo_ecc_prior_bound
+
+      
+
+   .. py:attribute:: hi_ecc_prior_bound
+      :value: 0.1
+
+      
+
+   .. py:attribute:: lo_dist_prior_bound
+      :value: 7600.0
+
+      
+
+   .. py:attribute:: hi_dist_prior_bound
+      :value: 8200.0
+
+      
+
+   .. py:attribute:: lo_t0_prior_bound
+      :value: 51773.0
+
+      
+
+   .. py:attribute:: hi_t0_prior_bound
+      :value: 51774.0
+
+      
+
+   .. py:method:: set_observation_filts(obs_filts)
+
+      
+      Function to set observation filters
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      ..
+          !! processed by numpydoc !!
+
+   .. py:method:: set_observation_times(obs_times)
+
+      
+      Function to set observation times
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      ..
+          !! processed by numpydoc !!
+
+   .. py:method:: set_observation_mags(obs_mags, obs_mag_errors)
+
+      
+      Function to set observation mags
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      ..
+          !! processed by numpydoc !!
+
+   .. py:method:: set_model_numTriangles(model_numTriangles)
+
+      
+      Function to set model mesh number of triangles
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      ..
+          !! processed by numpydoc !!
+
+   .. py:method:: set_model_use_blackbody_atm(use_blackbody_atm)
+
+      
+      Function to set model mesh number of triangles
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      ..
+          !! processed by numpydoc !!
+
+   .. py:method:: set_model_H_ext_mod(model_H_ext_mod)
+
+      
+      Function to set for modelling H extinction modifier
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      ..
+          !! processed by numpydoc !!
+
+   .. py:method:: set_model_eccentricity(model_eccentricity)
+
+
+   .. py:method:: set_model_distance(model_distance)
+
+
+   .. py:method:: set_Kp_ext_prior_bounds(lo_bound, hi_bound)
+
+
+   .. py:method:: set_H_ext_mod_prior_bounds(lo_bound, hi_bound)
+
+
+   .. py:method:: set_H_ext_mod_extLaw_sig_prior_bounds(sigma_bound)
+
+
+   .. py:method:: set_inc_prior_bounds(lo_bound, hi_bound)
+
+
+   .. py:method:: set_period_prior_bounds(lo_bound, hi_bound)
+
+
+   .. py:method:: set_ecc_prior_bounds(lo_bound, hi_bound)
+
+
+   .. py:method:: set_dist_prior_bounds(lo_bound, hi_bound)
+
+
+   .. py:method:: set_t0_prior_bounds(lo_bound, hi_bound)
+
+
+
+.. py:class:: mcmc_fitter_rad_interp
+
+
+   Bases: :py:obj:`mcmc_fitter_base_interp`
+
+   .. py:method:: lnprior(theta)
+
+
+   .. py:method:: calculate_model_lc(theta)
+
+
+   .. py:method:: lnlike(theta)
+
+
+   .. py:method:: lnprob(theta)
+
+
+
+.. py:class:: mcmc_fitter_mass_init_interp
+
+
+   Bases: :py:obj:`mcmc_fitter_base_interp`
+
+   .. py:method:: lnprior(theta)
+
+
+   .. py:method:: calculate_model_lc(theta)
+
+
+   .. py:method:: lnlike(theta)
+
+
+   .. py:method:: lnprob(theta)
+
+
+
+.. py:class:: mcmc_fitter_mass_init_and_rad_interp
+
+
+   Bases: :py:obj:`mcmc_fitter_base_interp`
+
+   .. py:method:: lnprior(theta)
+
+
+   .. py:method:: calculate_model_lc(theta)
+
+
+   .. py:method:: lnlike(theta)
+
+
+   .. py:method:: lnprob(theta)
+
+
+
+.. py:class:: mcmc_fitter_isoc_interp
+
+
+   Bases: :py:obj:`mcmc_fitter`
+
+   
+   Expands MCMC fitter object to work with
+   isochrone interpolation of stellar parameters
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+   .. py:method:: make_isochrone(age, Ks_ext, dist, phase, met, filts_list=[kp_filt, h_filt], use_atm_func='merged')
+
+
+   .. py:method:: make_star1_isochrone(age, Ks_ext, dist, phase, met, filts_list=[kp_filt, h_filt], use_atm_func='merged')
+
+
+   .. py:method:: make_star2_isochrone(age, Ks_ext, dist, phase, met, filts_list=[kp_filt, h_filt], use_atm_func='merged')
+
+
+

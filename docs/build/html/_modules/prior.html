@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>prior &#8212; phitter 0.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b3523f8e" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=eafc0fe6" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=d7c963c3"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for prior</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Priors for fitters in phitter</span>
+<span class="c1"># ---</span>
+<span class="c1"># Abhimat Gautam</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span>
+
+<div class="viewcode-block" id="uniform_prior"><a class="viewcode-back" href="../autoapi/prior/index.html#prior.uniform_prior">[docs]</a><span class="k">class</span> <span class="nc">uniform_prior</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Uniform distribution prior</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    bound_lo : float</span>
+<span class="sd">        Lower bound on the distribution </span>
+<span class="sd">    bound_up : float</span>
+<span class="sd">        Upper bound on the distribution</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bound_lo</span><span class="p">,</span> <span class="n">bound_up</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bound_lo</span> <span class="o">=</span> <span class="n">bound_lo</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bound_up</span> <span class="o">=</span> <span class="n">bound_up</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">param_count</span> <span class="o">=</span> <span class="mi">1</span>
+        
+        <span class="k">return</span>
+    
+<div class="viewcode-block" id="uniform_prior.__call__"><a class="viewcode-back" href="../autoapi/prior/index.html#prior.uniform_prior.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cube</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">cube</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bound_up</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">bound_lo</span><span class="p">))</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">bound_lo</span></div>
+    
+<div class="viewcode-block" id="uniform_prior.__repr__"><a class="viewcode-back" href="../autoapi/prior/index.html#prior.uniform_prior.__repr__">[docs]</a>    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;&lt;uniform_prior: bound_lo </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">bound_lo</span><span class="si">}</span><span class="s1"> bound_up </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">bound_up</span><span class="si">}</span><span class="s1">&gt;&#39;</span></div></div>
+
+<div class="viewcode-block" id="gaussian_prior"><a class="viewcode-back" href="../autoapi/prior/index.html#prior.gaussian_prior">[docs]</a><span class="k">class</span> <span class="nc">gaussian_prior</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Gaussian / normal distribution prior</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    mean : float</span>
+<span class="sd">        Mean of the distribution</span>
+<span class="sd">    sigma : float</span>
+<span class="sd">        Sigma of the distribution</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">sigma</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">=</span> <span class="n">mean</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="n">sigma</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">param_count</span> <span class="o">=</span> <span class="mi">1</span>
+        
+        <span class="k">return</span>
+    
+<div class="viewcode-block" id="gaussian_prior.__call__"><a class="viewcode-back" href="../autoapi/prior/index.html#prior.gaussian_prior.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cube</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span>
+            <span class="n">cube</span><span class="p">,</span>
+            <span class="n">loc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">,</span>
+        <span class="p">)</span></div>
+    
+<div class="viewcode-block" id="gaussian_prior.__repr__"><a class="viewcode-back" href="../autoapi/prior/index.html#prior.gaussian_prior.__repr__">[docs]</a>    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;&lt;gaussian_prior: mean </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="si">}</span><span class="s1"> sigma </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="si">}</span><span class="s1">&gt;&#39;</span></div></div>
+
+<div class="viewcode-block" id="const_prior"><a class="viewcode-back" href="../autoapi/prior/index.html#prior.const_prior">[docs]</a><span class="k">class</span> <span class="nc">const_prior</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Constant value prior</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    value : float</span>
+<span class="sd">        Constant value to return</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">param_count</span> <span class="o">=</span> <span class="mi">1</span>
+        
+        <span class="k">return</span>
+    
+<div class="viewcode-block" id="const_prior.__call__"><a class="viewcode-back" href="../autoapi/prior/index.html#prior.const_prior.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cube</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span></div>
+    
+<div class="viewcode-block" id="const_prior.__repr__"><a class="viewcode-back" href="../autoapi/prior/index.html#prior.const_prior.__repr__">[docs]</a>    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;&lt;const_prior: value </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s1">&gt;&#39;</span></div></div>
+
+<div class="viewcode-block" id="prior_collection"><a class="viewcode-back" href="../autoapi/prior/index.html#prior.prior_collection">[docs]</a><span class="k">class</span> <span class="nc">prior_collection</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Collection of prior objects. Transformation from unit cube to parameter</span>
+<span class="sd">    space takes place with the prior_transform() function. Contains separate</span>
+<span class="sd">    prior transform functions for use with different sampling software.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    priors_list : list[prior]</span>
+<span class="sd">        List of priors that consitute the full set of parameters being modeled.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">priors_list</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">priors_list</span> <span class="o">=</span> <span class="n">priors_list</span>
+        
+        <span class="c1"># Calculate number of parameters from the priors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_params</span> <span class="o">=</span> <span class="mi">0</span>
+        
+        <span class="k">for</span> <span class="n">prior</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">priors_list</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_params</span> <span class="o">+=</span> <span class="n">prior</span><span class="o">.</span><span class="n">param_count</span>
+        
+        <span class="k">return</span>
+    
+<div class="viewcode-block" id="prior_collection.prior_transform_multinest"><a class="viewcode-back" href="../autoapi/prior/index.html#prior.prior_collection.prior_transform_multinest">[docs]</a>    <span class="k">def</span> <span class="nf">prior_transform_multinest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cube</span><span class="p">,</span> <span class="n">ndim</span><span class="p">,</span> <span class="n">nparam</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Prior transform function for use with PyMultiNest</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nparam</span><span class="p">):</span>
+            <span class="n">cube</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">priors_list</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="n">cube</span><span class="p">[</span><span class="n">i</span><span class="p">])</span></div>
+        
+        <span class="c1"># TODO: Add support for dependent priors</span>
+    
+<div class="viewcode-block" id="prior_collection.prior_transform_ultranest"><a class="viewcode-back" href="../autoapi/prior/index.html#prior.prior_collection.prior_transform_ultranest">[docs]</a>    <span class="k">def</span> <span class="nf">prior_transform_ultranest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cube</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Prior transform function for use with Ultreanest</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="n">params</span> <span class="o">=</span> <span class="n">cube</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_params</span><span class="p">):</span>
+            <span class="n">params</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">priors_list</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="n">cube</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        
+        <span class="k">return</span> <span class="n">params</span></div>
+    
+<div class="viewcode-block" id="prior_collection.prior_transform_dynesty"><a class="viewcode-back" href="../autoapi/prior/index.html#prior.prior_collection.prior_transform_dynesty">[docs]</a>    <span class="k">def</span> <span class="nf">prior_transform_dynesty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">u</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Prior transform function for use with Ultreanest</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="n">params</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_params</span><span class="p">):</span>
+            <span class="n">params</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">priors_list</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="n">u</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        
+        <span class="k">return</span> <span class="n">params</span></div></div>
+    
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">phitter</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../autoapi/index.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2024, Abhimat K. Gautam.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

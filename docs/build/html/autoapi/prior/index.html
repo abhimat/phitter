@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>prior &#8212; phitter 0.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b3523f8e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=eafc0fe6" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=d7c963c3"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="likelihood" href="../likelihood/index.html" />
+    <link rel="prev" title="phitter.observables" href="../phitter/observables/index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-prior">
+<span id="prior"></span><h1><a class="reference internal" href="#module-prior" title="prior"><code class="xref py py-mod docutils literal notranslate"><span class="pre">prior</span></code></a><a class="headerlink" href="#module-prior" title="Permalink to this heading">¶</a></h1>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this heading">¶</a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Permalink to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#prior.uniform_prior" title="prior.uniform_prior"><code class="xref py py-obj docutils literal notranslate"><span class="pre">uniform_prior</span></code></a></p></td>
+<td><p>Uniform distribution prior</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#prior.gaussian_prior" title="prior.gaussian_prior"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gaussian_prior</span></code></a></p></td>
+<td><p>Gaussian / normal distribution prior</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#prior.const_prior" title="prior.const_prior"><code class="xref py py-obj docutils literal notranslate"><span class="pre">const_prior</span></code></a></p></td>
+<td><p>Constant value prior</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#prior.prior_collection" title="prior.prior_collection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prior_collection</span></code></a></p></td>
+<td><p>Collection of prior objects. Transformation from unit cube to parameter</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py" id="prior.uniform_prior">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">prior.</span></span><span class="sig-name descname"><span class="pre">uniform_prior</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bound_lo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bound_up</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/prior.html#uniform_prior"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prior.uniform_prior" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Uniform distribution prior</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>bound_lo</strong><span class="classifier">float</span></dt><dd><p>Lower bound on the distribution</p>
+</dd>
+<dt><strong>bound_up</strong><span class="classifier">float</span></dt><dd><p>Upper bound on the distribution</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="prior.uniform_prior.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cube</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/prior.html#uniform_prior.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prior.uniform_prior.__call__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prior.uniform_prior.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/prior.html#uniform_prior.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prior.uniform_prior.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return repr(self).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="prior.gaussian_prior">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">prior.</span></span><span class="sig-name descname"><span class="pre">gaussian_prior</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mean</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/prior.html#gaussian_prior"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prior.gaussian_prior" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Gaussian / normal distribution prior</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>mean</strong><span class="classifier">float</span></dt><dd><p>Mean of the distribution</p>
+</dd>
+<dt><strong>sigma</strong><span class="classifier">float</span></dt><dd><p>Sigma of the distribution</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="prior.gaussian_prior.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cube</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/prior.html#gaussian_prior.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prior.gaussian_prior.__call__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prior.gaussian_prior.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/prior.html#gaussian_prior.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prior.gaussian_prior.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return repr(self).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="prior.const_prior">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">prior.</span></span><span class="sig-name descname"><span class="pre">const_prior</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/prior.html#const_prior"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prior.const_prior" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Constant value prior</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>value</strong><span class="classifier">float</span></dt><dd><p>Constant value to return</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="prior.const_prior.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cube</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/prior.html#const_prior.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prior.const_prior.__call__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prior.const_prior.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/prior.html#const_prior.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prior.const_prior.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return repr(self).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="prior.prior_collection">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">prior.</span></span><span class="sig-name descname"><span class="pre">prior_collection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">priors_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/prior.html#prior_collection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prior.prior_collection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Collection of prior objects. Transformation from unit cube to parameter
+space takes place with the prior_transform() function. Contains separate
+prior transform functions for use with different sampling software.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>priors_list</strong><span class="classifier">list[prior]</span></dt><dd><p>List of priors that consitute the full set of parameters being modeled.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="prior.prior_collection.prior_transform_multinest">
+<span class="sig-name descname"><span class="pre">prior_transform_multinest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cube</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ndim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nparam</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/prior.html#prior_collection.prior_transform_multinest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prior.prior_collection.prior_transform_multinest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prior transform function for use with PyMultiNest</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prior.prior_collection.prior_transform_ultranest">
+<span class="sig-name descname"><span class="pre">prior_transform_ultranest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cube</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/prior.html#prior_collection.prior_transform_ultranest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prior.prior_collection.prior_transform_ultranest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prior transform function for use with Ultreanest</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prior.prior_collection.prior_transform_dynesty">
+<span class="sig-name descname"><span class="pre">prior_transform_dynesty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/prior.html#prior_collection.prior_transform_dynesty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prior.prior_collection.prior_transform_dynesty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prior transform function for use with Ultreanest</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">phitter</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../phitter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">phitter</span></code></a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">prior</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../likelihood/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">likelihood</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rv_adj_calc/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">rv_adj_calc</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../model_obs_calc/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">model_obs_calc</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../phot_adj_calc/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">phot_adj_calc</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../isoc_interp_params/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">isoc_interp_params</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../blackbody_params/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">blackbody_params</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../binary_params/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">binary_params</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../star_params/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">star_params</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">API Reference</a><ul>
+      <li>Previous: <a href="../phitter/observables/index.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">phitter.observables</span></code></a></li>
+      <li>Next: <a href="../likelihood/index.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">likelihood</span></code></a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2024, Abhimat K. Gautam.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../../_sources/autoapi/prior/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

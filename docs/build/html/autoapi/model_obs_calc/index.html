@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>model_obs_calc &#8212; phitter 0.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b3523f8e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=eafc0fe6" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=d7c963c3"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="phot_adj_calc" href="../phot_adj_calc/index.html" />
+    <link rel="prev" title="rv_adj_calc" href="../rv_adj_calc/index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-model_obs_calc">
+<span id="model-obs-calc"></span><h1><a class="reference internal" href="#module-model_obs_calc" title="model_obs_calc"><code class="xref py py-mod docutils literal notranslate"><span class="pre">model_obs_calc</span></code></a><a class="headerlink" href="#module-model_obs_calc" title="Permalink to this heading">¶</a></h1>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this heading">¶</a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Permalink to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#model_obs_calc.binary_star_model_obs" title="model_obs_calc.binary_star_model_obs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">binary_star_model_obs</span></code></a></p></td>
+<td><p>Class to compute the observables for a modeled binary system,</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Permalink to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#model_obs_calc.single_star_model_obs" title="model_obs_calc.single_star_model_obs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">single_star_model_obs</span></code></a>(stellar_params[, ...])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#model_obs_calc.phased_obs" title="model_obs_calc.phased_obs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">phased_obs</span></code></a>(observation_times, binary_period, t0[, ...])</p></td>
+<td><p>Phase observation times to a given binary period and t0</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#model_obs_calc.dist_ext_mag_calc" title="model_obs_calc.dist_ext_mag_calc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dist_ext_mag_calc</span></code></a>(input_mags, target_dist, filt_exts)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="attributes">
+<h3>Attributes<a class="headerlink" href="#attributes" title="Permalink to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#model_obs_calc.kp_filt" title="model_obs_calc.kp_filt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">kp_filt</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#model_obs_calc.h_filt" title="model_obs_calc.h_filt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">h_filt</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py data">
+<dt class="sig sig-object py" id="model_obs_calc.kp_filt">
+<span class="sig-prename descclassname"><span class="pre">model_obs_calc.</span></span><span class="sig-name descname"><span class="pre">kp_filt</span></span><a class="reference internal" href="../../_modules/model_obs_calc.html#kp_filt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#model_obs_calc.kp_filt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="model_obs_calc.h_filt">
+<span class="sig-prename descclassname"><span class="pre">model_obs_calc.</span></span><span class="sig-name descname"><span class="pre">h_filt</span></span><a class="reference internal" href="../../_modules/model_obs_calc.html#h_filt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#model_obs_calc.h_filt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="model_obs_calc.binary_star_model_obs">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">model_obs_calc.</span></span><span class="sig-name descname"><span class="pre">binary_star_model_obs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bin_observables</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_blackbody_atm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_compact_object</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_diagnostics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_compute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_par_processes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/model_obs_calc.html#binary_star_model_obs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#model_obs_calc.binary_star_model_obs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class to compute the observables for a modeled binary system,
+given stellar parameters and binary parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>bin_observables</strong><span class="classifier">observables</span></dt><dd><p>observables object, with obs_times, obs_filts, and obs_types specified.</p>
+</dd>
+<dt><strong>use_blackbody_atm</strong><span class="classifier">bool, default=False</span></dt><dd><p>Use blackbody atmosphere instead of default Castelli &amp; Kurucz
+atmosphere. Default: False (i.e.: using a C&amp;K atm by default)</p>
+</dd>
+<dt><strong>use_compact_object</strong><span class="classifier">bool, default=False</span></dt><dd><p>If true, sets eclipse_method to ‘only_horizon’ in PHOEBE, which is
+necessary for compact companions without eclipses. Default: False</p>
+</dd>
+<dt><strong>print_diagnostics</strong><span class="classifier">bool, default=False</span></dt><dd><p>Print diagnostic messages, helpful for debugging.</p>
+</dd>
+<dt><strong>par_compute</strong><span class="classifier">bool, default=False</span></dt><dd><p>Uses parallelization when computing with PHOEBE.</p>
+</dd>
+<dt><strong>num_par_processes</strong><span class="classifier">int, default=8</span></dt><dd><p>Number of processes to use when parallel computing with PHOEBE.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="model_obs_calc.binary_star_model_obs.compute_obs">
+<span class="sig-name descname"><span class="pre">compute_obs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">star1_params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">star2_params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary_params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">irrad_frac_refl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_triangles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">make_mesh_plots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh_plot_phases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">np.array([0.25])</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">animate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh_plot_fig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh_plot_subplot_grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh_plot_subplot_grid_indexes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh_temp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh_temp_cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh_plot_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/model_obs_calc.html#binary_star_model_obs.compute_obs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#model_obs_calc.binary_star_model_obs.compute_obs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to compute observables with the specified star and binary
+system parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>star1_params</strong><span class="classifier">star_params</span></dt><dd><p>star_params object, with parameters for the primary star.</p>
+</dd>
+<dt><strong>star2_params</strong><span class="classifier">star_params</span></dt><dd><p>star_params object, with parameters for the secondary star.</p>
+</dd>
+<dt><strong>binary_params</strong><span class="classifier">binary_params</span></dt><dd><p>binary_params object, with parameters for the binary system
+configuration.</p>
+</dd>
+<dt><strong>irrad_frac_refl</strong><span class="classifier">float, default=1.0</span></dt><dd><p>Fraction reflectivity for irradiation</p>
+</dd>
+<dt><strong>num_triangles</strong><span class="classifier">int, default=1500</span></dt><dd><p>Number of triangles to use for PHOEBE’s mesh model of each stellar
+atmosphere. For contact system, num_triangles*2 are used for contact
+envelope.</p>
+</dd>
+<dt><strong>make_mesh_plots</strong><span class="classifier">bool, default=False</span></dt><dd><p>Make a mesh plot of the binary system. Default: False</p>
+</dd>
+<dt><strong>plot_name</strong><span class="classifier">str, default=None</span></dt><dd><p>Name for the output plots, if making a mesh plot</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>observables</dt><dd><p>observables object returned. Deep copy of input observables object,
+with obs also defined, with modeled values.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="model_obs_calc.single_star_model_obs">
+<span class="sig-prename descclassname"><span class="pre">model_obs_calc.</span></span><span class="sig-name descname"><span class="pre">single_star_model_obs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stellar_params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_blackbody_atm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_triangles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1500</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/model_obs_calc.html#single_star_model_obs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#model_obs_calc.single_star_model_obs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="model_obs_calc.phased_obs">
+<span class="sig-prename descclassname"><span class="pre">model_obs_calc.</span></span><span class="sig-name descname"><span class="pre">phased_obs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">observation_times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary_period</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filts_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[kp_filt,</span> <span class="pre">h_filt]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/model_obs_calc.html#phased_obs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#model_obs_calc.phased_obs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Phase observation times to a given binary period and t0</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="model_obs_calc.dist_ext_mag_calc">
+<span class="sig-prename descclassname"><span class="pre">model_obs_calc.</span></span><span class="sig-name descname"><span class="pre">dist_ext_mag_calc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_mags</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filt_exts</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/model_obs_calc.html#dist_ext_mag_calc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#model_obs_calc.dist_ext_mag_calc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">phitter</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../phitter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">phitter</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../prior/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">prior</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../likelihood/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">likelihood</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rv_adj_calc/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">rv_adj_calc</span></code></a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">model_obs_calc</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../phot_adj_calc/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">phot_adj_calc</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../isoc_interp_params/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">isoc_interp_params</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../blackbody_params/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">blackbody_params</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../binary_params/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">binary_params</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../star_params/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">star_params</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">API Reference</a><ul>
+      <li>Previous: <a href="../rv_adj_calc/index.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">rv_adj_calc</span></code></a></li>
+      <li>Next: <a href="../phot_adj_calc/index.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">phot_adj_calc</span></code></a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2024, Abhimat K. Gautam.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../../_sources/autoapi/model_obs_calc/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

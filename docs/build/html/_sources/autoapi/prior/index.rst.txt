@@ -1,0 +1,297 @@
+:py:mod:`prior`
+===============
+
+.. py:module:: prior
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   prior.uniform_prior
+   prior.gaussian_prior
+   prior.const_prior
+   prior.prior_collection
+
+
+
+
+.. py:class:: uniform_prior(bound_lo, bound_up)
+
+
+   Bases: :py:obj:`object`
+
+   
+   Uniform distribution prior
+
+
+   :Parameters:
+
+       **bound_lo** : float
+           Lower bound on the distribution 
+
+       **bound_up** : float
+           Upper bound on the distribution
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+   .. py:method:: __call__(cube)
+
+
+   .. py:method:: __repr__()
+
+      
+      Return repr(self).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      ..
+          !! processed by numpydoc !!
+
+
+.. py:class:: gaussian_prior(mean, sigma)
+
+
+   Bases: :py:obj:`object`
+
+   
+   Gaussian / normal distribution prior
+
+
+   :Parameters:
+
+       **mean** : float
+           Mean of the distribution
+
+       **sigma** : float
+           Sigma of the distribution
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+   .. py:method:: __call__(cube)
+
+
+   .. py:method:: __repr__()
+
+      
+      Return repr(self).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      ..
+          !! processed by numpydoc !!
+
+
+.. py:class:: const_prior(value)
+
+
+   Bases: :py:obj:`object`
+
+   
+   Constant value prior
+
+
+   :Parameters:
+
+       **value** : float
+           Constant value to return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+   .. py:method:: __call__(cube)
+
+
+   .. py:method:: __repr__()
+
+      
+      Return repr(self).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      ..
+          !! processed by numpydoc !!
+
+
+.. py:class:: prior_collection(priors_list)
+
+
+   Bases: :py:obj:`object`
+
+   
+   Collection of prior objects. Transformation from unit cube to parameter
+   space takes place with the prior_transform() function. Contains separate
+   prior transform functions for use with different sampling software.
+
+
+   :Parameters:
+
+       **priors_list** : list[prior]
+           List of priors that consitute the full set of parameters being modeled.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+   .. py:method:: prior_transform_multinest(cube, ndim, nparam)
+
+      
+      Prior transform function for use with PyMultiNest
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      ..
+          !! processed by numpydoc !!
+
+   .. py:method:: prior_transform_ultranest(cube)
+
+      
+      Prior transform function for use with Ultreanest
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      ..
+          !! processed by numpydoc !!
+
+   .. py:method:: prior_transform_dynesty(u)
+
+      
+      Prior transform function for use with Ultreanest
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      ..
+          !! processed by numpydoc !!
+
+

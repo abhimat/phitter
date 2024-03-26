@@ -1,0 +1,404 @@
+:py:mod:`phitter.isoc_interp`
+=============================
+
+.. py:module:: phitter.isoc_interp
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   phitter.isoc_interp.isochrone
+   phitter.isoc_interp.isochrone_mist
+   phitter.isoc_interp.isochrone_ekstrom12
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   phitter.isoc_interp.mist_phase_dict
+   phitter.isoc_interp.lambda_Ks
+   phitter.isoc_interp.dlambda_Ks
+   phitter.isoc_interp.lambda_Lp
+   phitter.isoc_interp.dlambda_Lp
+   phitter.isoc_interp.lambda_Kp
+   phitter.isoc_interp.dlambda_Kp
+   phitter.isoc_interp.lambda_H
+   phitter.isoc_interp.dlambda_H
+   phitter.isoc_interp.ks_filt_info
+   phitter.isoc_interp.lp_filt_info
+   phitter.isoc_interp.kp_filt_info
+   phitter.isoc_interp.h_filt_info
+   phitter.isoc_interp.v_filt_info
+   phitter.isoc_interp.flux_ref_Lp
+   phitter.isoc_interp.flux_ref_Ks
+   phitter.isoc_interp.flux_ref_Kp
+   phitter.isoc_interp.flux_ref_H
+   phitter.isoc_interp.flux_ref_V
+
+
+.. py:data:: mist_phase_dict
+
+   
+
+.. py:data:: lambda_Ks
+
+   
+
+.. py:data:: dlambda_Ks
+
+   
+
+.. py:data:: lambda_Lp
+
+   
+
+.. py:data:: dlambda_Lp
+
+   
+
+.. py:data:: lambda_Kp
+
+   
+
+.. py:data:: dlambda_Kp
+
+   
+
+.. py:data:: lambda_H
+
+   
+
+.. py:data:: dlambda_H
+
+   
+
+.. py:data:: ks_filt_info
+
+   
+
+.. py:data:: lp_filt_info
+
+   
+
+.. py:data:: kp_filt_info
+
+   
+
+.. py:data:: h_filt_info
+
+   
+
+.. py:data:: v_filt_info
+
+   
+
+.. py:data:: flux_ref_Lp
+
+   
+
+.. py:data:: flux_ref_Ks
+
+   
+
+.. py:data:: flux_ref_Kp
+
+   
+
+.. py:data:: flux_ref_H
+
+   
+
+.. py:data:: flux_ref_V
+
+   
+
+.. py:class:: isochrone(age=3900000.0, ext=2.63, dist=7971.0, met=0.0, use_atm_func='merged', filts_list=['nirc2,Kp', 'nirc2,H'])
+
+
+   Bases: :py:obj:`object`
+
+   
+   Base isochrone object. Other objects base off of this.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+   .. py:attribute:: filts_list
+      :value: ['nirc2,Kp', 'nirc2,H']
+
+      
+
+   .. py:attribute:: evo_model
+
+      
+
+   .. py:method:: calc_isochrones()
+
+      
+      Function to calculate the isochrone for the given parameters and
+      a second isochrone for the calculation of absolute mags and
+      passband luminosities.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      ..
+          !! processed by numpydoc !!
+
+   .. py:method:: extract_iso_stellar_params()
+
+      
+      Function to extract the specific stellar parameters needed from the
+      isochrone
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      ..
+          !! processed by numpydoc !!
+
+   .. py:method:: rad_interp(star_rad_interp)
+
+      
+      Interpolate stellar parameters using the stellar radius
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      ..
+          !! processed by numpydoc !!
+
+   .. py:method:: teff_interp(star_teff_interp)
+
+      
+      Interpolate stellar parameters using the Teff
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      ..
+          !! processed by numpydoc !!
+
+   .. py:method:: mass_init_interp(star_mass_init_interp)
+
+      
+      Interpolate stellar parameters using the initial stellar mass
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      ..
+          !! processed by numpydoc !!
+
+   .. py:method:: mass_interp(star_mass_interp)
+
+      
+      Interpolate stellar parameters using the (current) stellar mass
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      ..
+          !! processed by numpydoc !!
+
+   .. py:method:: calc_pblums(filt_absMags)
+
+      
+      Calculate the reference passband luminosity corresponding to 0 mag
+      in each filter.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      ..
+          !! processed by numpydoc !!
+
+
+.. py:class:: isochrone_mist(age=3900000.0, ext=2.63, dist=7971.0, met=0.0, phase=None, use_atm_func='merged', filts_list=['nirc2,Kp', 'nirc2,H'])
+
+
+   Bases: :py:obj:`isochrone`
+
+   
+   Isochrone object for MIST.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+   .. py:method:: extract_iso_stellar_params()
+
+      
+      Function to extract the specific stellar parameters needed from the
+      isochrone. Implements cutting down the isochrone to a specific stellar
+      evolution phase in MIST.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      ..
+          !! processed by numpydoc !!
+
+
+.. py:class:: isochrone_ekstrom12(age=3900000.0, ext=2.63, dist=7971.0, met=0.0, use_atm_func='merged', filts_list=['nirc2,Kp', 'nirc2,H'], models_rot=True)
+
+
+   Bases: :py:obj:`isochrone`
+
+   
+   Isochrone object for Ekstrom+ 12 (Geneva stellar evolution models).
+
+
+   :Parameters:
+
+       **models_rot=True**
+           ..
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+

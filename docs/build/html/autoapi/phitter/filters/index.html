@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>phitter.filters &#8212; phitter 0.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b3523f8e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=eafc0fe6" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=d7c963c3"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="phitter.observables" href="../observables/index.html" />
+    <link rel="prev" title="phitter" href="../index.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-phitter.filters">
+<span id="phitter-filters"></span><h1><a class="reference internal" href="#module-phitter.filters" title="phitter.filters"><code class="xref py py-mod docutils literal notranslate"><span class="pre">phitter.filters</span></code></a><a class="headerlink" href="#module-phitter.filters" title="Permalink to this heading">¶</a></h1>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this heading">¶</a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Permalink to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#phitter.filters.filter" title="phitter.filters.filter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#phitter.filters.naco_ks_filt" title="phitter.filters.naco_ks_filt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">naco_ks_filt</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#phitter.filters.nirc2_lp_filt" title="phitter.filters.nirc2_lp_filt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nirc2_lp_filt</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#phitter.filters.nirc2_kp_filt" title="phitter.filters.nirc2_kp_filt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nirc2_kp_filt</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#phitter.filters.nirc2_h_filt" title="phitter.filters.nirc2_h_filt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nirc2_h_filt</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#phitter.filters.jwst_115w_filt" title="phitter.filters.jwst_115w_filt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jwst_115w_filt</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#phitter.filters.jwst_212n_filt" title="phitter.filters.jwst_212n_filt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jwst_212n_filt</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#phitter.filters.jwst_323n_filt" title="phitter.filters.jwst_323n_filt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jwst_323n_filt</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="attributes">
+<h3>Attributes<a class="headerlink" href="#attributes" title="Permalink to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#phitter.filters.lambda_Ks" title="phitter.filters.lambda_Ks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lambda_Ks</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py data">
+<dt class="sig sig-object py" id="phitter.filters.lambda_Ks">
+<span class="sig-prename descclassname"><span class="pre">phitter.filters.</span></span><span class="sig-name descname"><span class="pre">lambda_Ks</span></span><a class="reference internal" href="../../../_modules/phitter/filters.html#lambda_Ks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#phitter.filters.lambda_Ks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="phitter.filters.filter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">phitter.filters.</span></span><span class="sig-name descname"><span class="pre">filter</span></span><a class="reference internal" href="../../../_modules/phitter/filters.html#filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#phitter.filters.filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="phitter.filters.filter.calc_isoc_filt_ext">
+<span class="sig-name descname"><span class="pre">calc_isoc_filt_ext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">isoc_Ks_ext</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ext_alpha</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/phitter/filters.html#filter.calc_isoc_filt_ext"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#phitter.filters.filter.calc_isoc_filt_ext" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="phitter.filters.filter.__eq__">
+<span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/phitter/filters.html#filter.__eq__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#phitter.filters.filter.__eq__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return self==value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="phitter.filters.filter.__hash__">
+<span class="sig-name descname"><span class="pre">__hash__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/phitter/filters.html#filter.__hash__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#phitter.filters.filter.__hash__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return hash(self).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="phitter.filters.filter.__lt__">
+<span class="sig-name descname"><span class="pre">__lt__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/phitter/filters.html#filter.__lt__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#phitter.filters.filter.__lt__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return self&lt;value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="phitter.filters.filter.__gt__">
+<span class="sig-name descname"><span class="pre">__gt__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/phitter/filters.html#filter.__gt__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#phitter.filters.filter.__gt__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return self&gt;value.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="phitter.filters.naco_ks_filt">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">phitter.filters.</span></span><span class="sig-name descname"><span class="pre">naco_ks_filt</span></span><a class="reference internal" href="../../../_modules/phitter/filters.html#naco_ks_filt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#phitter.filters.naco_ks_filt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#phitter.filters.filter" title="phitter.filters.filter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="phitter.filters.nirc2_lp_filt">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">phitter.filters.</span></span><span class="sig-name descname"><span class="pre">nirc2_lp_filt</span></span><a class="reference internal" href="../../../_modules/phitter/filters.html#nirc2_lp_filt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#phitter.filters.nirc2_lp_filt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#phitter.filters.filter" title="phitter.filters.filter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="phitter.filters.nirc2_lp_filt.calc_isoc_filt_ext">
+<span class="sig-name descname"><span class="pre">calc_isoc_filt_ext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">isoc_Ks_ext</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ext_alpha</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/phitter/filters.html#nirc2_lp_filt.calc_isoc_filt_ext"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#phitter.filters.nirc2_lp_filt.calc_isoc_filt_ext" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="phitter.filters.nirc2_kp_filt">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">phitter.filters.</span></span><span class="sig-name descname"><span class="pre">nirc2_kp_filt</span></span><a class="reference internal" href="../../../_modules/phitter/filters.html#nirc2_kp_filt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#phitter.filters.nirc2_kp_filt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#phitter.filters.filter" title="phitter.filters.filter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="phitter.filters.nirc2_h_filt">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">phitter.filters.</span></span><span class="sig-name descname"><span class="pre">nirc2_h_filt</span></span><a class="reference internal" href="../../../_modules/phitter/filters.html#nirc2_h_filt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#phitter.filters.nirc2_h_filt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#phitter.filters.filter" title="phitter.filters.filter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="phitter.filters.jwst_115w_filt">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">phitter.filters.</span></span><span class="sig-name descname"><span class="pre">jwst_115w_filt</span></span><a class="reference internal" href="../../../_modules/phitter/filters.html#jwst_115w_filt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#phitter.filters.jwst_115w_filt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#phitter.filters.filter" title="phitter.filters.filter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="phitter.filters.jwst_212n_filt">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">phitter.filters.</span></span><span class="sig-name descname"><span class="pre">jwst_212n_filt</span></span><a class="reference internal" href="../../../_modules/phitter/filters.html#jwst_212n_filt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#phitter.filters.jwst_212n_filt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#phitter.filters.filter" title="phitter.filters.filter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="phitter.filters.jwst_323n_filt">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">phitter.filters.</span></span><span class="sig-name descname"><span class="pre">jwst_323n_filt</span></span><a class="reference internal" href="../../../_modules/phitter/filters.html#jwst_323n_filt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#phitter.filters.jwst_323n_filt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#phitter.filters.filter" title="phitter.filters.filter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter</span></code></a></p>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">phitter</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">phitter</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../prior/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">prior</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../likelihood/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">likelihood</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rv_adj_calc/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">rv_adj_calc</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../model_obs_calc/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">model_obs_calc</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../phot_adj_calc/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">phot_adj_calc</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../isoc_interp_params/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">isoc_interp_params</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../blackbody_params/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">blackbody_params</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../binary_params/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">binary_params</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../star_params/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">star_params</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">API Reference</a><ul>
+  <li><a href="../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">phitter</span></code></a><ul>
+      <li>Previous: <a href="../index.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">phitter</span></code></a></li>
+      <li>Next: <a href="../observables/index.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">phitter.observables</span></code></a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2024, Abhimat K. Gautam.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../../../_sources/autoapi/phitter/filters/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

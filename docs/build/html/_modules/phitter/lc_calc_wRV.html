@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>phitter.lc_calc_wRV &#8212; phitter 0.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b3523f8e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=eafc0fe6" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=d7c963c3"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for phitter.lc_calc_wRV</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="c1"># Light curve calculation functions,</span>
+<span class="c1"># for fitting with PHOEBE</span>
+<span class="c1"># ---</span>
+<span class="c1"># Abhimat Gautam</span>
+
+<span class="kn">import</span> <span class="nn">phoebe</span>
+<span class="kn">from</span> <span class="nn">phoebe</span> <span class="kn">import</span> <span class="n">u</span>
+<span class="kn">from</span> <span class="nn">phoebe</span> <span class="kn">import</span> <span class="n">c</span> <span class="k">as</span> <span class="n">const</span>
+<span class="kn">from</span> <span class="nn">spisea</span> <span class="kn">import</span> <span class="n">synthetic</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">filters</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">astropy.table</span> <span class="kn">import</span> <span class="n">Table</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">matplotlib.font_manager</span> <span class="k">as</span> <span class="nn">font_manager</span>
+<span class="kn">from</span> <span class="nn">matplotlib.ticker</span> <span class="kn">import</span> <span class="n">MultipleLocator</span>
+
+<span class="c1"># Filters for default filter list</span>
+<div class="viewcode-block" id="kp_filt"><a class="viewcode-back" href="../../autoapi/phitter/lc_calc_wRV/index.html#phitter.lc_calc_wRV.kp_filt">[docs]</a><span class="n">kp_filt</span> <span class="o">=</span> <span class="n">filters</span><span class="o">.</span><span class="n">nirc2_kp_filt</span><span class="p">()</span></div>
+<div class="viewcode-block" id="h_filt"><a class="viewcode-back" href="../../autoapi/phitter/lc_calc_wRV/index.html#phitter.lc_calc_wRV.h_filt">[docs]</a><span class="n">h_filt</span> <span class="o">=</span> <span class="n">filters</span><span class="o">.</span><span class="n">nirc2_h_filt</span><span class="p">()</span></div>
+
+<span class="c1"># Stellar Parameters</span>
+<span class="c1"># stellar_params = (mass, rad, teff, mag_Kp, mag_H, pblum_Kp, pblum_H)</span>
+
+<div class="viewcode-block" id="single_star_lc"><a class="viewcode-back" href="../../autoapi/phitter/lc_calc_wRV/index.html#phitter.lc_calc_wRV.single_star_lc">[docs]</a><span class="k">def</span> <span class="nf">single_star_lc</span><span class="p">(</span><span class="n">stellar_params</span><span class="p">,</span>
+        <span class="n">use_blackbody_atm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">num_triangles</span><span class="o">=</span><span class="mi">1500</span><span class="p">):</span>
+    <span class="c1"># Read in the stellar parameters of the current star</span>
+    <span class="p">(</span><span class="n">star_mass</span><span class="p">,</span> <span class="n">star_rad</span><span class="p">,</span> <span class="n">star_teff</span><span class="p">,</span> <span class="n">star_logg</span><span class="p">,</span>
+     <span class="p">[</span><span class="n">star_mag_Kp</span><span class="p">,</span> <span class="n">star_mag_H</span><span class="p">],</span>
+     <span class="p">[</span><span class="n">star_pblum_Kp</span><span class="p">,</span> <span class="n">star_pblum_H</span><span class="p">])</span> <span class="o">=</span> <span class="n">stellar_params</span>
+    
+    <span class="n">err_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">1.</span><span class="p">])</span>
+
+    <span class="c1"># Set up a single star model</span>
+    <span class="n">sing_star</span> <span class="o">=</span> <span class="n">phoebe</span><span class="o">.</span><span class="n">default_star</span><span class="p">()</span>
+    
+    <span class="c1"># Light curve dataset</span>
+    <span class="k">if</span> <span class="n">use_blackbody_atm</span><span class="p">:</span>
+        <span class="n">sing_star</span><span class="o">.</span><span class="n">add_dataset</span><span class="p">(</span><span class="n">phoebe</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">lc</span><span class="p">,</span> <span class="n">times</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dataset</span><span class="o">=</span><span class="s1">&#39;mod_lc_Kp&#39;</span><span class="p">,</span> <span class="n">passband</span><span class="o">=</span><span class="s1">&#39;Keck_NIRC2:Kp&#39;</span><span class="p">,</span> <span class="n">ld_func</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">ld_coeffs</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">])</span>
+        <span class="n">sing_star</span><span class="o">.</span><span class="n">add_dataset</span><span class="p">(</span><span class="n">phoebe</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">lc</span><span class="p">,</span> <span class="n">times</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dataset</span><span class="o">=</span><span class="s1">&#39;mod_lc_H&#39;</span><span class="p">,</span> <span class="n">passband</span><span class="o">=</span><span class="s1">&#39;Keck_NIRC2:H&#39;</span><span class="p">,</span> <span class="n">ld_func</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">ld_coeffs</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">])</span>
+        <span class="c1"># sing_star.add_dataset(phoebe.dataset.lc, times=[0], dataset=&#39;mod_lc_V&#39;, passband=&#39;Johnson:V&#39;, ld_func=&#39;linear&#39;, ld_coeffs=[0.0])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">sing_star</span><span class="o">.</span><span class="n">add_dataset</span><span class="p">(</span><span class="n">phoebe</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">lc</span><span class="p">,</span> <span class="n">times</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dataset</span><span class="o">=</span><span class="s1">&#39;mod_lc_Kp&#39;</span><span class="p">,</span> <span class="n">passband</span><span class="o">=</span><span class="s1">&#39;Keck_NIRC2:Kp&#39;</span><span class="p">)</span>
+        <span class="n">sing_star</span><span class="o">.</span><span class="n">add_dataset</span><span class="p">(</span><span class="n">phoebe</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">lc</span><span class="p">,</span> <span class="n">times</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dataset</span><span class="o">=</span><span class="s1">&#39;mod_lc_H&#39;</span><span class="p">,</span> <span class="n">passband</span><span class="o">=</span><span class="s1">&#39;Keck_NIRC2:H&#39;</span><span class="p">)</span>
+        <span class="c1"># sing_star.add_dataset(phoebe.dataset.lc, times=[0], dataset=&#39;mod_lc_V&#39;, passband=&#39;Johnson:V&#39;)</span>
+    
+    <span class="c1"># Set up compute</span>
+    <span class="k">if</span> <span class="n">use_blackbody_atm</span><span class="p">:</span>
+        <span class="n">sing_star</span><span class="o">.</span><span class="n">add_compute</span><span class="p">(</span><span class="s1">&#39;phoebe&#39;</span><span class="p">,</span> <span class="n">compute</span><span class="o">=</span><span class="s1">&#39;detailed&#39;</span><span class="p">,</span> <span class="n">distortion_method</span><span class="o">=</span><span class="s1">&#39;sphere&#39;</span><span class="p">,</span> <span class="n">irrad_method</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">atm</span><span class="o">=</span><span class="s1">&#39;blackbody&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">sing_star</span><span class="o">.</span><span class="n">add_compute</span><span class="p">(</span><span class="s1">&#39;phoebe&#39;</span><span class="p">,</span> <span class="n">compute</span><span class="o">=</span><span class="s1">&#39;detailed&#39;</span><span class="p">,</span> <span class="n">distortion_method</span><span class="o">=</span><span class="s1">&#39;sphere&#39;</span><span class="p">,</span> <span class="n">irrad_method</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Set a default distance</span>
+    <span class="n">sing_star</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="s1">&#39;distance&#39;</span><span class="p">,</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">pc</span><span class="p">)</span>
+    
+    <span class="c1"># Set the passband luminosities</span>
+    <span class="n">sing_star</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="s1">&#39;pblum@mod_lc_Kp&#39;</span><span class="p">,</span> <span class="n">star_pblum_Kp</span><span class="p">)</span>
+    <span class="n">sing_star</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="s1">&#39;pblum@mod_lc_H&#39;</span><span class="p">,</span> <span class="n">star_pblum_H</span><span class="p">)</span>
+    
+    <span class="c1"># Set the stellar parameters</span>
+    <span class="n">sing_star</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="s1">&#39;teff@component&#39;</span><span class="p">,</span> <span class="n">star_teff</span><span class="p">)</span>
+    <span class="n">sing_star</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="s1">&#39;requiv@component&#39;</span><span class="p">,</span> <span class="n">star_rad</span><span class="p">)</span>
+    
+    <span class="c1"># Set the number of triangles in the mesh</span>
+    <span class="n">sing_star</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="s1">&#39;ntriangles@detailed@compute&#39;</span><span class="p">,</span> <span class="n">num_triangles</span><span class="p">)</span>
+    
+    <span class="c1"># Run compute</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">sing_star</span><span class="o">.</span><span class="n">run_compute</span><span class="p">(</span><span class="n">compute</span><span class="o">=</span><span class="s1">&#39;detailed&#39;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s1">&#39;run&#39;</span><span class="p">,</span>
+                              <span class="n">progressbar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span> <span class="c1"># Catch errors during computation (probably shouldn&#39;t happen during individual star computation)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error during primary ind. star compute: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">err_out</span><span class="p">,</span> <span class="n">err_out</span><span class="p">)</span>
+    
+    <span class="c1"># Retrieve computed fluxes from phoebe</span>
+    <span class="n">sing_star_fluxes_Kp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sing_star</span><span class="p">[</span><span class="s1">&#39;fluxes@lc@mod_lc_Kp@model&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">W</span> <span class="o">/</span> <span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">m</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">sing_star_mags_Kp</span> <span class="o">=</span> <span class="o">-</span><span class="mf">2.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">sing_star_fluxes_Kp</span> <span class="o">/</span> <span class="n">flux_ref_Kp</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.03</span>
+    
+    <span class="n">sing_star_fluxes_H</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sing_star</span><span class="p">[</span><span class="s1">&#39;fluxes@lc@mod_lc_H@model&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">W</span> <span class="o">/</span> <span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">m</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">sing_star_mags_H</span> <span class="o">=</span> <span class="o">-</span><span class="mf">2.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">sing_star_fluxes_H</span> <span class="o">/</span> <span class="n">flux_ref_H</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.03</span>
+        
+    <span class="k">return</span> <span class="p">(</span><span class="n">sing_star_mags_Kp</span><span class="p">,</span> <span class="n">sing_star_mags_H</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="binary_star_lc"><a class="viewcode-back" href="../../autoapi/phitter/lc_calc_wRV/index.html#phitter.lc_calc_wRV.binary_star_lc">[docs]</a><span class="k">def</span> <span class="nf">binary_star_lc</span><span class="p">(</span><span class="n">star1_params</span><span class="p">,</span> <span class="n">star2_params</span><span class="p">,</span> <span class="n">binary_params</span><span class="p">,</span> <span class="n">observation_times</span><span class="p">,</span>
+        <span class="n">filts_list</span><span class="o">=</span><span class="p">[</span><span class="n">kp_filt</span><span class="p">,</span> <span class="n">h_filt</span><span class="p">],</span>
+        <span class="n">use_blackbody_atm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">use_compact_object</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">irrad_frac_refl</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">make_mesh_plots</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">mesh_temp</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">mesh_temp_cmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">plot_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">print_diagnostics</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">par_compute</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">num_par_processes</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+        <span class="n">num_triangles</span><span class="o">=</span><span class="mi">1500</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the light curve for a binary system</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    star1_params : tuple</span>
+<span class="sd">        Tuple of parameters for the primary star</span>
+<span class="sd">    star2_params : tuple</span>
+<span class="sd">        Tuple of parameters for the secondary star</span>
+<span class="sd">    binary_params : tuple</span>
+<span class="sd">        Tuple of parameters for the binary system configuration</span>
+<span class="sd">    observation_times : tuple of numpy arrays</span>
+<span class="sd">        Tuple of observation times, with tuple length equal to [number of</span>
+<span class="sd">        photometric filters] + [1: for RV observation times].</span>
+<span class="sd">        Expects an iterable list or 1d numpy array of MJDs for each band</span>
+<span class="sd">        and for the RVs.</span>
+<span class="sd">        For example for photometry in Kp and H:</span>
+<span class="sd">        (kp_MJDs, h_MJDs, rv_MJDs) = observation_times</span>
+<span class="sd">    use_blackbody_atm : bool, default=False</span>
+<span class="sd">        Use blackbody atmosphere instead of default Castelli &amp; Kurucz</span>
+<span class="sd">        atmosphere. Default: False (i.e.: using a C&amp;K atm by default)</span>
+<span class="sd">    use_compact_object : bool, default=False</span>
+<span class="sd">        If true, sets eclipse_method to &#39;only_horizon&#39;, necessary for compact</span>
+<span class="sd">        companions without eclipses. Default: False</span>
+<span class="sd">    make_mesh_plots : bool, default=False</span>
+<span class="sd">        Make a mesh plot of the binary system (default False)</span>
+<span class="sd">    plot_name : str, default=None</span>
+<span class="sd">    print_diagnostics : bool, default=False</span>
+<span class="sd">    par_compute : bool, default=False</span>
+<span class="sd">    num_par_processes : int, default=8</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">if</span> <span class="n">par_compute</span><span class="p">:</span>
+        <span class="c1"># TODO: Need to implement parallelization correctly</span>
+        <span class="n">phoebe</span><span class="o">.</span><span class="n">mpi_on</span><span class="p">(</span><span class="n">nprocs</span><span class="o">=</span><span class="n">num_par_processes</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">phoebe</span><span class="o">.</span><span class="n">mpi_off</span><span class="p">()</span>
+    
+    <span class="c1"># Read in the stellar parameters of the binary components</span>
+    <span class="p">(</span><span class="n">star1_mass</span><span class="p">,</span> <span class="n">star1_rad</span><span class="p">,</span> <span class="n">star1_teff</span><span class="p">,</span> <span class="n">star1_logg</span><span class="p">,</span>
+     <span class="n">star1_filt_mags</span><span class="p">,</span> <span class="n">star1_filt_pblums</span><span class="p">)</span> <span class="o">=</span> <span class="n">star1_params</span>
+    <span class="p">(</span><span class="n">star2_mass</span><span class="p">,</span> <span class="n">star2_rad</span><span class="p">,</span> <span class="n">star2_teff</span><span class="p">,</span> <span class="n">star2_logg</span><span class="p">,</span>
+     <span class="n">star2_filt_mags</span><span class="p">,</span> <span class="n">star2_filt_pblums</span><span class="p">)</span> <span class="o">=</span> <span class="n">star2_params</span>
+    
+    <span class="c1"># Read in the parameters of the binary system</span>
+    <span class="p">(</span><span class="n">binary_period</span><span class="p">,</span> <span class="n">binary_ecc</span><span class="p">,</span> <span class="n">binary_inc</span><span class="p">,</span> <span class="n">t0</span><span class="p">)</span> <span class="o">=</span> <span class="n">binary_params</span>
+    
+    <span class="n">err_out</span> <span class="o">=</span> <span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">1.</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">1.</span><span class="p">])),</span>
+               <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">1.</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">1.</span><span class="p">]))</span>
+    <span class="k">if</span> <span class="n">make_mesh_plots</span><span class="p">:</span>
+        <span class="n">err_out</span> <span class="o">=</span> <span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">1.</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">1.</span><span class="p">])),</span>
+                   <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">1.</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">1.</span><span class="p">]),</span>
+                   <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">1.</span><span class="p">]))</span>
+    
+    <span class="c1"># Check for high temp ck2004 atmosphere limits</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">use_blackbody_atm</span><span class="p">:</span>
+        <span class="c1"># log g = 3.5, high temp bounds (above 31e3 K)</span>
+        <span class="k">if</span> <span class="n">star1_teff</span> <span class="o">&gt;</span> <span class="p">(</span><span class="mi">31000</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">K</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="mf">4.0</span> <span class="o">&gt;</span> <span class="n">star1_logg</span> <span class="o">&gt;</span> <span class="mf">3.5</span><span class="p">):</span>
+            <span class="n">star1_teff_round</span> <span class="o">=</span> <span class="mf">30995.0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">K</span>
+            
+            <span class="k">if</span> <span class="n">print_diagnostics</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Star 1 out of C&amp;K 2004 grid&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;star1_logg = </span><span class="si">{0:.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">star1_logg</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Rounding down star1_teff&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0:.4f}</span><span class="s1"> -&gt; </span><span class="si">{1:.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">star1_teff</span><span class="p">,</span> <span class="n">star1_teff_round</span><span class="p">))</span>
+            
+            <span class="n">star1_teff</span> <span class="o">=</span> <span class="n">star1_teff_round</span>
+        <span class="k">if</span> <span class="n">star2_teff</span> <span class="o">&gt;</span> <span class="p">(</span><span class="mi">31000</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">K</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="mf">4.0</span> <span class="o">&gt;</span> <span class="n">star2_logg</span> <span class="o">&gt;</span> <span class="mf">3.5</span><span class="p">):</span>
+            <span class="n">star2_teff_round</span> <span class="o">=</span> <span class="mf">30995.0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">K</span>
+            
+            <span class="k">if</span> <span class="n">print_diagnostics</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Star 2 out of C&amp;K 2004 grid&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;star2_logg = </span><span class="si">{0:.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">star2_logg</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Rounding down star2_teff&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0:.4f}</span><span class="s1"> -&gt; </span><span class="si">{1:.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">star2_teff</span><span class="p">,</span> <span class="n">star2_teff_round</span><span class="p">))</span>
+            
+            <span class="n">star2_teff</span> <span class="o">=</span> <span class="n">star2_teff_round</span>
+        
+        <span class="c1"># log g = 4.0, high temp bounds (above 40e3 K)</span>
+        <span class="k">if</span> <span class="n">star1_teff</span> <span class="o">&gt;</span> <span class="p">(</span><span class="mi">40000</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">K</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="mf">4.5</span> <span class="o">&gt;</span> <span class="n">star1_logg</span> <span class="o">&gt;</span> <span class="mf">4.0</span><span class="p">):</span>
+            <span class="n">star1_teff_round</span> <span class="o">=</span> <span class="mf">39995.0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">K</span>
+            
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Star 1 out of C&amp;K 2004 grid&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;star1_logg = </span><span class="si">{0:.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">star1_logg</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Rounding down star1_teff&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0:.4f}</span><span class="s1"> -&gt; </span><span class="si">{1:.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">star1_teff</span><span class="p">,</span> <span class="n">star1_teff_round</span><span class="p">))</span>
+            
+            <span class="n">star1_teff</span> <span class="o">=</span> <span class="n">star1_teff_round</span>
+        <span class="k">if</span> <span class="n">star2_teff</span> <span class="o">&gt;</span> <span class="p">(</span><span class="mi">40000</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">K</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="mf">4.0</span> <span class="o">&gt;</span> <span class="n">star2_logg</span> <span class="o">&gt;</span> <span class="mf">3.50</span><span class="p">):</span>
+            <span class="n">star2_teff_round</span> <span class="o">=</span> <span class="mf">39995.0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">K</span>
+            
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Star 2 out of C&amp;K 2004 grid&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;star2_logg = </span><span class="si">{0:.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">star2_logg</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Rounding down star2_teff&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0:.4f}</span><span class="s1"> -&gt; </span><span class="si">{1:.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">star2_teff</span><span class="p">,</span> <span class="n">star2_teff_round</span><span class="p">))</span>
+            
+            <span class="n">star2_teff</span> <span class="o">=</span> <span class="n">star2_teff_round</span>
+    
+    <span class="c1"># Set up binary model</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">phoebe</span><span class="o">.</span><span class="n">default_binary</span><span class="p">()</span>
+    
+    <span class="c1">## Set a default distance</span>
+    <span class="n">b</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="s1">&#39;distance&#39;</span><span class="p">,</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">pc</span><span class="p">)</span>
+    
+    <span class="c1">## Set period, semimajor axis, and mass ratio (q)</span>
+    <span class="n">binary_sma</span> <span class="o">=</span> <span class="p">((</span><span class="n">binary_period</span><span class="o">**</span><span class="mf">2.</span> <span class="o">*</span> <span class="n">const</span><span class="o">.</span><span class="n">G</span> <span class="o">*</span> <span class="p">(</span><span class="n">star1_mass</span> <span class="o">+</span> <span class="n">star2_mass</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="mf">4.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">**</span><span class="mf">2.</span><span class="p">))</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mf">3.</span><span class="p">)</span>
+    
+    <span class="n">binary_q</span> <span class="o">=</span> <span class="n">star2_mass</span> <span class="o">/</span> <span class="n">star1_mass</span>
+    
+    <span class="k">if</span> <span class="n">print_diagnostics</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Binary orbit checks&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Binary SMA: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">binary_sma</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">AU</span><span class="p">)))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Binary Mass Ratio (q): </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">binary_q</span><span class="p">))</span>
+    
+    <span class="n">b</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="s1">&#39;period@orbit&#39;</span><span class="p">,</span> <span class="n">binary_period</span><span class="p">)</span>
+    <span class="n">b</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="s1">&#39;sma@binary@component&#39;</span><span class="p">,</span> <span class="n">binary_sma</span><span class="p">)</span>
+    <span class="n">b</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="s1">&#39;q@binary@component&#39;</span><span class="p">,</span> <span class="n">binary_q</span><span class="p">)</span>
+    
+    <span class="c1"># Star rotation support tests</span>
+    <span class="c1"># print(b.get_value(&#39;period@secondary@star@component&#39;))</span>
+    <span class="c1"># print(b.get_value(&#39;period@secondary@star@constraint&#39;))</span>
+    <span class="c1"># b.remove_constraint(&#39;period@secondary@star@constraint&#39;)</span>
+    <span class="c1"># b.set_value(&#39;period@secondary@star@component&#39;, 3 * u.d)</span>
+    <span class="c1"># print(b.get_value(&#39;period@secondary&#39;))</span>
+    <span class="c1"># print(b.get_value(&#39;period@orbit&#39;))</span>
+    <span class="c1"># # print(hi)</span>
+    
+    <span class="c1">## Inclination</span>
+    <span class="n">b</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="s1">&#39;incl@orbit&#39;</span><span class="p">,</span> <span class="n">binary_inc</span><span class="p">)</span>
+    
+    <span class="c1"># Check for overflow</span>
+    <span class="c1">## Variables to help store the non-detached binary cases</span>
+    <span class="n">star1_semidetached</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">star2_semidetached</span> <span class="o">=</span> <span class="kc">False</span>
+    
+    <span class="n">star1_overflow</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">star2_overflow</span> <span class="o">=</span> <span class="kc">False</span>
+    
+    <span class="c1">## Get the max radii for both component stars</span>
+    <span class="n">star1_rad_max</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="s1">&#39;requiv_max@primary@component&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">solRad</span>
+    <span class="n">star2_rad_max</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="s1">&#39;requiv_max@secondary@component&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">solRad</span>
+    
+    <span class="c1">## Check for semidetached cases</span>
+    <span class="k">if</span> <span class="n">print_diagnostics</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Semidetached checks&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Star 1: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">((</span><span class="n">star1_rad</span> <span class="o">-</span> <span class="n">star1_rad_max</span><span class="p">)</span> <span class="o">/</span> <span class="n">star1_rad_max</span><span class="p">)))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Star 2: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">((</span><span class="n">star2_rad</span> <span class="o">-</span> <span class="n">star2_rad_max</span><span class="p">)</span> <span class="o">/</span> <span class="n">star2_rad_max</span><span class="p">)))</span>
+    
+    <span class="n">semidet_cut</span> <span class="o">=</span> <span class="mf">0.001</span>   <span class="c1"># (within 0.1% of max radii)</span>
+    <span class="n">semidet_cut</span> <span class="o">=</span> <span class="mf">0.015</span>   <span class="c1"># (within 1.5% of max radii)</span>
+    
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">((</span><span class="n">star1_rad</span> <span class="o">-</span> <span class="n">star1_rad_max</span><span class="p">)</span> <span class="o">/</span> <span class="n">star1_rad_max</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">semidet_cut</span><span class="p">:</span>
+        <span class="n">star1_semidetached</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">((</span><span class="n">star2_rad</span> <span class="o">-</span> <span class="n">star2_rad_max</span><span class="p">)</span> <span class="o">/</span> <span class="n">star2_rad_max</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">semidet_cut</span><span class="p">:</span>
+        <span class="n">star2_semidetached</span> <span class="o">=</span> <span class="kc">True</span>
+    
+    <span class="c1">## Check for overflow</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">star1_rad</span> <span class="o">&gt;</span> <span class="n">star1_rad_max</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">star1_semidetached</span><span class="p">:</span>
+        <span class="n">star1_overflow</span> <span class="o">=</span> <span class="kc">True</span>
+    
+    <span class="k">if</span> <span class="p">(</span><span class="n">star2_rad</span> <span class="o">&gt;</span> <span class="n">star2_rad_max</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">star2_semidetached</span><span class="p">:</span>
+        <span class="n">star2_overflow</span> <span class="o">=</span> <span class="kc">True</span>
+    
+    <span class="c1">### Check for if both stars are overflowing; which star overflows more?</span>
+    <span class="c1">### Choose that star to be overflowing more</span>
+    <span class="k">if</span> <span class="n">star1_overflow</span> <span class="ow">and</span> <span class="n">star2_overflow</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">star1_rad</span> <span class="o">-</span> <span class="n">star1_rad_max</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="n">star2_rad</span> <span class="o">-</span> <span class="n">star2_rad_max</span><span class="p">):</span>
+            <span class="n">star2_overflow</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">star1_overflow</span> <span class="o">=</span> <span class="kc">False</span>
+    
+    
+    <span class="k">if</span> <span class="n">print_diagnostics</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Overflow Checks&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Star 1 Semidetached: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">star1_semidetached</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Star 2 Semidetached: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">star2_semidetached</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Star 1 Overflow: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">star1_overflow</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Star 2 Overflow: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">star2_overflow</span><span class="p">))</span>
+    
+    <span class="c1"># If star 2 is overflowing, have to re set up model:</span>
+    <span class="c1"># Calling this same binary_star_lc function again,</span>
+    <span class="c1"># with star 2 as primary and star 1 as secondary.</span>
+    <span class="c1"># Change t0 = t0 - per/2 to make sure phase is correct,</span>
+    <span class="c1"># wrt stars 1 and 2 being in same respective position</span>
+    <span class="k">if</span> <span class="n">star2_overflow</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">star1_overflow</span><span class="p">:</span>
+        <span class="n">redo_binary_params</span> <span class="o">=</span> <span class="p">(</span><span class="n">binary_period</span><span class="p">,</span> <span class="n">binary_ecc</span><span class="p">,</span> <span class="n">binary_inc</span><span class="p">,</span>
+                              <span class="n">t0</span> <span class="o">-</span> <span class="p">(</span><span class="n">binary_period</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="o">/</span><span class="mf">2.</span><span class="p">))</span>
+        
+        <span class="k">return</span> <span class="n">binary_star_lc</span><span class="p">(</span><span class="n">star2_params</span><span class="p">,</span> <span class="n">star1_params</span><span class="p">,</span>
+                    <span class="n">redo_binary_params</span><span class="p">,</span>
+                    <span class="n">observation_times</span><span class="p">,</span>
+                    <span class="n">filts_list</span><span class="o">=</span><span class="n">filts_list</span><span class="p">,</span>
+                    <span class="n">use_blackbody_atm</span><span class="o">=</span><span class="n">use_blackbody_atm</span><span class="p">,</span>
+                    <span class="n">make_mesh_plots</span><span class="o">=</span><span class="n">make_mesh_plots</span><span class="p">,</span>
+                    <span class="n">mesh_temp</span><span class="o">=</span><span class="n">mesh_temp</span><span class="p">,</span> <span class="n">mesh_temp_cmap</span><span class="o">=</span><span class="n">mesh_temp_cmap</span><span class="p">,</span>
+                    <span class="n">plot_name</span><span class="o">=</span><span class="n">plot_name</span><span class="p">,</span>
+                    <span class="n">print_diagnostics</span><span class="o">=</span><span class="n">print_diagnostics</span><span class="p">,</span>
+                    <span class="n">par_compute</span><span class="o">=</span><span class="n">par_compute</span><span class="p">,</span> <span class="n">num_par_processes</span><span class="o">=</span><span class="n">num_par_processes</span><span class="p">,</span>
+                    <span class="n">num_triangles</span><span class="o">=</span><span class="n">num_triangles</span><span class="p">)</span>
+    
+    <span class="c1">## If none of these overflow cases, set variable to store if binary is detached</span>
+    <span class="n">binary_detached</span> <span class="o">=</span> <span class="p">(</span><span class="ow">not</span> <span class="n">star1_semidetached</span><span class="p">)</span> <span class="ow">and</span> \
+                      <span class="p">(</span><span class="ow">not</span> <span class="n">star2_semidetached</span><span class="p">)</span> <span class="ow">and</span> \
+                      <span class="p">(</span><span class="ow">not</span> <span class="n">star1_overflow</span><span class="p">)</span> <span class="ow">and</span> \
+                      <span class="p">(</span><span class="ow">not</span> <span class="n">star2_overflow</span><span class="p">)</span>
+    
+    <span class="c1">### Set non-zero eccentricity only if binary is detached</span>
+    <span class="k">if</span> <span class="n">binary_detached</span><span class="p">:</span>
+        <span class="n">b</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="s1">&#39;ecc@binary@component&#39;</span><span class="p">,</span> <span class="n">binary_ecc</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">b</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="s1">&#39;ecc@binary@component&#39;</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+    
+    <span class="c1">## Change set up for contact or semidetached cases</span>
+    <span class="k">if</span> <span class="n">star1_overflow</span> <span class="ow">or</span> <span class="n">star2_overflow</span><span class="p">:</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="n">phoebe</span><span class="o">.</span><span class="n">default_binary</span><span class="p">(</span><span class="n">contact_binary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+        <span class="c1">### Reset all necessary binary properties for contact system</span>
+        <span class="n">b</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="s1">&#39;distance&#39;</span><span class="p">,</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">pc</span><span class="p">)</span>
+        
+        <span class="n">b</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="s1">&#39;period@orbit&#39;</span><span class="p">,</span> <span class="n">binary_period</span><span class="p">)</span>
+        <span class="n">b</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="s1">&#39;sma@binary@component&#39;</span><span class="p">,</span> <span class="n">binary_sma</span><span class="p">)</span>
+        <span class="n">b</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="s1">&#39;q@binary@component&#39;</span><span class="p">,</span> <span class="n">binary_q</span><span class="p">)</span>
+        <span class="n">b</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="s1">&#39;incl@orbit&#39;</span><span class="p">,</span> <span class="n">binary_inc</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">star1_semidetached</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">star2_overflow</span><span class="p">:</span>
+        <span class="n">b</span><span class="o">.</span><span class="n">add_constraint</span><span class="p">(</span><span class="s1">&#39;semidetached&#39;</span><span class="p">,</span> <span class="s1">&#39;primary&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">star2_semidetached</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">star1_overflow</span><span class="p">:</span>
+        <span class="n">b</span><span class="o">.</span><span class="n">add_constraint</span><span class="p">(</span><span class="s1">&#39;semidetached&#39;</span><span class="p">,</span> <span class="s1">&#39;secondary&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Set up compute</span>
+    <span class="k">if</span> <span class="n">use_blackbody_atm</span><span class="p">:</span>
+        <span class="n">b</span><span class="o">.</span><span class="n">add_compute</span><span class="p">(</span><span class="s1">&#39;phoebe&#39;</span><span class="p">,</span> <span class="n">compute</span><span class="o">=</span><span class="s1">&#39;detailed&#39;</span><span class="p">,</span>
+                      <span class="n">irrad_method</span><span class="o">=</span><span class="s1">&#39;wilson&#39;</span><span class="p">,</span> <span class="n">atm</span><span class="o">=</span><span class="s1">&#39;blackbody&#39;</span><span class="p">)</span>
+        
+        <span class="c1"># b.add_compute(&#39;phoebe&#39;, compute=&#39;detailed&#39;,</span>
+        <span class="c1">#               irrad_method=&#39;horvat&#39;, atm=&#39;blackbody&#39;, distortion_method=&#39;rotstar&#39;)</span>
+        
+        <span class="n">b</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="s1">&#39;atm@primary@detailed&#39;</span><span class="p">,</span> <span class="s1">&#39;blackbody&#39;</span><span class="p">)</span>
+        <span class="n">b</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="s1">&#39;atm@secondary@detailed&#39;</span><span class="p">,</span> <span class="s1">&#39;blackbody&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">b</span><span class="o">.</span><span class="n">add_compute</span><span class="p">(</span><span class="s1">&#39;phoebe&#39;</span><span class="p">,</span> <span class="n">compute</span><span class="o">=</span><span class="s1">&#39;detailed&#39;</span><span class="p">,</span> <span class="n">irrad_method</span><span class="o">=</span><span class="s1">&#39;wilson&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Set the parameters of the component stars of the system</span>
+    <span class="c1">## Primary</span>
+    <span class="n">b</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="s1">&#39;teff@primary@component&#39;</span><span class="p">,</span> <span class="n">star1_teff</span><span class="p">)</span>
+    <span class="c1"># b.set_value(&#39;logg@primary@component&#39;, star1_logg)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">star1_semidetached</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">star2_overflow</span><span class="p">):</span>
+        <span class="n">b</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="s1">&#39;requiv@primary@component&#39;</span><span class="p">,</span> <span class="n">star1_rad</span><span class="p">)</span>
+    
+    <span class="c1">## Secondary</span>
+    <span class="n">b</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="s1">&#39;teff@secondary@component&#39;</span><span class="p">,</span> <span class="n">star2_teff</span><span class="p">)</span>
+    <span class="c1"># b.set_value(&#39;logg@secondary@component&#39;, star2_logg)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">star2_semidetached</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">star1_overflow</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">star2_overflow</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">b</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="s1">&#39;requiv@secondary@component&#39;</span><span class="p">,</span> <span class="n">star2_rad</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Overflow Checks&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Star 1 Semidetached: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">star1_semidetached</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Star 2 Semidetached: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">star2_semidetached</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Star 1 Overflow: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">star1_overflow</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Star 2 Overflow: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">star2_overflow</span><span class="p">))</span>
+            
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cannot set secondary radius: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">]))</span>
+            
+            <span class="k">return</span> <span class="n">err_out</span>
+    
+    <span class="k">if</span> <span class="n">print_diagnostics</span><span class="p">:</span>
+       <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Contact envelope parameters:&#39;</span><span class="p">)</span>
+       <span class="nb">print</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s1">&#39;contact_envelope@detailed@compute&#39;</span><span class="p">))</span>
+    
+    <span class="c1"># Set the number of triangles in the mesh</span>
+    <span class="c1"># Detached stars</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s1">&#39;ntriangles@primary@detailed@compute&#39;</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> 
+        <span class="n">b</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="s1">&#39;ntriangles@primary@detailed@compute&#39;</span><span class="p">,</span> <span class="n">num_triangles</span><span class="p">)</span>
+        
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s1">&#39;ntriangles@secondary@detailed@compute&#39;</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> 
+        <span class="n">b</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="s1">&#39;ntriangles@secondary@detailed@compute&#39;</span><span class="p">,</span> <span class="n">num_triangles</span><span class="p">)</span>
+    
+    <span class="c1"># Contact envelope</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s1">&#39;ntriangles@contact_envelope@detailed@compute&#39;</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+       <span class="k">if</span> <span class="n">print_diagnostics</span><span class="p">:</span>
+           <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Setting number of triangles for contact envelope&#39;</span><span class="p">)</span>
+       <span class="n">b</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="s1">&#39;ntriangles@contact_envelope@detailed@compute&#39;</span><span class="p">,</span>
+                   <span class="n">num_triangles</span> <span class="o">*</span> <span class="mf">2.</span><span class="p">)</span>
+    
+    <span class="c1"># Phase the observation times</span>
+    <span class="n">num_filts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">filts_list</span><span class="p">)</span>
+    
+    <span class="c1"># Read in observation times, and separate photometry from RVs</span>
+    <span class="n">filt_MJDs</span> <span class="o">=</span> <span class="n">observation_times</span><span class="p">[:</span><span class="n">num_filts</span><span class="p">]</span>
+    <span class="n">rv_MJDs</span> <span class="o">=</span> <span class="n">observation_times</span><span class="p">[</span><span class="n">num_filts</span><span class="p">]</span>
+    
+    <span class="c1"># Phase the observation times</span>
+    
+    <span class="c1"># Phase photometric observation times</span>
+    <span class="n">filt_phased_days</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="k">for</span> <span class="n">filt_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_filts</span><span class="p">):</span>
+        <span class="c1"># Phase the current filter&#39;s MJDs</span>
+        <span class="n">cur_filt_MJDs</span> <span class="o">=</span> <span class="n">filt_MJDs</span><span class="p">[</span><span class="n">filt_index</span><span class="p">]</span>
+        <span class="n">cur_filt_phased_days</span> <span class="o">=</span> <span class="p">(((</span><span class="n">cur_filt_MJDs</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span> <span class="o">%</span>
+                                 <span class="n">binary_period</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">/</span>
+                                <span class="n">binary_period</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        
+        <span class="c1"># Append to tuple of all filters&#39; phased days</span>
+        <span class="n">filt_phased_days</span> <span class="o">=</span> <span class="n">filt_phased_days</span> <span class="o">+</span> <span class="p">(</span><span class="n">cur_filt_phased_days</span><span class="p">,</span> <span class="p">)</span>
+    
+    <span class="c1"># Phase RV observation times</span>
+    <span class="n">rv_phased_days</span> <span class="o">=</span> <span class="p">(((</span><span class="n">rv_MJDs</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span> <span class="o">%</span> <span class="n">binary_period</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">/</span>
+                      <span class="n">binary_period</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+    
+    
+    <span class="c1"># Add light curve datasets</span>
+    
+    <span class="c1"># Parameters to change when using a blackbody atmosphere</span>
+    <span class="k">if</span> <span class="n">use_blackbody_atm</span><span class="p">:</span>
+        <span class="n">b</span><span class="o">.</span><span class="n">set_value_all</span><span class="p">(</span><span class="s1">&#39;ld_mode_bol&#39;</span><span class="p">,</span> <span class="s1">&#39;manual&#39;</span><span class="p">)</span>
+        <span class="n">b</span><span class="o">.</span><span class="n">set_value_all</span><span class="p">(</span><span class="s1">&#39;ld_func_bol&#39;</span><span class="p">,</span> <span class="s1">&#39;linear&#39;</span><span class="p">)</span>
+        <span class="n">b</span><span class="o">.</span><span class="n">set_value_all</span><span class="p">(</span><span class="s1">&#39;ld_coeffs_bol&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">])</span>
+    
+    <span class="c1"># Set irradiation reflection fraction </span>
+    <span class="n">b</span><span class="o">.</span><span class="n">set_value_all</span><span class="p">(</span><span class="s1">&#39;irrad_frac_refl_bol&#39;</span><span class="p">,</span> <span class="n">irrad_frac_refl</span><span class="p">)</span>
+    
+    <span class="c1"># Check for compact companion</span>
+    <span class="k">if</span> <span class="n">use_compact_object</span><span class="p">:</span>
+        <span class="n">b</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="s1">&#39;irrad_method@detailed&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span><span class="p">)</span>
+    
+    
+    <span class="c1"># Go through each filter and add a lightcurve dataset</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">filt_index</span><span class="p">,</span> <span class="n">filt</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">filts_list</span><span class="p">):</span>
+        <span class="n">filt_phases_sorted_inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">filt_phased_days</span><span class="p">[</span><span class="n">filt_index</span><span class="p">])</span>
+        
+        <span class="n">filt_model_times</span> <span class="o">=</span> <span class="p">(</span><span class="n">filt_phased_days</span><span class="p">[</span><span class="n">filt_index</span><span class="p">]</span> <span class="o">*</span>
+                            <span class="n">binary_period</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">filt_model_times</span> <span class="o">=</span> <span class="n">filt_model_times</span><span class="p">[</span><span class="n">filt_phases_sorted_inds</span><span class="p">]</span>
+        
+        
+        <span class="n">b</span><span class="o">.</span><span class="n">add_dataset</span><span class="p">(</span><span class="n">phoebe</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">lc</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">filt_model_times</span><span class="p">,</span>
+                      <span class="n">dataset</span><span class="o">=</span><span class="n">filt</span><span class="o">.</span><span class="n">phoebe_ds_name</span><span class="p">,</span>
+                      <span class="n">passband</span><span class="o">=</span><span class="n">filt</span><span class="o">.</span><span class="n">phoebe_pb_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">use_blackbody_atm</span><span class="p">:</span>
+            <span class="n">b</span><span class="o">.</span><span class="n">set_value_all</span><span class="p">(</span><span class="s1">&#39;ld_mode@&#39;</span> <span class="o">+</span> <span class="n">filt</span><span class="o">.</span><span class="n">phoebe_ds_name</span><span class="p">,</span> <span class="s1">&#39;manual&#39;</span><span class="p">)</span>
+    
+            <span class="n">b</span><span class="o">.</span><span class="n">set_value_all</span><span class="p">(</span><span class="s1">&#39;ld_func@&#39;</span> <span class="o">+</span> <span class="n">filt</span><span class="o">.</span><span class="n">phoebe_ds_name</span><span class="p">,</span> <span class="s1">&#39;linear&#39;</span><span class="p">)</span>
+    
+            <span class="n">b</span><span class="o">.</span><span class="n">set_value_all</span><span class="p">(</span><span class="s1">&#39;ld_coeffs@&#39;</span> <span class="o">+</span> <span class="n">filt</span><span class="o">.</span><span class="n">phoebe_ds_name</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">])</span>
+    
+    <span class="c1"># Add RV dataset</span>
+    <span class="n">rv_phases_sorted_inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">rv_phased_days</span><span class="p">)</span>
+    
+    <span class="n">rv_model_times</span> <span class="o">=</span> <span class="p">(</span><span class="n">rv_phased_days</span><span class="p">)</span> <span class="o">*</span> <span class="n">binary_period</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">rv_model_times</span> <span class="o">=</span> <span class="n">rv_model_times</span><span class="p">[</span><span class="n">rv_phases_sorted_inds</span><span class="p">]</span>
+    
+    <span class="c1"># Uses passband of first filter in filts_list for calculating RVs</span>
+    <span class="n">b</span><span class="o">.</span><span class="n">add_dataset</span><span class="p">(</span><span class="n">phoebe</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">rv</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">rv_model_times</span><span class="p">,</span>
+                  <span class="n">dataset</span><span class="o">=</span><span class="s1">&#39;mod_rv&#39;</span><span class="p">,</span>
+                  <span class="n">passband</span><span class="o">=</span><span class="n">filts_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">phoebe_pb_name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">use_blackbody_atm</span><span class="p">:</span>
+        <span class="n">b</span><span class="o">.</span><span class="n">set_value_all</span><span class="p">(</span><span class="s1">&#39;ld_mode@mod_rv&#39;</span><span class="p">,</span> <span class="s1">&#39;manual&#39;</span><span class="p">)</span>
+        
+        <span class="n">b</span><span class="o">.</span><span class="n">set_value_all</span><span class="p">(</span><span class="s1">&#39;ld_func@mod_rv&#39;</span><span class="p">,</span> <span class="s1">&#39;linear&#39;</span><span class="p">)</span>
+        
+        <span class="n">b</span><span class="o">.</span><span class="n">set_value_all</span><span class="p">(</span><span class="s1">&#39;ld_coeffs@mod_rv&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">])</span>    
+    
+    <span class="c1"># Add mesh dataset if making mesh plot</span>
+    <span class="k">if</span> <span class="n">make_mesh_plots</span><span class="p">:</span>
+        <span class="n">b</span><span class="o">.</span><span class="n">add_dataset</span><span class="p">(</span><span class="s1">&#39;mesh&#39;</span><span class="p">,</span> <span class="n">times</span><span class="o">=</span><span class="p">[(</span><span class="n">binary_period</span><span class="o">/</span><span class="mf">4.</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">],</span>
+                      <span class="n">dataset</span><span class="o">=</span><span class="s1">&#39;mod_mesh&#39;</span><span class="p">)</span>
+        <span class="n">b</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="s1">&#39;coordinates@mesh&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;uvw&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">mesh_temp</span><span class="p">:</span>
+            <span class="n">mesh_columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;us&#39;</span><span class="p">,</span> <span class="s1">&#39;vs&#39;</span><span class="p">,</span> <span class="s1">&#39;ws&#39;</span><span class="p">,</span> <span class="s1">&#39;rprojs&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;teffs&#39;</span><span class="p">,</span> <span class="s1">&#39;loggs&#39;</span><span class="p">,</span> <span class="s1">&#39;rs&#39;</span><span class="p">,</span> <span class="s1">&#39;areas&#39;</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">filt</span> <span class="ow">in</span> <span class="n">filts_list</span><span class="p">:</span>
+                <span class="n">mesh_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;*@&#39;</span> <span class="o">+</span> <span class="n">filt</span><span class="o">.</span><span class="n">phoebe_ds_name</span><span class="p">)</span>
+            
+            <span class="n">b</span><span class="p">[</span><span class="s1">&#39;columns@mesh&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mesh_columns</span>
+    
+    <span class="c1"># Set the passband luminosities for the stars</span>
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">star1_overflow</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">star2_overflow</span><span class="p">):</span>
+        <span class="c1"># Detached / semidetached case</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">filt_index</span><span class="p">,</span> <span class="n">filt</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">filts_list</span><span class="p">):</span>
+            <span class="n">b</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="s1">&#39;pblum_mode@&#39;</span> <span class="o">+</span> <span class="n">filt</span><span class="o">.</span><span class="n">phoebe_ds_name</span><span class="p">,</span>
+                        <span class="s1">&#39;decoupled&#39;</span><span class="p">)</span>
+            
+            <span class="n">b</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="s1">&#39;pblum@primary@&#39;</span> <span class="o">+</span> <span class="n">filt</span><span class="o">.</span><span class="n">phoebe_ds_name</span><span class="p">,</span>
+                        <span class="n">star1_filt_pblums</span><span class="p">[</span><span class="n">filt_index</span><span class="p">])</span>
+            
+            <span class="n">b</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="s1">&#39;pblum@secondary@&#39;</span> <span class="o">+</span> <span class="n">filt</span><span class="o">.</span><span class="n">phoebe_ds_name</span><span class="p">,</span>
+                        <span class="n">star2_filt_pblums</span><span class="p">[</span><span class="n">filt_index</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">star1_overflow</span><span class="p">:</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">filt_index</span><span class="p">,</span> <span class="n">filt</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">filts_list</span><span class="p">):</span>
+                <span class="n">b</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="s1">&#39;pblum@primary@&#39;</span> <span class="o">+</span> <span class="n">filt</span><span class="o">.</span><span class="n">phoebe_ds_name</span><span class="p">,</span>
+                            <span class="n">star1_filt_pblums</span><span class="p">[</span><span class="n">filt_index</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">star2_overflow</span><span class="p">:</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">filt_index</span><span class="p">,</span> <span class="n">filt</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">filts_list</span><span class="p">):</span>
+                <span class="n">b</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="s1">&#39;pblum@secondary@&#39;</span> <span class="o">+</span> <span class="n">filt</span><span class="o">.</span><span class="n">phoebe_ds_name</span><span class="p">,</span>
+                            <span class="n">star2_filt_pblums</span><span class="p">[</span><span class="n">filt_index</span><span class="p">])</span>
+    
+    <span class="c1"># Run compute</span>
+    <span class="c1"># Determine eclipse method</span>
+    <span class="k">if</span> <span class="n">use_compact_object</span><span class="p">:</span>
+        <span class="n">eclipse_method</span> <span class="o">=</span> <span class="s1">&#39;only_horizon&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">eclipse_method</span> <span class="o">=</span> <span class="s1">&#39;native&#39;</span>
+    
+    <span class="k">if</span> <span class="n">print_diagnostics</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Trying inital compute run&quot;</span><span class="p">)</span>
+        <span class="n">b</span><span class="o">.</span><span class="n">run_compute</span><span class="p">(</span><span class="n">compute</span><span class="o">=</span><span class="s1">&#39;detailed&#39;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s1">&#39;run&#39;</span><span class="p">,</span>
+                      <span class="n">progressbar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">eclipse_method</span><span class="o">=</span><span class="n">eclipse_method</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">b</span><span class="o">.</span><span class="n">run_compute</span><span class="p">(</span><span class="n">compute</span><span class="o">=</span><span class="s1">&#39;detailed&#39;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s1">&#39;run&#39;</span><span class="p">,</span>
+                          <span class="n">progressbar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">eclipse_method</span><span class="o">=</span><span class="n">eclipse_method</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">print_diagnostics</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error during primary binary compute: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+                     <span class="p">)</span>
+            <span class="k">return</span> <span class="n">err_out</span>
+    
+    <span class="c1"># Save out mesh plot</span>
+    <span class="k">if</span> <span class="n">make_mesh_plots</span><span class="p">:</span>
+        <span class="c1">## Plot Nerdery</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;font&#39;</span><span class="p">,</span> <span class="n">family</span><span class="o">=</span><span class="s1">&#39;serif&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;font&#39;</span><span class="p">,</span> <span class="n">serif</span><span class="o">=</span><span class="s1">&#39;Computer Modern Roman&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;text&#39;</span><span class="p">,</span> <span class="n">usetex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;text.latex&#39;</span><span class="p">,</span> <span class="n">preamble</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;\usepackage</span><span class="si">{gensymb}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;xtick&#39;</span><span class="p">,</span> <span class="n">direction</span> <span class="o">=</span> <span class="s1">&#39;in&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;ytick&#39;</span><span class="p">,</span> <span class="n">direction</span> <span class="o">=</span> <span class="s1">&#39;in&#39;</span><span class="p">)</span>
+        <span class="c1"># plt.rc(&#39;xtick&#39;, top = True)</span>
+        <span class="c1"># plt.rc(&#39;ytick&#39;, right = True)</span>
+        
+        <span class="n">suffix_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">plot_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">suffix_str</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">plot_name</span>
+        
+        <span class="c1">## Mesh plot</span>
+        <span class="k">if</span> <span class="n">mesh_temp</span><span class="p">:</span>
+            <span class="n">mesh_plot_out</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="s1">&#39;mod_mesh@model&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                                <span class="n">save</span><span class="o">=</span><span class="s1">&#39;./binary_mesh</span><span class="si">{0}</span><span class="s1">.pdf&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">suffix_str</span><span class="p">),</span>
+                                <span class="n">fc</span><span class="o">=</span><span class="s1">&#39;teffs&#39;</span><span class="p">,</span>
+                                <span class="n">fcmap</span><span class="o">=</span><span class="n">mesh_temp_cmap</span><span class="p">,</span>
+                                <span class="n">ec</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span>
+                            <span class="p">)</span>
+                                                     
+            <span class="c1"># print(mesh_plot_out.axs)</span>
+            
+            <span class="c1"># Extract and output mesh quantities</span>
+            <span class="n">mesh_quant_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;us&#39;</span><span class="p">,</span> <span class="s1">&#39;vs&#39;</span><span class="p">,</span> <span class="s1">&#39;ws&#39;</span><span class="p">,</span> <span class="s1">&#39;rprojs&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;teffs&#39;</span><span class="p">,</span> <span class="s1">&#39;loggs&#39;</span><span class="p">,</span> <span class="s1">&#39;rs&#39;</span><span class="p">,</span> <span class="s1">&#39;areas&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;abs_intensities&#39;</span><span class="p">]</span>
+            <span class="n">mesh_quant_do_filt</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span>
+                                  <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span>
+                                  <span class="kc">True</span><span class="p">]</span>
+            <span class="n">mesh_quant_units</span> <span class="o">=</span> <span class="p">[</span><span class="n">u</span><span class="o">.</span><span class="n">solRad</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">solRad</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">solRad</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">solRad</span><span class="p">,</span>
+                                <span class="n">u</span><span class="o">.</span><span class="n">K</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">solRad</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">solRad</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span>
+                                <span class="n">u</span><span class="o">.</span><span class="n">W</span> <span class="o">/</span> <span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">m</span><span class="o">**</span><span class="mi">3</span><span class="p">)]</span>
+            
+            <span class="n">mesh_quant_filts</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">filt</span> <span class="ow">in</span> <span class="n">filts_list</span><span class="p">:</span>
+                <span class="n">mesh_quant_filts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">filt</span><span class="o">.</span><span class="n">phoebe_ds_name</span><span class="p">)</span>
+                        
+            <span class="n">mesh_quants_pri</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">mesh_quants_sec</span> <span class="o">=</span> <span class="p">{}</span>
+            
+            <span class="k">for</span> <span class="p">(</span><span class="n">quant</span><span class="p">,</span> <span class="n">do_filt</span><span class="p">,</span>
+                 <span class="n">quant_unit</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">mesh_quant_names</span><span class="p">,</span> <span class="n">mesh_quant_do_filt</span><span class="p">,</span>
+                                    <span class="n">mesh_quant_units</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">do_filt</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">filt</span> <span class="ow">in</span> <span class="n">mesh_quant_filts</span><span class="p">:</span>
+                        <span class="n">quant_pri</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">quant</span><span class="si">}</span><span class="s1">@primary@</span><span class="si">{</span><span class="n">filt</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span>\
+                                    <span class="n">quant_unit</span>
+                        <span class="n">quant_sec</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">quant</span><span class="si">}</span><span class="s1">@secondary@</span><span class="si">{</span><span class="n">filt</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span>\
+                                    <span class="n">quant_unit</span>
+                    
+                        <span class="n">mesh_quants_pri</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">quant</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">filt</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">quant_pri</span>
+                        <span class="n">mesh_quants_sec</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">quant</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">filt</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">quant_sec</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">quant_pri</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">quant</span><span class="si">}</span><span class="s1">@primary&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">quant_unit</span>
+                    <span class="n">quant_sec</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">quant</span><span class="si">}</span><span class="s1">@secondary&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">quant_unit</span>
+                    
+                    <span class="n">mesh_quants_pri</span><span class="p">[</span><span class="n">quant</span><span class="p">]</span> <span class="o">=</span> <span class="n">quant_pri</span>
+                    <span class="n">mesh_quants_sec</span><span class="p">[</span><span class="n">quant</span><span class="p">]</span> <span class="o">=</span> <span class="n">quant_sec</span>
+            
+            <span class="c1"># Get uvw coordinates of each vertix of triangle in mesh</span>
+            <span class="n">uvw_elements_pri</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="n">qualifier</span><span class="o">=</span><span class="s1">&#39;uvw_elements&#39;</span><span class="p">,</span> 
+                                  <span class="n">component</span><span class="o">=</span><span class="s1">&#39;primary&#39;</span><span class="p">,</span> 
+                                  <span class="n">dataset</span><span class="o">=</span><span class="s1">&#39;mod_mesh&#39;</span><span class="p">,</span>
+                                  <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;mesh&#39;</span><span class="p">,</span> 
+                                  <span class="n">context</span><span class="o">=</span><span class="s1">&#39;model&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">solRad</span>
+            <span class="n">uvw_elements_sec</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="n">qualifier</span><span class="o">=</span><span class="s1">&#39;uvw_elements&#39;</span><span class="p">,</span> 
+                                  <span class="n">component</span><span class="o">=</span><span class="s1">&#39;secondary&#39;</span><span class="p">,</span> 
+                                  <span class="n">dataset</span><span class="o">=</span><span class="s1">&#39;mod_mesh&#39;</span><span class="p">,</span>
+                                  <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;mesh&#39;</span><span class="p">,</span> 
+                                  <span class="n">context</span><span class="o">=</span><span class="s1">&#39;model&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">solRad</span>
+            
+            <span class="n">mesh_quants_pri</span><span class="p">[</span><span class="s1">&#39;v1_us&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">uvw_elements_pri</span><span class="p">[:,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">mesh_quants_pri</span><span class="p">[</span><span class="s1">&#39;v1_vs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">uvw_elements_pri</span><span class="p">[:,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">mesh_quants_pri</span><span class="p">[</span><span class="s1">&#39;v1_ws&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">uvw_elements_pri</span><span class="p">[:,</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span>
+            
+            <span class="n">mesh_quants_pri</span><span class="p">[</span><span class="s1">&#39;v2_us&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">uvw_elements_pri</span><span class="p">[:,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">mesh_quants_pri</span><span class="p">[</span><span class="s1">&#39;v2_vs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">uvw_elements_pri</span><span class="p">[:,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">mesh_quants_pri</span><span class="p">[</span><span class="s1">&#39;v2_ws&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">uvw_elements_pri</span><span class="p">[:,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span>
+            
+            <span class="n">mesh_quants_pri</span><span class="p">[</span><span class="s1">&#39;v3_us&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">uvw_elements_pri</span><span class="p">[:,</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">mesh_quants_pri</span><span class="p">[</span><span class="s1">&#39;v3_vs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">uvw_elements_pri</span><span class="p">[:,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">mesh_quants_pri</span><span class="p">[</span><span class="s1">&#39;v3_ws&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">uvw_elements_pri</span><span class="p">[:,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span>
+            
+            
+            <span class="n">mesh_quants_sec</span><span class="p">[</span><span class="s1">&#39;v1_us&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">uvw_elements_sec</span><span class="p">[:,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">mesh_quants_sec</span><span class="p">[</span><span class="s1">&#39;v1_vs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">uvw_elements_sec</span><span class="p">[:,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">mesh_quants_sec</span><span class="p">[</span><span class="s1">&#39;v1_ws&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">uvw_elements_sec</span><span class="p">[:,</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span>
+            
+            <span class="n">mesh_quants_sec</span><span class="p">[</span><span class="s1">&#39;v2_us&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">uvw_elements_sec</span><span class="p">[:,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">mesh_quants_sec</span><span class="p">[</span><span class="s1">&#39;v2_vs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">uvw_elements_sec</span><span class="p">[:,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">mesh_quants_sec</span><span class="p">[</span><span class="s1">&#39;v2_ws&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">uvw_elements_sec</span><span class="p">[:,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span>
+            
+            <span class="n">mesh_quants_sec</span><span class="p">[</span><span class="s1">&#39;v3_us&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">uvw_elements_sec</span><span class="p">[:,</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">mesh_quants_sec</span><span class="p">[</span><span class="s1">&#39;v3_vs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">uvw_elements_sec</span><span class="p">[:,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">mesh_quants_sec</span><span class="p">[</span><span class="s1">&#39;v3_ws&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">uvw_elements_sec</span><span class="p">[:,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span>
+            
+            
+            <span class="c1"># Construct mesh tables for each star and output</span>
+            <span class="n">mesh_pri_table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="n">mesh_quants_pri</span><span class="p">)</span>
+            <span class="n">mesh_pri_table</span><span class="o">.</span><span class="n">sort</span><span class="p">([</span><span class="s1">&#39;us&#39;</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;mesh_pri.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">out_file</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">mesh_pri_table</span><span class="o">.</span><span class="n">pformat_all</span><span class="p">():</span>
+                    <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">mesh_pri_table</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;mesh_pri.h5&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;hdf5&#39;</span><span class="p">,</span>
+                                 <span class="n">path</span><span class="o">=</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="n">serialize_meta</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                 <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">mesh_pri_table</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;mesh_pri.fits&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;fits&#39;</span><span class="p">,</span>
+                                 <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            
+            <span class="n">mesh_sec_table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="n">mesh_quants_sec</span><span class="p">)</span>
+            <span class="n">mesh_sec_table</span><span class="o">.</span><span class="n">sort</span><span class="p">([</span><span class="s1">&#39;us&#39;</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;mesh_sec.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">out_file</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">mesh_sec_table</span><span class="o">.</span><span class="n">pformat_all</span><span class="p">():</span>
+                    <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">mesh_sec_table</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;mesh_sec.h5&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;hdf5&#39;</span><span class="p">,</span>
+                                 <span class="n">path</span><span class="o">=</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="n">serialize_meta</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                 <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">mesh_sec_table</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;mesh_sec.fits&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;fits&#39;</span><span class="p">,</span>
+                                 <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mesh_plot_out</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="s1">&#39;mod_mesh@model&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">save</span><span class="o">=</span><span class="s1">&#39;./binary_mesh</span><span class="si">{0}</span><span class="s1">.pdf&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">suffix_str</span><span class="p">))</span>
+    
+    
+    <span class="c1"># Get fluxes</span>
+    <span class="n">filt_model_fluxes</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="n">filt_model_mags</span> <span class="o">=</span> <span class="p">()</span>
+    
+    <span class="c1"># Go through each filter</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">filt_index</span><span class="p">,</span> <span class="n">filt</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">filts_list</span><span class="p">):</span>
+        <span class="n">cur_filt_model_fluxes</span> <span class="o">=</span>\
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;fluxes@lc@</span><span class="si">{</span><span class="n">filt</span><span class="o">.</span><span class="n">phoebe_ds_name</span><span class="si">}</span><span class="s1">@model&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">*</span>\
+            <span class="n">u</span><span class="o">.</span><span class="n">W</span> <span class="o">/</span> <span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">m</span><span class="o">**</span><span class="mf">2.</span><span class="p">)</span>
+        <span class="n">cur_filt_model_mags</span> <span class="o">=</span> <span class="o">-</span><span class="mf">2.5</span> <span class="o">*</span>\
+            <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">cur_filt_model_fluxes</span> <span class="o">/</span> <span class="n">filt</span><span class="o">.</span><span class="n">flux_ref_filt</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.03</span>
+        
+        <span class="n">filt_model_fluxes</span> <span class="o">=</span> <span class="n">filt_model_fluxes</span> <span class="o">+</span> <span class="p">(</span><span class="n">cur_filt_model_fluxes</span><span class="p">,</span> <span class="p">)</span>
+        <span class="n">filt_model_mags</span> <span class="o">=</span> <span class="n">filt_model_mags</span> <span class="o">+</span> <span class="p">(</span><span class="n">cur_filt_model_mags</span><span class="p">,</span> <span class="p">)</span>
+    
+    <span class="c1"># Get RVs</span>
+    <span class="n">model_RVs_pri</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="s1">&#39;rvs@primary@run@rv@model&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">km</span> <span class="o">/</span> <span class="n">u</span><span class="o">.</span><span class="n">s</span>
+    <span class="n">model_RVs_sec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="s1">&#39;rvs@secondary@run@rv@model&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">km</span> <span class="o">/</span> <span class="n">u</span><span class="o">.</span><span class="n">s</span>
+    
+    
+    <span class="k">if</span> <span class="n">print_diagnostics</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Flux Checks&quot;</span><span class="p">)</span>
+        
+        <span class="k">for</span> <span class="p">(</span><span class="n">filt_index</span><span class="p">,</span> <span class="n">filt</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">filts_list</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Fluxes, </span><span class="si">{0}</span><span class="s2">: </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">filt</span><span class="o">.</span><span class="n">filter_name</span><span class="p">,</span>
+                <span class="n">filt_model_fluxes</span><span class="p">[</span><span class="n">filt_index</span><span class="p">]))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Mags, </span><span class="si">{0}</span><span class="s2">: </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">filt</span><span class="o">.</span><span class="n">filter_name</span><span class="p">,</span>
+                <span class="n">filt_model_mags</span><span class="p">[</span><span class="n">filt_index</span><span class="p">]))</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">RV Checks&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;RVs, Primary: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model_RVs_pri</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;RVs, Secondary: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model_RVs_sec</span><span class="p">))</span>
+        
+    <span class="k">if</span> <span class="n">make_mesh_plots</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">filt_model_mags</span><span class="p">,</span>
+                <span class="n">model_RVs_pri</span><span class="p">,</span> <span class="n">model_RVs_sec</span><span class="p">,</span>
+                <span class="n">mesh_plot_out</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">filt_model_mags</span><span class="p">,</span>
+                <span class="n">model_RVs_pri</span><span class="p">,</span> <span class="n">model_RVs_sec</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="phased_obs"><a class="viewcode-back" href="../../autoapi/phitter/lc_calc_wRV/index.html#phitter.lc_calc_wRV.phased_obs">[docs]</a><span class="k">def</span> <span class="nf">phased_obs</span><span class="p">(</span><span class="n">observation_times</span><span class="p">,</span> <span class="n">binary_period</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span>
+               <span class="n">filts_list</span><span class="o">=</span><span class="p">[</span><span class="n">kp_filt</span><span class="p">,</span> <span class="n">h_filt</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Phase observation times to a given binary period and t0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">num_filts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">filts_list</span><span class="p">)</span>
+    
+    <span class="c1"># Read in observation times, and separate photometry from RVs</span>
+    <span class="n">filt_MJDs</span> <span class="o">=</span> <span class="n">observation_times</span><span class="p">[:</span><span class="n">num_filts</span><span class="p">]</span>
+    <span class="n">rv_MJDs</span> <span class="o">=</span> <span class="n">observation_times</span><span class="p">[</span><span class="n">num_filts</span><span class="p">]</span>
+    
+    <span class="n">out_phased_obs</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="c1"># Phase photometric observation times</span>
+    <span class="k">for</span> <span class="n">filt_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_filts</span><span class="p">):</span>
+        <span class="c1"># Phase the current filter&#39;s MJDs</span>
+        <span class="n">cur_filt_MJDs</span> <span class="o">=</span> <span class="n">filt_MJDs</span><span class="p">[</span><span class="n">filt_index</span><span class="p">]</span>
+        <span class="n">cur_filt_phased_days</span> <span class="o">=</span> <span class="p">(((</span><span class="n">cur_filt_MJDs</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span> <span class="o">%</span>
+                                 <span class="n">binary_period</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">/</span>
+                                <span class="n">binary_period</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        
+        <span class="c1"># Compute phase sorted inds</span>
+        <span class="n">cur_filt_phases_sorted_inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">cur_filt_phased_days</span><span class="p">)</span>
+        
+        <span class="c1"># Compute model times sorted to phase sorted inds</span>
+        <span class="n">cur_filt_model_times</span> <span class="o">=</span> <span class="n">cur_filt_phased_days</span> <span class="o">*</span>\
+                               <span class="n">binary_period</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+        <span class="n">cur_filt_model_times</span> <span class="o">=</span> <span class="n">cur_filt_model_times</span><span class="p">[</span><span class="n">cur_filt_phases_sorted_inds</span><span class="p">]</span>
+        
+        <span class="c1"># Append calculated values to output tuple</span>
+        <span class="n">out_phased_obs</span> <span class="o">=</span> <span class="n">out_phased_obs</span> <span class="o">+</span> \
+                         <span class="p">((</span><span class="n">cur_filt_phased_days</span><span class="p">,</span> <span class="n">cur_filt_phases_sorted_inds</span><span class="p">,</span>
+                           <span class="n">cur_filt_model_times</span><span class="p">),</span> <span class="p">)</span>
+    
+    <span class="c1"># Phase RV observation times</span>
+    <span class="n">rv_phased_days</span> <span class="o">=</span> <span class="p">(((</span><span class="n">rv_MJDs</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span> <span class="o">%</span> <span class="n">binary_period</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">/</span>
+                      <span class="n">binary_period</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+    
+    <span class="n">rv_phases_sorted_inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">rv_phased_days</span><span class="p">)</span>
+    
+    <span class="n">rv_model_times</span> <span class="o">=</span> <span class="p">(</span><span class="n">rv_phased_days</span><span class="p">)</span> <span class="o">*</span> <span class="n">binary_period</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">rv_model_times</span> <span class="o">=</span> <span class="n">rv_model_times</span><span class="p">[</span><span class="n">rv_phases_sorted_inds</span><span class="p">]</span>
+    
+    <span class="c1"># Append RV values to output tuple</span>
+    <span class="n">out_phased_obs</span> <span class="o">=</span> <span class="n">out_phased_obs</span> <span class="o">+</span> \
+                     <span class="p">((</span><span class="n">rv_phased_days</span><span class="p">,</span> <span class="n">rv_phases_sorted_inds</span><span class="p">,</span>
+                       <span class="n">rv_model_times</span><span class="p">),</span> <span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">out_phased_obs</span></div>
+
+<div class="viewcode-block" id="dist_ext_mag_calc"><a class="viewcode-back" href="../../autoapi/phitter/lc_calc_wRV/index.html#phitter.lc_calc_wRV.dist_ext_mag_calc">[docs]</a><span class="k">def</span> <span class="nf">dist_ext_mag_calc</span><span class="p">(</span><span class="n">input_mags</span><span class="p">,</span> <span class="n">target_dist</span><span class="p">,</span> <span class="n">filt_exts</span><span class="p">):</span>
+    <span class="n">binary_mags_filts</span> <span class="o">=</span> <span class="p">()</span>
+    
+    <span class="c1"># Calculate distance modulus</span>
+    <span class="n">dist_mod</span> <span class="o">=</span> <span class="mf">5.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">target_dist</span> <span class="o">/</span> <span class="p">(</span><span class="mf">10.</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">pc</span><span class="p">))</span>
+    
+    <span class="c1"># Adjust magnitudes in each filter</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">filt_index</span><span class="p">,</span> <span class="n">filt_ext</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">filt_exts</span><span class="p">):</span>
+        <span class="c1"># Add mag distance modulus and extinction</span>
+         <span class="n">adjusted_mags</span> <span class="o">=</span> <span class="n">input_mags</span><span class="p">[</span><span class="n">filt_index</span><span class="p">]</span> <span class="o">+</span> <span class="n">dist_mod</span> <span class="o">+</span> <span class="n">filt_ext</span>
+         <span class="n">binary_mags_filts</span> <span class="o">=</span> <span class="n">binary_mags_filts</span> <span class="o">+</span> <span class="p">(</span><span class="n">adjusted_mags</span><span class="p">,</span> <span class="p">)</span>
+    
+    <span class="c1"># Return mags adjusted for target distance and extinction</span>
+    <span class="k">return</span> <span class="n">binary_mags_filts</span></div>
+    
+
+<div class="viewcode-block" id="flux_adj"><a class="viewcode-back" href="../../autoapi/phitter/lc_calc_wRV/index.html#phitter.lc_calc_wRV.flux_adj">[docs]</a><span class="k">def</span> <span class="nf">flux_adj</span><span class="p">(</span><span class="n">mags_pri</span><span class="p">,</span> <span class="n">mags_ref_pri</span><span class="p">,</span> <span class="n">mags_sec</span><span class="p">,</span> <span class="n">mags_ref_sec</span><span class="p">,</span> <span class="n">mags_bin</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Perform flux adjustment for binary magnitudes</span>
+<span class="sd">    * Uses calculated and reference single star magnitudes for binary components</span>
+<span class="sd">    * Derives adjustment to binary magnitude based on the discrepancy</span>
+<span class="sd">    * Applies correction to the calculated binary magnitudes</span>
+<span class="sd">    </span>
+<span class="sd">    Keyword arguments:</span>
+<span class="sd">    mags_pri -- Model calculated magnitudes (Kp, H) of primary</span>
+<span class="sd">    mags_ref_pri -- Reference magnitudes (Kp, H) of primary</span>
+<span class="sd">    mags_sec -- Model calculated magnitudes (Kp, H) of secondary</span>
+<span class="sd">    mags_ref_sec -- Reference magnitudes (Kp, H) of secondary</span>
+<span class="sd">    mags_bin -- Model calculated magnitudes ([Kp], [H]) of the binary system</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># Properly expand and extract the input magnitudes</span>
+    <span class="p">(</span><span class="n">mag_pri_Kp</span><span class="p">,</span> <span class="n">mag_pri_H</span><span class="p">)</span> <span class="o">=</span> <span class="n">mags_pri</span>
+    <span class="p">(</span><span class="n">mag_ref_pri_Kp</span><span class="p">,</span> <span class="n">mag_ref_pri_H</span><span class="p">)</span> <span class="o">=</span> <span class="n">mags_ref_pri</span>
+    
+    <span class="p">(</span><span class="n">mag_sec_Kp</span><span class="p">,</span> <span class="n">mag_sec_H</span><span class="p">)</span> <span class="o">=</span> <span class="n">mags_sec</span>
+    <span class="p">(</span><span class="n">mag_ref_sec_Kp</span><span class="p">,</span> <span class="n">mag_ref_sec_H</span><span class="p">)</span> <span class="o">=</span> <span class="n">mags_ref_sec</span>
+    
+    <span class="p">(</span><span class="n">mags_bin_Kp</span><span class="p">,</span> <span class="n">mags_bin_H</span><span class="p">)</span> <span class="o">=</span> <span class="n">mags_bin</span>
+    
+    <span class="c1"># Calculate flux adjustment for each component star</span>
+    <span class="n">flux_adj_star_pri_Kp</span> <span class="o">=</span> <span class="p">(</span><span class="mf">10.</span><span class="o">**</span><span class="p">((</span><span class="n">mag_pri_Kp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">mag_ref_pri_Kp</span><span class="p">)</span><span class="o">/</span><span class="mf">2.5</span><span class="p">))</span>
+    <span class="n">flux_adj_star_pri_H</span> <span class="o">=</span> <span class="p">(</span><span class="mf">10.</span><span class="o">**</span><span class="p">((</span><span class="n">mag_pri_H</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">mag_ref_pri_H</span><span class="p">)</span><span class="o">/</span><span class="mf">2.5</span><span class="p">))</span>
+    
+    <span class="n">flux_adj_star_sec_Kp</span> <span class="o">=</span> <span class="p">(</span><span class="mf">10.</span><span class="o">**</span><span class="p">((</span><span class="n">mag_sec_Kp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">mag_ref_sec_Kp</span><span class="p">)</span><span class="o">/</span><span class="mf">2.5</span><span class="p">))</span>
+    <span class="n">flux_adj_star_sec_H</span> <span class="o">=</span> <span class="p">(</span><span class="mf">10.</span><span class="o">**</span><span class="p">((</span><span class="n">mag_sec_H</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">mag_ref_sec_H</span><span class="p">)</span><span class="o">/</span><span class="mf">2.5</span><span class="p">))</span>
+    
+    <span class="c1"># Calculate total flux adjustment for the binary system</span>
+    <span class="n">flux_adj_bin_Kp</span> <span class="o">=</span> <span class="p">((</span><span class="mf">10.</span><span class="o">**</span><span class="p">(</span><span class="n">mag_ref_pri_Kp</span> <span class="o">/</span> <span class="o">-</span><span class="mf">2.5</span><span class="p">))</span> <span class="o">+</span> <span class="p">(</span><span class="mf">10.</span><span class="o">**</span><span class="p">(</span><span class="n">mag_ref_sec_Kp</span> <span class="o">/</span> <span class="o">-</span><span class="mf">2.5</span><span class="p">)))</span> <span class="o">/</span> <span class="p">((</span><span class="mf">10.</span><span class="o">**</span><span class="p">(</span><span class="n">mag_pri_Kp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="o">-</span><span class="mf">2.5</span><span class="p">))</span> <span class="o">+</span> <span class="p">(</span><span class="mf">10.</span><span class="o">**</span><span class="p">(</span><span class="n">mag_sec_Kp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="o">-</span><span class="mf">2.5</span><span class="p">)))</span>
+    <span class="n">flux_adj_bin_H</span> <span class="o">=</span> <span class="p">((</span><span class="mf">10.</span><span class="o">**</span><span class="p">(</span><span class="n">mag_ref_pri_H</span> <span class="o">/</span> <span class="o">-</span><span class="mf">2.5</span><span class="p">))</span> <span class="o">+</span> <span class="p">(</span><span class="mf">10.</span><span class="o">**</span><span class="p">(</span><span class="n">mag_ref_sec_H</span> <span class="o">/</span> <span class="o">-</span><span class="mf">2.5</span><span class="p">)))</span> <span class="o">/</span> <span class="p">((</span><span class="mf">10.</span><span class="o">**</span><span class="p">(</span><span class="n">mag_pri_H</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="o">-</span><span class="mf">2.5</span><span class="p">))</span> <span class="o">+</span> <span class="p">(</span><span class="mf">10.</span><span class="o">**</span><span class="p">(</span><span class="n">mag_sec_H</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="o">-</span><span class="mf">2.5</span><span class="p">)))</span>
+    
+    
+    <span class="c1"># Apply flux adjustment to the input binary magnitudes</span>
+    <span class="c1">## Convert magnitudes back into flux space</span>
+    <span class="n">fluxes_bin_Kp</span> <span class="o">=</span> <span class="n">flux_ref_Kp</span> <span class="o">*</span> <span class="p">(</span><span class="mf">10.</span><span class="o">**</span><span class="p">((</span><span class="n">mags_bin_Kp</span> <span class="o">-</span> <span class="mf">0.03</span><span class="p">)</span><span class="o">/</span> <span class="o">-</span><span class="mf">2.5</span><span class="p">))</span>
+    <span class="n">fluxes_bin_H</span> <span class="o">=</span> <span class="n">flux_ref_H</span> <span class="o">*</span> <span class="p">(</span><span class="mf">10.</span><span class="o">**</span><span class="p">((</span><span class="n">mags_bin_H</span> <span class="o">-</span> <span class="mf">0.03</span><span class="p">)</span><span class="o">/</span> <span class="o">-</span><span class="mf">2.5</span><span class="p">))</span>
+    
+    <span class="c1">## Apply flux adjustment, derived from the single stars</span>
+    <span class="n">fluxes_bin_Kp</span> <span class="o">=</span> <span class="n">fluxes_bin_Kp</span> <span class="o">*</span> <span class="n">flux_adj_bin_Kp</span>
+    <span class="n">fluxes_bin_H</span> <span class="o">=</span> <span class="n">fluxes_bin_H</span> <span class="o">*</span> <span class="n">flux_adj_bin_H</span>
+    
+    <span class="c1">## Convert to magnitudes and return</span>
+    <span class="n">adj_mags_bin_Kp</span> <span class="o">=</span> <span class="o">-</span><span class="mf">2.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">fluxes_bin_Kp</span> <span class="o">/</span> <span class="n">flux_ref_Kp</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.03</span>
+    <span class="n">adj_mags_bin_H</span> <span class="o">=</span> <span class="o">-</span><span class="mf">2.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">fluxes_bin_H</span> <span class="o">/</span> <span class="n">flux_ref_H</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.03</span>
+    
+    <span class="k">return</span> <span class="p">(</span><span class="n">adj_mags_bin_Kp</span><span class="p">,</span> <span class="n">adj_mags_bin_H</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="binary_mags_calc"><a class="viewcode-back" href="../../autoapi/phitter/lc_calc_wRV/index.html#phitter.lc_calc_wRV.binary_mags_calc">[docs]</a><span class="k">def</span> <span class="nf">binary_mags_calc</span><span class="p">(</span>
+        <span class="n">star1_params_lcfit</span><span class="p">,</span> <span class="n">star2_params_lcfit</span><span class="p">,</span>
+        <span class="n">binary_params</span><span class="p">,</span>
+        <span class="n">observation_times</span><span class="p">,</span>
+        <span class="n">isoc_Ks_ext</span><span class="p">,</span> <span class="n">filt_exts</span><span class="p">,</span> <span class="n">ext_alpha</span><span class="p">,</span>
+        <span class="n">isoc_dist</span><span class="p">,</span> <span class="n">bin_dist</span><span class="p">,</span>
+        <span class="n">filts_list</span><span class="o">=</span><span class="p">[</span><span class="n">kp_filt</span><span class="p">,</span> <span class="n">h_filt</span><span class="p">],</span>
+        <span class="n">use_blackbody_atm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">use_compact_object</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">irrad_frac_refl</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">make_mesh_plots</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">mesh_temp</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">mesh_temp_cmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">plot_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">par_compute</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">num_par_processes</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+        <span class="n">num_triangles</span><span class="o">=</span><span class="mi">1500</span><span class="p">,</span>
+        <span class="n">print_diagnostics</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+    <span class="c1"># Filter calculations</span>
+    <span class="n">num_filts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">filts_list</span><span class="p">)</span>
+    
+    <span class="n">isoc_filt_exts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">num_filts</span><span class="p">)</span>
+    <span class="n">filt_ext_adjs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">num_filts</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">filt_index</span><span class="p">,</span> <span class="n">cur_filt</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">filts_list</span><span class="p">):</span>
+        <span class="c1"># Calculate extinctions implied by isochrone extinction</span>
+        <span class="n">isoc_filt_exts</span><span class="p">[</span><span class="n">filt_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">cur_filt</span><span class="o">.</span><span class="n">calc_isoc_filt_ext</span><span class="p">(</span>
+                                         <span class="n">isoc_Ks_ext</span><span class="p">,</span> <span class="n">ext_alpha</span><span class="p">)</span>
+        
+        <span class="c1"># Calculate extinction adjustments</span>
+        <span class="n">filt_ext_adjs</span><span class="p">[</span><span class="n">filt_index</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">filt_exts</span><span class="p">[</span><span class="n">filt_index</span><span class="p">]</span> <span class="o">-</span>
+                                     <span class="n">isoc_filt_exts</span><span class="p">[</span><span class="n">filt_index</span><span class="p">])</span>
+    
+    <span class="c1"># Calculate distance modulus adjustments</span>
+    <span class="n">dist_mod_mag_adj</span> <span class="o">=</span> <span class="mf">5.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">bin_dist</span> <span class="o">/</span> <span class="p">(</span><span class="n">isoc_dist</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">pc</span><span class="p">))</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+    
+    <span class="c1"># Extract stellar parameters from input</span>
+    <span class="p">(</span><span class="n">star1_mass</span><span class="p">,</span> <span class="n">star1_rad</span><span class="p">,</span> <span class="n">star1_teff</span><span class="p">,</span> <span class="n">star1_logg</span><span class="p">,</span>
+     <span class="n">star1_filt_mags</span><span class="p">,</span> <span class="n">star1_filt_pblums</span><span class="p">)</span> <span class="o">=</span> <span class="n">star1_params_lcfit</span>
+    <span class="p">(</span><span class="n">star2_mass</span><span class="p">,</span> <span class="n">star2_rad</span><span class="p">,</span> <span class="n">star2_teff</span><span class="p">,</span> <span class="n">star2_logg</span><span class="p">,</span>
+     <span class="n">star2_filt_mags</span><span class="p">,</span> <span class="n">star2_filt_pblums</span><span class="p">)</span> <span class="o">=</span> <span class="n">star2_params_lcfit</span>
+    
+    <span class="c1"># Run binary star model to get binary mags</span>
+    <span class="n">binary_star_lc_out</span> <span class="o">=</span> <span class="n">binary_star_lc</span><span class="p">(</span>
+        <span class="n">star1_params_lcfit</span><span class="p">,</span>
+        <span class="n">star2_params_lcfit</span><span class="p">,</span>
+        <span class="n">binary_params</span><span class="p">,</span>
+        <span class="n">observation_times</span><span class="p">,</span>
+        <span class="n">filts_list</span><span class="o">=</span><span class="n">filts_list</span><span class="p">,</span>
+        <span class="n">use_blackbody_atm</span><span class="o">=</span><span class="n">use_blackbody_atm</span><span class="p">,</span>
+        <span class="n">use_compact_object</span><span class="o">=</span><span class="n">use_compact_object</span><span class="p">,</span>
+        <span class="n">irrad_frac_refl</span><span class="o">=</span><span class="n">irrad_frac_refl</span><span class="p">,</span>
+        <span class="n">make_mesh_plots</span><span class="o">=</span><span class="n">make_mesh_plots</span><span class="p">,</span>
+        <span class="n">mesh_temp</span><span class="o">=</span><span class="n">mesh_temp</span><span class="p">,</span>
+        <span class="n">mesh_temp_cmap</span><span class="o">=</span><span class="n">mesh_temp_cmap</span><span class="p">,</span>
+        <span class="n">plot_name</span><span class="o">=</span><span class="n">plot_name</span><span class="p">,</span>
+        <span class="n">par_compute</span><span class="o">=</span><span class="n">par_compute</span><span class="p">,</span> <span class="n">num_par_processes</span><span class="o">=</span><span class="n">num_par_processes</span><span class="p">,</span>
+        <span class="n">num_triangles</span><span class="o">=</span><span class="n">num_triangles</span><span class="p">,</span>
+        <span class="n">print_diagnostics</span><span class="o">=</span><span class="n">print_diagnostics</span><span class="p">,</span>
+    <span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">make_mesh_plots</span><span class="p">:</span>
+        <span class="p">(</span><span class="n">binary_mags_filts</span><span class="p">,</span>
+         <span class="n">binary_RVs_pri</span><span class="p">,</span> <span class="n">binary_RVs_sec</span><span class="p">,</span>
+         <span class="n">mesh_plot_out</span><span class="p">)</span> <span class="o">=</span> <span class="n">binary_star_lc_out</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="p">(</span><span class="n">binary_mags_filts</span><span class="p">,</span>
+         <span class="n">binary_RVs_pri</span><span class="p">,</span> <span class="n">binary_RVs_sec</span><span class="p">)</span> <span class="o">=</span> <span class="n">binary_star_lc_out</span>
+    
+    <span class="c1"># Test failure of binary mag calculation</span>
+    <span class="k">if</span> <span class="p">((</span><span class="n">binary_mags_filts</span><span class="p">[</span><span class="mi">0</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mf">1.</span><span class="p">):</span>
+        <span class="k">return</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+    
+    <span class="c1">## Apply distance modulus and isoc. extinction to binary magnitudes</span>
+    <span class="n">binary_mags_filts</span> <span class="o">=</span> <span class="n">dist_ext_mag_calc</span><span class="p">(</span>
+                            <span class="n">binary_mags_filts</span><span class="p">,</span>
+                            <span class="n">isoc_dist</span><span class="p">,</span>
+                            <span class="n">isoc_filt_exts</span><span class="p">,</span>
+                        <span class="p">)</span>
+    
+    <span class="c1"># Go through the mag adjustments, filter by filter</span>
+    <span class="n">binary_mags_filts_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">binary_mags_filts</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">filt_index</span><span class="p">,</span> <span class="n">cur_filt</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">filts_list</span><span class="p">):</span>
+        <span class="c1"># Apply the extinction difference between model and isochrone values</span>
+        <span class="c1"># for each filter</span>
+        <span class="n">binary_mags_filts_list</span><span class="p">[</span><span class="n">filt_index</span><span class="p">]</span> <span class="o">+=</span> <span class="n">filt_ext_adjs</span><span class="p">[</span><span class="n">filt_index</span><span class="p">]</span>
+        
+        <span class="c1"># Apply the distance modulus for difference between isoc. distance</span>
+        <span class="c1"># and binary distance</span>
+        <span class="c1"># (Same for each filter)</span>
+        <span class="n">binary_mags_filts_list</span><span class="p">[</span><span class="n">filt_index</span><span class="p">]</span> <span class="o">+=</span> <span class="n">dist_mod_mag_adj</span>
+    
+    <span class="n">binary_mags_filts</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">binary_mags_filts_list</span><span class="p">)</span>
+    
+    <span class="c1"># Return final light curve</span>
+    <span class="k">if</span> <span class="n">make_mesh_plots</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">binary_mags_filts</span><span class="p">,</span>
+                <span class="n">binary_RVs_pri</span><span class="p">,</span> <span class="n">binary_RVs_sec</span><span class="p">,</span>
+                <span class="n">mesh_plot_out</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">binary_mags_filts</span><span class="p">,</span>
+                <span class="n">binary_RVs_pri</span><span class="p">,</span> <span class="n">binary_RVs_sec</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">phitter</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2024, Abhimat K. Gautam.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
