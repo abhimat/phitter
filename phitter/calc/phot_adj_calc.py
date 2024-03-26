@@ -86,12 +86,16 @@ def apply_extinction(
     filts_ext_adj = {}
     
     for cur_filt in bin_observables.unique_filts_phot:
+        # Determine extinction in current band from the extinction law used and
+        # the reference extinction from the isochrone object
         isoc_filts_ext[cur_filt] = red_law_funcs_ks[isoc_red_law](
             cur_filt.lambda_filt.to(u.micron).value,
             isoc_Ks_ext,
         )[0]
         
-        # Allow a tweaked extinction law, with a tweaked power law slope
+        # Allow a tweaked to the extinction law, with a tweaked power law slope.
+        # Currently implemented as an extinction implied by a new power law
+        # slope.
         if ext_alpha is not None:
             filts_ext_adj[cur_filt] = (\
                 ((target_ref_filt_ext *
