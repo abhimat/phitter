@@ -18,4 +18,4 @@ dependencies:
   - nbsphinx
   - recommonmark
   - sphinx-markdown-tables
-  - myst_parser
+  - myst-parser
