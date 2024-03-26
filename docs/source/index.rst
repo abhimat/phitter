@@ -3,9 +3,9 @@
 phitter
 =======
 
-phitter is an open-source python package to simulate and fit to data observables from stellar binary systems. At this time, observables that can be generated and fit with phitter include photometry (i.e., observed fluxes) and line-of-sight radial velocities (RVs).
+phitter is an open-source python package to simulate observables  from stellar binary systems and to fit them to observed data. Observables that can be calculated and fit with phitter include photometry (i.e., observed fluxes) and line-of-sight radial velocities (RVs).
 
-Modeling of binary systems and calculation of observables is primarily handled with `PHOEBE <http://www.phoebe-project.org>`_. When computing flux from model binaries, synthetic photometry for stars is derived for a wide range of telescope and passbands using `SPISEA <https://spisea.readthedocs.io/en/latest/>`_. Parameters for the binary system's stellar components can be derived via interpolation of model stellar tracks (we currently implement `MIST <http://waps.cfa.harvard.edu/MIST/>`_). Otherwise, arbitrary stellar parameters for one or both stars can also be specified.
+Modeling of binary systems and calculation of observables is primarily handled with `PHOEBE <http://www.phoebe-project.org>`_. When computing flux from model binaries, synthetic photometry for stars is derived for a wide range of telescope and passbands using `SPISEA <https://spisea.readthedocs.io/en/latest/>`_. Parameters for the binary system's stellar components can be derived via interpolation of model stellar tracks (phitter currently implements `MIST <http://waps.cfa.harvard.edu/MIST/>`_). Otherwise, arbitrary stellar parameters for one or both stars can also be specified.
 
 Fitting of observables to binary models is conducted with the use of MCMC sampling code. We provide support for sampling with nested sampling codes like `MultiNest <https://github.com/farhanferoz/MultiNest>`_ (via `PyMultiNest <https://github.com/JohannesBuchner/PyMultiNest>`_), `UltraNest <https://johannesbuchner.github.io/UltraNest/>`_, or `dynesty <https://dynesty.readthedocs.io/en/stable/index.html>`_. Example scripts to demonstrate how to set up a fitter are provided.
 
