@@ -39,11 +39,12 @@ class bb_stellar_params(stellar_params_obj):
     ext_Ks : float, default=2.63
         Extinction of stellar parameters object in Ks band.
     dist : Astropy Quantity, length units, default=7.971e3*u.pc
-        Distance to object, specified during isochrone creation
+        Distance to object, specified during isochrone creation.
     filts_list : [filter], default=[filters.nirc2_kp_filt(), filters.nirc2_h_filt()]
         List of filters to compute synthetic photometry.
     ext_law : str, default='NL18'
         Choice of extinction law to use when computing synthetic photometry.
+        Default is 'NL18', corresponding to Nogueras-Lara+ 2018.
     """
     
     def __init__(
