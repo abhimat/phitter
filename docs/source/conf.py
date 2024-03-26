@@ -20,6 +20,7 @@ extensions = [
     'numpydoc',
     'sphinx.ext.viewcode',
     'autoapi.extension',
+    'myst_parser',
 ]
 
 autoapi_dirs = ['../../phitter']
