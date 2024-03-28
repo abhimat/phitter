@@ -1,0 +1,16 @@
+:py:mod:`phitter`
+=================
+
+.. py:module:: phitter
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   filters/index.rst
+   observables/index.rst
+
+

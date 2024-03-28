@@ -1,0 +1,265 @@
+:py:mod:`star_params`
+=====================
+
+.. py:module:: star_params
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   star_params.star_params
+   star_params.stellar_params_obj
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   star_params.ks_filt_info
+   star_params.v_filt_info
+   star_params.flux_ref_Ks
+   star_params.flux_ref_V
+   star_params.kp_filt
+   star_params.h_filt
+   star_params.red_law_options
+
+
+.. py:class:: star_params
+
+
+   Bases: :py:obj:`object`
+
+   
+   star_params is an object to store stellar parameters. These parameters can
+   be interpolated from an isochrone, from a black body function, or
+   constructed from scratch.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   :Attributes:
+
+       **mass_init** : Astropy Quantity, unit:solMass
+           Initial stellar mass in solar masses
+
+       **mass** : Astropy Quantity, unit:solMass
+           Current stellar mass in solar masses
+
+       **rad** : Astropy Quantity, unit:solRad
+           Current stellar radius in solar radii
+
+       **lum** : Astropy Quantity, unit:solLum
+           Current stellar luminosity in solar luminosities
+
+       **teff** : Astropy Quantity, unit:K
+           Current effective temperature of star in Kelvin
+
+       **logg** : float
+           Current surface gravity of star, specified as a unitless quantity as
+           log_10 (g / [1 * cm s^-2])
+
+       **filts** : list_like
+           List of phitter filters / passbands that mags and pblums are generated for.
+
+       **mags** : array_like(dtype=float)
+           Array of apparent magnitude in filters / passbands being used.
+
+       **mags_abs** : array_like(dtype=float)
+           Array of absolute magnitude in filters / passbands being used.
+
+       **pblums** : array_like(dtype=Astropy Quantity)
+           Array of passband luminosities in filters / passbands being used, each
+           in units of solar luminosities. Passband luminosity in a filter /
+           passband is defined as the luminosity of the star only in that passband.
+
+
+   ..
+       !! processed by numpydoc !!
+   .. py:attribute:: mass_init
+
+      
+
+   .. py:attribute:: mass
+
+      
+
+   .. py:attribute:: rad
+
+      
+
+   .. py:attribute:: lum
+
+      
+
+   .. py:attribute:: teff
+
+      
+
+   .. py:attribute:: logg
+      :value: 0.0
+
+      
+
+   .. py:attribute:: filts
+      :value: []
+
+      
+
+   .. py:attribute:: mags
+
+      
+
+   .. py:attribute:: mags_abs
+
+      
+
+   .. py:attribute:: pblums
+
+      
+
+   .. py:method:: __str__()
+
+      
+      String representation function
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      ..
+          !! processed by numpydoc !!
+
+
+.. py:data:: ks_filt_info
+
+   
+
+.. py:data:: v_filt_info
+
+   
+
+.. py:data:: flux_ref_Ks
+
+   
+
+.. py:data:: flux_ref_V
+
+   
+
+.. py:data:: kp_filt
+
+   
+
+.. py:data:: h_filt
+
+   
+
+.. py:data:: red_law_options
+
+   
+
+.. py:class:: stellar_params_obj(ext_Ks=2.63, dist=7971.0 * u.pc, filts_list=[kp_filt, h_filt], ext_law='NL18', *args, **kwargs)
+
+
+   Bases: :py:obj:`object`
+
+   
+   Base stellar parameters object. Provides common functionality across objects
+   used for obtaining star parameters.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+   .. py:method:: _calc_filts_info()
+
+      
+      Gather information for all filters being used
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      ..
+          !! processed by numpydoc !!
+
+   .. py:method:: _create_spisea_filts_list()
+
+      
+      Create list of filter strings for use in SPISEA
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      ..
+          !! processed by numpydoc !!
+
+   .. py:method:: calc_pblums(filt_absMags)
+
+
+

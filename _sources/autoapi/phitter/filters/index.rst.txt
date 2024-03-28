@@ -1,0 +1,184 @@
+:py:mod:`phitter.filters`
+=========================
+
+.. py:module:: phitter.filters
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   phitter.filters.filter
+   phitter.filters.naco_ks_filt
+   phitter.filters.nirc2_lp_filt
+   phitter.filters.nirc2_kp_filt
+   phitter.filters.nirc2_h_filt
+   phitter.filters.jwst_115w_filt
+   phitter.filters.jwst_212n_filt
+   phitter.filters.jwst_323n_filt
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   phitter.filters.lambda_Ks
+
+
+.. py:data:: lambda_Ks
+
+   
+
+.. py:class:: filter
+
+
+   Bases: :py:obj:`object`
+
+   .. py:method:: calc_isoc_filt_ext(isoc_Ks_ext, ext_alpha)
+
+
+   .. py:method:: __eq__(other)
+
+      
+      Return self==value.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      ..
+          !! processed by numpydoc !!
+
+   .. py:method:: __hash__()
+
+      
+      Return hash(self).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      ..
+          !! processed by numpydoc !!
+
+   .. py:method:: __lt__(other)
+
+      
+      Return self<value.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      ..
+          !! processed by numpydoc !!
+
+   .. py:method:: __gt__(other)
+
+      
+      Return self>value.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      ..
+          !! processed by numpydoc !!
+
+
+.. py:class:: naco_ks_filt
+
+
+   Bases: :py:obj:`filter`
+
+
+.. py:class:: nirc2_lp_filt
+
+
+   Bases: :py:obj:`filter`
+
+   .. py:method:: calc_isoc_filt_ext(isoc_Ks_ext, ext_alpha)
+
+
+
+.. py:class:: nirc2_kp_filt
+
+
+   Bases: :py:obj:`filter`
+
+
+.. py:class:: nirc2_h_filt
+
+
+   Bases: :py:obj:`filter`
+
+
+.. py:class:: jwst_115w_filt
+
+
+   Bases: :py:obj:`filter`
+
+
+.. py:class:: jwst_212n_filt
+
+
+   Bases: :py:obj:`filter`
+
+
+.. py:class:: jwst_323n_filt
+
+
+   Bases: :py:obj:`filter`
+
+
