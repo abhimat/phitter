@@ -802,20 +802,25 @@ class binary_star_model_obs(object):
         phot_model_fluxes = {}
         phot_model_mags = {}
         
-        # Go through each filter
-        for (filt_index, filt) in enumerate(self.bin_observables.unique_filts_phot):
-            cur_filt_model_fluxes =\
-                np.array(b[f'fluxes@lc@{filt.phoebe_ds_name}@model'].value) *\
-                u.W / (u.m**2.)
-            cur_filt_model_mags = -2.5 *\
-                np.log10(cur_filt_model_fluxes / filt.flux_ref_filt) + 0.03
-            
-            phot_model_fluxes[filt] = cur_filt_model_fluxes
-            phot_model_mags[filt] = cur_filt_model_mags
+        if self.bin_observables.num_obs_phot > 0:        
+            # Go through each filter
+            for (filt_index, filt) in enumerate(self.bin_observables.unique_filts_phot):
+                cur_filt_model_fluxes =\
+                    np.array(b[f'fluxes@lc@{filt.phoebe_ds_name}@model'].value) *\
+                    u.W / (u.m**2.)
+                cur_filt_model_mags = -2.5 *\
+                    np.log10(cur_filt_model_fluxes / filt.flux_ref_filt) + 0.03
+                
+                phot_model_fluxes[filt] = cur_filt_model_fluxes
+                phot_model_mags[filt] = cur_filt_model_mags
         
         # Get RVs
-        model_RVs_pri = np.array(b['rvs@primary@run@rv@model'].value)
-        model_RVs_sec = np.array(b['rvs@secondary@run@rv@model'].value)
+        if self.bin_observables.num_obs_rv > 0:
+            model_RVs_pri = np.array(b['rvs@primary@run@rv@model'].value)
+            model_RVs_sec = np.array(b['rvs@secondary@run@rv@model'].value)
+        else:
+            model_RVs_pri = np.array([])
+            model_RVs_sec = np.array([])
         
         if self.print_diagnostics:
             print("\nFlux Checks")
