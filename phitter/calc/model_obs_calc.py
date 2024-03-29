@@ -460,7 +460,7 @@ class binary_star_model_obs(object):
                 
                 b.add_dataset(
                     phoebe.dataset.lc,
-                    time=filt_model_times,
+                    times=filt_model_times,
                     dataset=filt.phoebe_ds_name,
                     passband=filt.phoebe_pb_name,
                 )
@@ -495,7 +495,7 @@ class binary_star_model_obs(object):
                 
             b.add_dataset(
                 phoebe.dataset.rv,
-                time=rv_model_times,
+                times=rv_model_times,
                 dataset='mod_rv',
                 passband=(self.bin_observables.unique_filts_rv)[0].phoebe_pb_name,
             )
@@ -511,7 +511,7 @@ class binary_star_model_obs(object):
         if make_mesh_plots:
             b.add_dataset(
                 'mesh',
-                times=mesh_plot_times,
+                compute_times=mesh_plot_times,
                 dataset='mod_mesh',
             )
             b.set_value('coordinates@mesh', ['uvw'])
