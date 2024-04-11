@@ -617,64 +617,46 @@ class binary_star_model_obs(object):
                 
                 additional_kwargs = {}
                 
-                if mesh_temp:
-                    plt.clf()
-                    new_fig = plt.figure()
-                    (mesh_af_fig, mesh_plt_fig) = b['mod_mesh@model'].plot(
-                        fig=new_fig,
-                        time=mesh_plot_time,
-                        fc='teffs',
-                        fcmap=mesh_temp_cmap,
-                        ec='face',
-                        save='./binary_mesh{0}{1}.pdf'.format(
-                            plot_name_suffix, plot_phase_suffix,
-                        ),
-                        **additional_kwargs,
-                    )
-                    mesh_plot_out.append(mesh_plt_fig)
-                    plt.close(new_fig)
+                # Add kwargs for handling figure of mesh plot
+                if mesh_plot_fig is not None:
+                    additional_kwargs['fig'] = mesh_plot_fig
                 else:
-                    if mesh_plot_fig is not None:
-                        additional_kwargs['fig'] = mesh_plot_fig
-                    else:
-                        additional_kwargs['save'] =\
-                            './binary_mesh{0}{1}.pdf'.format(
-                                plot_name_suffix, plot_phase_suffix,
-                            )
-                    
-                    if (mesh_plot_subplot_grid is not None and
-                        mesh_plot_subplot_grid_indexes is not None):
-                        additional_kwargs['axpos'] = (
-                            mesh_plot_subplot_grid[0],
-                            mesh_plot_subplot_grid[1],
-                            mesh_plot_subplot_grid_indexes[mesh_index],
+                    additional_kwargs['save'] =\
+                        './binary_mesh{0}{1}.pdf'.format(
+                            plot_name_suffix, plot_phase_suffix,
                         )
-                        
-                        # ax = mesh_plot_fig.add_subplot(
-                        #     mesh_plot_subplot_grid[0],
-                        #     mesh_plot_subplot_grid[1],
-                        #     mesh_plot_subplot_grid_indexes[mesh_index],
-                        # )
-                        # 
-                        # additional_kwargs['ax'] = ax
-                        # 
-                        # additional_kwargs['axorder'] = \
-                        #     int(mesh_plot_subplot_grid_indexes[mesh_index])
-                    
-                    (mesh_af_fig, mesh_plt_fig) = b['mod_mesh@model'].plot(
-                        time=mesh_plot_time,
-                        **additional_kwargs,
-                        **mesh_plot_kwargs,
+                
+                # Add kwargs if coloring mesh plot by Teff
+                if mesh_temp:
+                    additional_kwargs['fc'] = 'teffs'
+                    additional_kwargs['fcmap'] = mesh_temp_cmap
+                    additional_kwargs['ec'] = 'face'
+                
+                # Add kwargs if making grid of mesh plots with a subplot grid
+                if (mesh_plot_subplot_grid is not None and
+                    mesh_plot_subplot_grid_indexes is not None):
+                    additional_kwargs['axpos'] = (
+                        mesh_plot_subplot_grid[0],
+                        mesh_plot_subplot_grid[1],
+                        mesh_plot_subplot_grid_indexes[mesh_index],
                     )
-                    
-                    # if mesh_plot_fig is not None:
-                    #     calls_list.append(mesh_af_fig.calls._items)
-                    
-                    # mesh_plot_fig = mesh_plt_fig
-                    mesh_plot_out.append(mesh_plt_fig)
+                
+                # Draw plot
+                (mesh_af_fig, mesh_plt_fig) = b['mod_mesh@model'].plot(
+                    time=mesh_plot_time,
+                    **additional_kwargs,
+                    **mesh_plot_kwargs,
+                )
+                
+                mesh_plot_out.append(mesh_plt_fig)
             
             if mesh_plot_fig is not None:
                 additional_kwargs = {}
+                
+                # Have to turn off sidebar if making subplots with Teff faces
+                if mesh_temp and mesh_plot_subplot_grid is not None:
+                    additional_kwargs['draw_sidebars'] = False
+                
                 (mesh_af_fig, mesh_plt_fig) = b['mod_mesh@model'].show(
                     save='./binary_mesh{0}{1}.pdf'.format(
                         plot_name_suffix, plot_phase_suffix,
