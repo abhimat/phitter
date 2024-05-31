@@ -129,6 +129,74 @@ class nirc2_h_filt(filter):
         
         return
 
+class hst_f127m_filt(filter):
+    def __init__(self):
+        self.filter_name = 'wfc3,ir,f127m'
+        self.phoebe_ds_name = 'mod_lc_F127M'
+        self.phoebe_pb_name = 'HST_WFC3IR:F127M'
+        self.spisea_name = 'hst_f127m'
+        
+        # Filter properties
+        self.lambda_filt = 1274.0e-9 * u.m
+        self.dlambda_filt = 68.8e-9 * u.m
+        
+        self.filt_info = synthetic.get_filter_info(self.filter_name)
+        
+        self.flux_ref_filt = self.filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
+        
+        return
+
+class hst_f139m_filt(filter):
+    def __init__(self):
+        self.filter_name = 'wfc3,ir,f139m'
+        self.phoebe_ds_name = 'mod_lc_F139M'
+        self.phoebe_pb_name = 'HST_WFC3IR:F139M'
+        self.spisea_name = 'hst_f139m'
+        
+        # Filter properties
+        self.lambda_filt = 1383.8e-9 * u.m
+        self.dlambda_filt = 64.3e-9 * u.m
+        
+        self.filt_info = synthetic.get_filter_info(self.filter_name)
+        
+        self.flux_ref_filt = self.filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
+        
+        return
+
+class hst_f153m_filt(filter):
+    def __init__(self):
+        self.filter_name = 'wfc3,ir,f153m'
+        self.phoebe_ds_name = 'mod_lc_F153M'
+        self.phoebe_pb_name = 'HST_WFC3IR:F153M'
+        self.spisea_name = 'hst_f153m'
+        
+        # Filter properties
+        self.lambda_filt = 1532.2e-9 * u.m
+        self.dlambda_filt = 68.5e-9 * u.m
+        
+        self.filt_info = synthetic.get_filter_info(self.filter_name)
+        
+        self.flux_ref_filt = self.filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
+        
+        return
+
+class hst_f105w_filt(filter):
+    def __init__(self):
+        self.filter_name = 'wfc3,ir,f105w'
+        self.phoebe_ds_name = 'mod_lc_F105W'
+        self.phoebe_pb_name = 'HST_WFC3IR:F105W'
+        self.spisea_name = 'hst_f105w'
+        
+        # Filter properties
+        self.lambda_filt = 1055.2e-9 * u.m
+        self.dlambda_filt = 265.0e-9 * u.m
+        
+        self.filt_info = synthetic.get_filter_info(self.filter_name)
+        
+        self.flux_ref_filt = self.filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
+        
+        return
+
 class jwst_115w_filt(filter):
     def __init__(self):
         self.filter_name = 'jwst,F115W'
