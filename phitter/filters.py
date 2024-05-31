@@ -247,3 +247,20 @@ class jwst_323n_filt(filter):
         self.flux_ref_filt = self.filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
         
         return
+
+class hst_153m_filt(filter):
+    def __init__(self):
+        self.filter_name = 'wfc3,ir,f153m'
+        self.phoebe_ds_name = 'mod_lc_153M'
+        self.phoebe_pb_name = 'HST_WFC3IR:F153M'
+        self.spisea_name = 'wfc3_ir_f212m'
+        
+        # Filter properties
+        self.lambda_filt = 2.120e-6 * u.m
+        self.dlambda_filt = 0.027e-6 * u.m
+        
+        self.filt_info = synthetic.get_filter_info(self.filter_name)
+        
+        self.flux_ref_filt = self.filt_info.flux0 * (u.erg / u.s) / (u.cm**2.)
+        
+        return
