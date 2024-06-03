@@ -363,6 +363,17 @@ class binary_star_model_obs(object):
         if (not star1_semidetached) and (not star2_overflow):
             b.set_value('requiv@primary@component', star1_rad)
         
+        # Gravity darkening coefficient
+        if star1_teff >= 8000 * u.K:    # Radiative
+            b.set_value('gravb_bol@primary@component', 1.0)
+        elif star1_teff < 6600 * u.K:   # Convective
+            b.set_value('gravb_bol@primary@component', 0.32)
+        else:
+            # Interpolate between the radiative and convective cases
+            star1_gravb = ((star1_teff.to(u.K).value - 6600) / (8000 - 6600) *\
+                (1-0.32)) + 0.32
+            b.set_value('gravb_bol@primary@component', star1_gravb)
+        
         ## Secondary
         b.set_value('teff@secondary@component', star2_teff)
         # b.set_value('logg@secondary@component', star2_logg)
@@ -379,6 +390,17 @@ class binary_star_model_obs(object):
                 print("Cannot set secondary radius: {0}".format(sys.exc_info()[0]))
                 
                 return err_out
+        
+        # Gravity darkening coefficient
+        if star2_teff >= 8000 * u.K:    # Radiative
+            b.set_value('gravb_bol@secondary@component', 1.0)
+        elif star2_teff < 6600 * u.K:   # Convective
+            b.set_value('gravb_bol@secondary@component', 0.32)
+        else:
+            # Interpolate between the radiative and convective cases
+            star2_gravb = ((star2_teff.to(u.K).value - 6600) / (8000 - 6600) *\
+                (1-0.32)) + 0.32
+            b.set_value('gravb_bol@primary@component', star2_gravb)
         
         if self.print_diagnostics:
            print('Contact envelope parameters:')
