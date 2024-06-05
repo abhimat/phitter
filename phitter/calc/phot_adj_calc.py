@@ -127,14 +127,14 @@ def apply_mag_shift_filt(
         filter object, for whose photometric observations the mag shift will be
         applied.
     mag_shift : float
-        The shift in mags to apply to photometric observations of `filt` filter.
-        Positive values indicate a fainter shift, while negative values indicate
-        a brighter shift.
+        The shift in mags to apply to photometric observations of ``filt``
+        filter. Positive values indicate a fainter shift, while negative values
+        indicate a brighter shift.
     
     Returns
     -------
     observables
-        observables object, where photometry has mag shift in `filt` added.
+        observables object, where photometry has mag shift in ``filt`` added.
     """
     
     # Return if there are no photometry observations
