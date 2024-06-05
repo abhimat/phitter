@@ -54,8 +54,7 @@ def apply_extinction(
     Parameters
     ----------
     bin_observables : observables
-        observables object containing photometry to which to apply distance
-        modulus.
+        observables object containing photometry to which to apply extinction.
     isoc_Ks_ext : float
         Extinction, in Ks band, for the isochrone object used to generate
         stellar parameters.
@@ -75,7 +74,7 @@ def apply_extinction(
     Returns
     -------
     observables
-        observables object, where photometry has distance modulus added.
+        observables object, where photometry has reddening from extinction.
     """
     # Return if there are no photometry observations
     if bin_observables.num_obs_phot == 0:
@@ -111,4 +110,42 @@ def apply_extinction(
         bin_observables.obs[obs_filt_filter] += \
             isoc_filts_ext[cur_filt] + filts_ext_adj[cur_filt]
         
+    return bin_observables
+
+def apply_mag_shift_filt(
+        bin_observables, filt, mag_shift,
+    ):
+    """
+    Modeled observables are calculated without any uncertainties in zeropoint.
+    This function allows adding a shift to account for errors in zeropoint mags.
+    
+    Parameters
+    ----------
+    bin_observables : observables
+        observables object containing photometry to which to apply mag shift.
+    filt : filter
+        filter object, for whose photometric observations the mag shift will be
+        applied.
+    mag_shift : float
+        The shift in mags to apply to photometric observations of `filt` filter.
+        Positive values indicate a fainter shift, while negative values indicate
+        a brighter shift.
+    
+    Returns
+    -------
+    observables
+        observables object, where photometry has mag shift in `filt` added.
+    """
+    
+    # Return if there are no photometry observations
+    if bin_observables.num_obs_phot == 0:
+        return bin_observables
+    
+    obs_filt_filter = np.where(np.logical_and(
+        bin_observables.obs_types == 'phot',
+        bin_observables.obs_filts == filt,
+    ))
+    
+    bin_observables.obs[obs_filt_filter] += mag_shift
+    
     return bin_observables
