@@ -30,9 +30,6 @@ h_filt = filters.nirc2_h_filt()
 # Stellar Parameters
 # stellar_params = (mass, rad, teff, mag_Kp, mag_H, pblum_Kp, pblum_H)
 
-
-
-
 class binary_star_model_obs(object):
     """
     Class to compute the observables for a modeled binary system,
@@ -841,21 +838,6 @@ class binary_star_model_obs(object):
             print("RVs, Primary: {0}".format(model_RVs_pri))
             print("RVs, Secondary: {0}".format(model_RVs_sec))
         
-        if self.print_diagnostics:
-            print("\nFlux Checks")
-            
-            for (filt_index, filt) in enumerate(self.bin_observables.unique_filts_phot):
-                print("Fluxes, {0}: {1}".format(
-                    filt.filter_name,
-                    phot_model_fluxes[filt]))
-                print("Mags, {0}: {1}".format(
-                    filt.filter_name,
-                    phot_model_mags[filt]))
-            
-            print("\nRV Checks")
-            print("RVs, Primary: {0}".format(model_RVs_pri))
-            print("RVs, Secondary: {0}".format(model_RVs_sec))
-        
         # Set up output observables object
         bin_observables_out = copy.deepcopy(self.bin_observables)
     
@@ -942,237 +924,420 @@ class binary_star_model_obs(object):
         else:
             return bin_observables_out
 
-def single_star_model_obs(
-        stellar_params,
-        use_blackbody_atm=False,
-        num_triangles=1500):
-    # Read in the stellar parameters of the current star
-    (star_mass, star_rad, star_teff, star_logg,
-     [star_mag_Kp, star_mag_H],
-     [star_pblum_Kp, star_pblum_H]) = stellar_params
-    
-    err_out = np.array([-1.])
-    
-    # Set up a single star model
-    sing_star = phoebe.default_star()
-    
-    # Light curve dataset
-    if use_blackbody_atm:
-        sing_star.add_dataset(phoebe.dataset.lc, times=[0], dataset='mod_lc_Kp', passband='Keck_NIRC2:Kp', ld_func='linear', ld_coeffs=[0.0])
-        sing_star.add_dataset(phoebe.dataset.lc, times=[0], dataset='mod_lc_H', passband='Keck_NIRC2:H', ld_func='linear', ld_coeffs=[0.0])
-        # sing_star.add_dataset(phoebe.dataset.lc, times=[0], dataset='mod_lc_V', passband='Johnson:V', ld_func='linear', ld_coeffs=[0.0])
-    else:
-        sing_star.add_dataset(phoebe.dataset.lc, times=[0], dataset='mod_lc_Kp', passband='Keck_NIRC2:Kp')
-        sing_star.add_dataset(phoebe.dataset.lc, times=[0], dataset='mod_lc_H', passband='Keck_NIRC2:H')
-        # sing_star.add_dataset(phoebe.dataset.lc, times=[0], dataset='mod_lc_V', passband='Johnson:V')
-    
-    # Set up compute
-    if use_blackbody_atm:
-        sing_star.add_compute('phoebe', compute='detailed', distortion_method='sphere', irrad_method='none', atm='blackbody')
-    else:
-        sing_star.add_compute('phoebe', compute='detailed', distortion_method='sphere', irrad_method='none')
-    
-    # Set a default distance
-    sing_star.set_value('distance', 10 * u.pc)
-    
-    # Set the passband luminosities
-    sing_star.set_value('pblum@mod_lc_Kp', star_pblum_Kp)
-    sing_star.set_value('pblum@mod_lc_H', star_pblum_H)
-    
-    # Set the stellar parameters
-    sing_star.set_value('teff@component', star_teff)
-    sing_star.set_value('requiv@component', star_rad)
-    
-    # Set the number of triangles in the mesh
-    sing_star.set_value('ntriangles@detailed@compute', num_triangles)
-    
-    # Run compute
-    try:
-        sing_star.run_compute(compute='detailed', model='run',
-                              progressbar=False)
-    except: # Catch errors during computation (probably shouldn't happen during individual star computation)
-        print("Error during primary ind. star compute: {0}".format(sys.exc_info()[0]))
-        return (err_out, err_out)
-    
-    # Retrieve computed fluxes from phoebe
-    sing_star_fluxes_Kp = np.array(sing_star['fluxes@lc@mod_lc_Kp@model'].value) * u.W / (u.m**2)
-    sing_star_mags_Kp = -2.5 * np.log10(sing_star_fluxes_Kp / flux_ref_Kp) + 0.03
-    
-    sing_star_fluxes_H = np.array(sing_star['fluxes@lc@mod_lc_H@model'].value) * u.W / (u.m**2)
-    sing_star_mags_H = -2.5 * np.log10(sing_star_fluxes_H / flux_ref_H) + 0.03
-        
-    return (sing_star_mags_Kp, sing_star_mags_H)
-   
-def phased_obs(observation_times, binary_period, t0,
-               filts_list=[kp_filt, h_filt]):
-    """Phase observation times to a given binary period and t0
+class single_star_model_obs(object):
     """
-    num_filts = len(filts_list)
+    Class to compute the observables for a modeled binary system,
+    given stellar parameters and binary parameters.
     
-    # Read in observation times, and separate photometry from RVs
-    filt_MJDs = observation_times[:num_filts]
-    rv_MJDs = observation_times[num_filts]
+    Parameters
+    ----------
+    sing_star_observables : observables
+        observables object, with obs_times, obs_filts, and obs_types specified.
+    use_blackbody_atm : bool, default=False
+        Use blackbody atmosphere instead of default Castelli & Kurucz
+        atmosphere. Default: False (i.e.: using a C&K atm by default)
+    use_compact_object : bool, default=False
+        If true, sets eclipse_method to 'only_horizon' in PHOEBE, which is
+        necessary for compact companions without eclipses. Default: False
     
-    out_phased_obs = ()
-    # Phase photometric observation times
-    for filt_index in range(num_filts):
-        # Phase the current filter's MJDs
-        cur_filt_MJDs = filt_MJDs[filt_index]
-        cur_filt_phased_days = (((cur_filt_MJDs - t0) %
-                                 binary_period.to(u.d).value) /
-                                binary_period.to(u.d).value)
+    print_diagnostics : bool, default=False
+        Print diagnostic messages, helpful for debugging.
+    par_compute : bool, default=False
+        Uses parallelization when computing with PHOEBE.
+    num_par_processes : int, default=8
+        Number of processes to use when parallel computing with PHOEBE.
+    """
+    
+    def __init__(
+            self,
+            sing_star_observables,
+            use_blackbody_atm=False,
+            use_compact_object=False,
+            print_diagnostics=False,
+            par_compute=False, num_par_processes=8,
+            *args, **kwargs,
+    ):
+        super().__init__(
+            *args, **kwargs,
+        )
         
-        # Compute phase sorted inds
-        cur_filt_phases_sorted_inds = np.argsort(cur_filt_phased_days)
+        self.sing_star_observables = sing_star_observables
+        self.use_blackbody_atm = use_blackbody_atm
+        self.use_compact_object = use_compact_object
         
-        # Compute model times sorted to phase sorted inds
-        cur_filt_model_times = cur_filt_phased_days *\
-                               binary_period.to(u.d).value
-        cur_filt_model_times = cur_filt_model_times[cur_filt_phases_sorted_inds]
+        self.print_diagnostics = print_diagnostics
         
-        # Append calculated values to output tuple
-        out_phased_obs = out_phased_obs + \
-                         ((cur_filt_phased_days, cur_filt_phases_sorted_inds,
-                           cur_filt_model_times), )
+        self.par_compute = par_compute
+        self.num_par_processes = num_par_processes
+        
+        return
     
-    # Phase RV observation times
-    rv_phased_days = (((rv_MJDs - t0) % binary_period.to(u.d).value) /
-                      binary_period.to(u.d).value)
-    
-    rv_phases_sorted_inds = np.argsort(rv_phased_days)
-    
-    rv_model_times = (rv_phased_days) * binary_period.to(u.d).value
-    rv_model_times = rv_model_times[rv_phases_sorted_inds]
-    
-    # Append RV values to output tuple
-    out_phased_obs = out_phased_obs + \
-                     ((rv_phased_days, rv_phases_sorted_inds,
-                       rv_model_times), )
-    
-    return out_phased_obs
-
-def dist_ext_mag_calc(input_mags, target_dist, filt_exts):
-    binary_mags_filts = ()
-    
-    # Calculate distance modulus
-    dist_mod = 5. * np.log10(target_dist / (10. * u.pc))
-    
-    # Adjust magnitudes in each filter
-    for (filt_index, filt_ext) in enumerate(filt_exts):
-        # Add mag distance modulus and extinction
-         adjusted_mags = input_mags[filt_index] + dist_mod + filt_ext
-         binary_mags_filts = binary_mags_filts + (adjusted_mags, )
-    
-    # Return mags adjusted for target distance and extinction
-    return binary_mags_filts
-    
-
-# def binary_star_model_obs(
-#         observables, star1_params, star2_params, binary_params,
-#         use_blackbody_atm=False,
-#         use_compact_object=False,
-#         irrad_frac_refl=1.0,
-#         num_triangles=1500,
-#         make_mesh_plots=False, mesh_temp=False, mesh_temp_cmap=None,
-#         plot_name=None,
-#         print_diagnostics=False, par_compute=False, num_par_processes=8,
-#         
-#     ):
-
-# def binary_mags_calc(
-#         observables,
-#         star1_params, star2_params,
-#         binary_params,
-#         isoc_Ks_ext, filt_exts, ext_alpha,
-#         isoc_dist, bin_dist,
-#         use_blackbody_atm=False,
-#         use_compact_object=False,
-#         irrad_frac_refl=1.0,
-#         make_mesh_plots=False, mesh_temp=False,
-#         mesh_temp_cmap=None,
-#         plot_name=None,
-#         par_compute=False, num_par_processes=8,
-#         num_triangles=1500,
-#         print_diagnostics=False,
-#     ):
-#     # Filter calculations
-#     num_filts = len(filts_list)
-#     
-#     isoc_filt_exts = np.empty(num_filts)
-#     filt_ext_adjs = np.empty(num_filts)
-#     
-#     for filt_index, cur_filt in enumerate(filts_list):
-#         # Calculate extinctions implied by isochrone extinction
-#         isoc_filt_exts[filt_index] = cur_filt.calc_isoc_filt_ext(
-#                                          isoc_Ks_ext, ext_alpha)
-#         
-#         if print_diagnostics:
-#             print(f'isoc_filt_exts = {isoc_filt_exts}')
-#         
-#         # Calculate extinction adjustments
-#         filt_ext_adjs[filt_index] = (filt_exts[filt_index] -
-#                                      isoc_filt_exts[filt_index])
-#     
-#     # Calculate distance modulus adjustments
-#     dist_mod_mag_adj = 5. * np.log10(bin_dist / (isoc_dist.to(u.pc)).value)
-#     
-#     # Run binary star model to get binary mags
-#     binary_star_lc_out = binary_star_model_obs(
-#         observables,
-#         star1_params,
-#         star2_params,
-#         binary_params,
-#         use_blackbody_atm=use_blackbody_atm,
-#         use_compact_object=use_compact_object,
-#         num_triangles=num_triangles,
-#         irrad_frac_refl=irrad_frac_refl,
-#         make_mesh_plots=make_mesh_plots,
-#         mesh_temp=mesh_temp,
-#         mesh_temp_cmap=mesh_temp_cmap,
-#         plot_name=plot_name,
-#         par_compute=par_compute, num_par_processes=num_par_processes,
-#         print_diagnostics=print_diagnostics,
-#     )
-#     
-#     if make_mesh_plots:
-#         (binary_mags_filts,
-#          binary_RVs_pri, binary_RVs_sec,
-#          mesh_plot_out) = binary_star_lc_out
-#     else:
-#         (binary_mags_filts,
-#          binary_RVs_pri, binary_RVs_sec) = binary_star_lc_out
-#     
-#     # Test failure of binary mag calculation
-#     if ((binary_mags_filts[0])[0] == -1.):
-#         return -np.inf
-#     
-#     ## Apply distance modulus and isoc. extinction to binary magnitudes
-#     binary_mags_filts = dist_ext_mag_calc(
-#                             binary_mags_filts,
-#                             isoc_dist,
-#                             isoc_filt_exts,
-#                         )
-#     
-#     # Go through the mag adjustments, filter by filter
-#     binary_mags_filts_list = list(binary_mags_filts)
-#     
-#     for filt_index, cur_filt in enumerate(filts_list):
-#         # Apply the extinction difference between model and isochrone values
-#         # for each filter
-#         binary_mags_filts_list[filt_index] += filt_ext_adjs[filt_index]
-#         
-#         # Apply the distance modulus for difference between isoc. distance
-#         # and binary distance
-#         # (Same for each filter)
-#         binary_mags_filts_list[filt_index] += dist_mod_mag_adj
-#     
-#     binary_mags_filts = tuple(binary_mags_filts_list)
-#     
-#     # Return final light curve
-#     if make_mesh_plots:
-#         return (binary_mags_filts,
-#                 binary_RVs_pri, binary_RVs_sec,
-#                 mesh_plot_out)
-#     else:
-#         return (binary_mags_filts,
-#                 binary_RVs_pri, binary_RVs_sec)
+    def compute_obs(
+            self,
+            star1_params,
+            num_triangles=1500,
+            make_mesh_plots=False,
+            mesh_plot_fig=None,
+            mesh_plot_subplot_grid=None,
+            mesh_plot_subplot_grid_indexes=None,
+            mesh_temp=False, mesh_temp_cmap=None,
+            plot_name=None,
+            mesh_plot_kwargs={},
+    ):
+        """
+        Function to compute observables with the specified star and binary
+        system parameters.
+        
+        Parameters
+        ----------
+        star1_params : star_params
+            star_params object, with parameters for the star.
+        num_triangles : int, default=1500
+            Number of triangles to use for PHOEBE's mesh model of each stellar
+            atmosphere. For contact system, num_triangles*2 are used for contact
+            envelope.
+        make_mesh_plots : bool, default=False
+            Make a mesh plot of the binary system. Default: False
+        plot_name : str, default=None
+            Name for the output plots, if making a mesh plot
+        
+        Returns
+        -------
+        observables
+            observables object returned. Deep copy of input observables object,
+            with obs also defined, with modeled values.
+        """
+        
+        if self.par_compute:
+            phoebe.mpi_on(nprocs=self.num_par_processes)
+        else:
+            phoebe.mpi_off()
+        
+        # Read in the stellar parameters of the binary components
+        star_mass = star1_params.mass
+        star_rad = star1_params.rad
+        star_teff = star1_params.teff
+        star_logg = star1_params.logg
+        star_filt_pblums = star1_params.pblums
+        
+        err_out = observables.observables(
+            obs_times=np.array([np.nan]),
+            obs=np.array([np.nan]),
+        )
+        
+        if make_mesh_plots:
+            err_out = ((np.array([-1.]), np.array([-1.])),
+                       np.array([-1.]), np.array([-1.]),
+                       np.array([-1.]))
+        
+        # Check for high temp ck2004 atmosphere limits
+        if not self.use_blackbody_atm:
+            # log g = 3.5, high temp bounds (above 31e3 K)
+            if star_teff > (31_000 * u.K) and (4.0 > star_logg > 3.5):
+                star_teff_round = 30995.0 * u.K
+                
+                if self.print_diagnostics:
+                    print('Star is out of C&K 2004 grid')
+                    print('star1_logg = {0:.4f}'.format(star_logg))
+                    print('Rounding down star1_teff')
+                    print('{0:.4f} -> {1:.4f}'.format(star_teff, star_teff_round))
+                
+                star_teff = star_teff_round
+            
+            # log g = 4.0, high temp bounds (above 40e3 K)
+            if star_teff > (40000 * u.K) and (4.5 > star_logg > 4.0):
+                star_teff_round = 39995.0 * u.K
+                
+                print('Star 1 out of C&K 2004 grid')
+                print('star_logg = {0:.4f}'.format(star_logg))
+                print('Rounding down star_teff')
+                print('{0:.4f} -> {1:.4f}'.format(star_teff, star_teff_round))
+                
+                star_teff = star_teff_round        
+        
+        # Set up a single star model
+        sing_star = phoebe.default_star()
+        
+        ## Set a default distance
+        sing_star.set_value('distance', 10 * u.pc)
+        
+        # Set up compute
+        if self.use_blackbody_atm:
+            sing_star.add_compute(
+                'phoebe', compute='detailed',
+                distortion_method='sphere',
+                irrad_method='none',
+                atm='blackbody',
+            )
+        else:
+            sing_star.add_compute(
+                'phoebe', compute='detailed',
+                distortion_method='sphere',
+                irrad_method='none',
+            )
+        
+        # Set the stellar parameters
+        sing_star.set_value('teff@component', star_teff)
+        sing_star.set_value('mass@component', star_mass)
+        # sing_star.set_value('logg@component', star_logg)
+        sing_star.set_value('requiv@component', star_rad)
+        
+        # Setting long rotation period so that large stellar radii can be stable
+        sing_star.set_value('period@component', 9e3 * u.yr)
+        
+        if self.print_diagnostics:
+            print('Star Parameters in PHOEBE:')
+            print(sing_star.filter('starA@component'))
+        
+        # Gravity darkening coefficient
+        if star_teff >= 8000 * u.K:    # Radiative
+            sing_star.set_value('gravb_bol@component', 1.0)
+        elif star_teff < 6600 * u.K:   # Convective
+            sing_star.set_value('gravb_bol@component', 0.32)
+        else:
+            # Interpolate between the radiative and convective cases
+            star_gravb = ((star_teff.to(u.K).value - 6600) / (8000 - 6600) *\
+                (1-0.32)) + 0.32
+            sing_star.set_value('gravb_bol@component', star_gravb)
+        
+        # Set the number of triangles in the mesh
+        sing_star.set_value('ntriangles@detailed@compute', num_triangles)
+        
+        # Add light curve datasets    
+        if self.sing_star_observables.num_obs_phot > 0:
+            # Parameters to change if using a blackbody atmosphere
+            if self.use_blackbody_atm:
+                sing_star.set_value_all('ld_mode_bol', 'manual')
+                sing_star.set_value_all('ld_func_bol', 'linear')
+                sing_star.set_value_all('ld_coeffs_bol', [0.0])
+            
+            # Change in setup for compact object
+            if self.use_compact_object:
+                sing_star.set_value('irrad_method@detailed', 'none')
+            
+            # Go through each filter and add a lightcurve dataset
+            for (filt_index, filt) in enumerate(self.sing_star_observables.unique_filts_phot):
+                sing_star.add_dataset(
+                    phoebe.dataset.lc,
+                    times=[0],
+                    dataset=filt.phoebe_ds_name,
+                    passband=filt.phoebe_pb_name,
+                )
+                if self.use_blackbody_atm:
+                    sing_star.set_value_all('ld_mode@' + filt.phoebe_ds_name, 'manual')
+                    sing_star.set_value_all('ld_func@' + filt.phoebe_ds_name, 'linear')
+            
+                    sing_star.set_value_all('ld_coeffs@' + filt.phoebe_ds_name, [0.0])
+        
+        # Not adding RV datasets since just a single star.
+        
+        if make_mesh_plots:
+            sing_star.add_dataset(
+                'mesh',
+                compute_times=[0],
+                dataset='mod_mesh',
+            )
+            sing_star.set_value('coordinates@mesh', ['uvw'])
+            if mesh_temp:
+                mesh_columns = [
+                    'us', 'vs', 'ws', 'rprojs',
+                    'teffs', 'loggs', 'rs', 'areas',
+                ]
+                for filt in self.bin_observables.unique_filts_phot:
+                    mesh_columns.append('*@' + filt.phoebe_ds_name)
+                
+                sing_star['columns@mesh'] = mesh_columns
+        
+        # Set the passband luminosities for the stars
+        for (filt_index, filt) in enumerate(self.sing_star_observables.unique_filts_phot):
+            sing_star.set_value(
+                'pblum_mode@' + filt.phoebe_ds_name,
+                'decoupled',
+            )
+            
+            sing_star.set_value(
+                'pblum@' + filt.phoebe_ds_name,
+                star_filt_pblums[filt_index],
+            )
+        
+        # Run compute
+        # Determine eclipse method
+        if self.use_compact_object:
+            eclipse_method = 'only_horizon'
+        else:
+            eclipse_method = 'native'
+        
+        if self.print_diagnostics:
+            print("Trying inital compute run")
+            sing_star.run_compute(
+                compute='detailed', model='run',
+                progressbar=False,
+                # eclipse_method=eclipse_method,
+            )
+        else:
+            try:
+                sing_star.run_compute(
+                    compute='detailed', model='run',
+                    progressbar=False, eclipse_method=eclipse_method,
+                )
+            except:
+                if self.print_diagnostics:
+                    print(
+                        "Error during primary binary compute: {0}".format(
+                            sys.exc_info()[0]
+                        )
+                    )
+                return err_out
+        
+        # Save out mesh plot
+        mesh_plot_out = []
+        if make_mesh_plots:
+            ## Plot Nerdery
+            plt.rc('font', family='serif')
+            plt.rc('font', serif='Computer Modern Roman')
+            plt.rc('text', usetex=True)
+            plt.rc('text.latex', preamble=r"\usepackage{gensymb}")
+            
+            plt.rc('xtick', direction = 'out')
+            plt.rc('ytick', direction = 'out')
+            # plt.rc('xtick', top = True)
+            # plt.rc('ytick', right = True)
+            
+            plot_name_suffix = ''
+            if plot_name is not None:
+                plot_name_suffix = f'_{plot_name}'
+            
+            calls_list = []
+            
+            # Go through each mesh model time and save
+            for mesh_index, mesh_plot_time in enumerate([0]):
+                plot_phase_suffix = ''
+                
+                additional_kwargs = {}
+                
+                # Add kwargs for handling figure of mesh plot
+                if mesh_plot_fig is not None:
+                    additional_kwargs['fig'] = mesh_plot_fig
+                else:
+                    additional_kwargs['save'] =\
+                        './binary_mesh{0}{1}.pdf'.format(
+                            plot_name_suffix, plot_phase_suffix,
+                        )
+                
+                # Add kwargs if coloring mesh plot by Teff
+                if mesh_temp:
+                    additional_kwargs['fc'] = 'teffs'
+                    additional_kwargs['fcmap'] = mesh_temp_cmap
+                    additional_kwargs['ec'] = 'face'
+                
+                # Add kwargs if making grid of mesh plots with a subplot grid
+                if (mesh_plot_subplot_grid is not None and
+                    mesh_plot_subplot_grid_indexes is not None):
+                    additional_kwargs['axpos'] = (
+                        mesh_plot_subplot_grid[0],
+                        mesh_plot_subplot_grid[1],
+                        mesh_plot_subplot_grid_indexes[mesh_index],
+                    )
+                
+                # Draw plot
+                (mesh_af_fig, mesh_plt_fig) = sing_star['mod_mesh@model'].plot(
+                    time=mesh_plot_time,
+                    **additional_kwargs,
+                    **mesh_plot_kwargs,
+                )
+                
+                mesh_plot_out.append(mesh_plt_fig)
+            
+            if mesh_plot_fig is not None:
+                additional_kwargs = {}
+                
+                # Have to turn off sidebar if making subplots with Teff faces
+                if mesh_temp and mesh_plot_subplot_grid is not None:
+                    additional_kwargs['draw_sidebars'] = False
+                
+                (mesh_af_fig, mesh_plt_fig) = sing_star['mod_mesh@model'].show(
+                    save='./binary_mesh{0}{1}.pdf'.format(
+                        plot_name_suffix, plot_phase_suffix,
+                    ),
+                    show=False,
+                    **additional_kwargs,
+                    **mesh_plot_kwargs,
+                )
+        
+        # Get fluxes
+        phot_model_fluxes = {}
+        phot_model_mags = {}
+        
+        if self.sing_star_observables.num_obs_phot > 0:        
+            # Go through each filter
+            for (filt_index, filt) in enumerate(self.sing_star_observables.unique_filts_phot):
+                cur_filt_model_fluxes =\
+                    np.array(sing_star[f'fluxes@lc@{filt.phoebe_ds_name}@model'].value) *\
+                    u.W / (u.m**2.)
+                cur_filt_model_mags = -2.5 *\
+                    np.log10(cur_filt_model_fluxes / filt.flux_ref_filt) + 0.03
+                
+                phot_model_fluxes[filt] = cur_filt_model_fluxes
+                phot_model_mags[filt] = cur_filt_model_mags
+        
+        # Get RVs
+        if self.sing_star_observables.num_obs_rv > 0:
+            model_RVs_pri = np.array([0.])
+            model_RVs_sec = np.array([0.])
+        else:
+            model_RVs_pri = np.array([])
+            model_RVs_sec = np.array([])
+        
+        if self.print_diagnostics:
+            print("\nFlux Checks")
+            
+            for (filt_index, filt) in enumerate(self.sing_star_observables.unique_filts_phot):
+                print("Fluxes, {0}: {1}".format(
+                    filt.filter_name,
+                    phot_model_fluxes[filt]))
+                print("Mags, {0}: {1}".format(
+                    filt.filter_name,
+                    phot_model_mags[filt]))
+            
+            print("\nRV Checks")
+            print("RVs, Primary: {0}".format(model_RVs_pri))
+            print("RVs, Secondary: {0}".format(model_RVs_sec))
+        
+        # Set up output observables object
+        sing_star_observables_out = copy.deepcopy(self.sing_star_observables)
+        
+        sing_star_observables_out.set_obs(
+            np.empty(len(sing_star_observables_out.obs_times))
+        )
+        
+        # Set photometric modeled observations back in original input order
+        if sing_star_observables_out.num_obs_phot > 0:
+            for (filt_index, filt) in enumerate(self.sing_star_observables.unique_filts_phot):
+                # Set up filter for observations in correct passband
+                obs_filt_filter = np.where(np.logical_and(
+                    sing_star_observables_out.obs_types == 'phot',
+                    sing_star_observables_out.obs_filts == filt,
+                ))
+                
+                sing_star_observables_out.obs[
+                    obs_filt_filter
+                ] = phot_model_mags[filt]
+        
+        # Set RV modeled observations back in original input order
+        if sing_star_observables_out.num_obs_rv > 0:
+            for (filt_index, filt) in enumerate(self.sing_star_observables.unique_filts_rv):
+                # Set up filter for observations for correct star
+                sing_star_observables_out.obs[
+                    sing_star_observables_out.obs_rv_pri_filter
+                ] = model_RVs_pri
+                sing_star_observables_out.obs[
+                    sing_star_observables_out.obs_rv_sec_filter
+                ] = model_RVs_sec
+                
+        # Return modeled observables, and mesh plot if being made
+        if mesh_plot_fig is not None:
+            return sing_star_observables_out, mesh_plot_out, mesh_plot_fig
+        elif make_mesh_plots:
+            return sing_star_observables_out, mesh_plot_out
+        else:
+            return sing_star_observables_out
