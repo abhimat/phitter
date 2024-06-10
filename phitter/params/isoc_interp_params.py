@@ -294,6 +294,75 @@ class isoc_mist_stellar_params(stellar_params_obj):
         
         return star_params_obj
     
+    def interp_star_params_teff(self, teff):
+        """
+        Interpolate stellar parameters from the isochrone, given a T_eff for
+        the star.
+        
+        Parameters
+        ----------
+        teff : float
+            Stellar T_eff as float, in units of Kelvin.
+        
+        Returns
+        -------
+        star_params
+            star_params object returned, with stellar parameters interpolated
+            from the MIST isochrone.
+        """
+        
+        # In order for isochrone interpolation to work with numpy,
+        # teff has to be increasing. Flip isochrone if not increasing.
+        if self.iso_teff[-1] < self.iso_teff[0]:
+            self._flip_isochrone()
+            
+        # Create star params object for output
+        star_params_obj = star_params()
+        
+        # Interpolate stellar parameters and set
+        star_params_obj.mass_init = np.interp(
+            teff, self.iso_teff, self.iso_mass_init,
+        ) * u.solMass
+        star_params_obj.mass = np.interp(
+            teff, self.iso_teff, self.iso_mass,
+        ) * u.solMass
+        star_params_obj.rad = np.interp(
+            teff, self.iso_teff, self.iso_rad,
+        ) * u.solRad
+        star_params_obj.lum = np.interp(
+            teff, self.iso_teff, self.iso_lum,
+        ) * u.W
+        star_params_obj.teff = teff * u.K
+        star_params_obj.logg = np.interp(
+            teff, self.iso_teff, self.iso_logg,
+        )
+        
+        # Interpolate mags for every filter
+        filt_mags = np.empty(self.num_filts)
+        filt_absMags = np.empty(self.num_filts)
+        
+        for filt_index, filt in enumerate(self.filts_list):
+            filt_mags[filt_index] = np.interp(
+                teff, self.iso_teff,
+                self.iso_mag_filts[filt],
+            )
+            
+            filt_absMags[filt_index] = np.interp(
+                teff, self.iso_teff,
+                self.iso_absMag_filts[filt],
+            )
+        
+        # Calculate passband luminosities
+        filt_pblums = self.calc_pblums(filt_absMags)
+        
+        # Set photometric info
+        star_params_obj.filts = self.filts_list
+        star_params_obj.mags = filt_mags
+        star_params_obj.mags_abs = filt_absMags
+        star_params_obj.pblums = filt_pblums
+        
+        return star_params_obj
+    
     def interp_star_params_mass(self, mass):
         """
         Interpolate stellar parameters from the isochrone, given a mass for
