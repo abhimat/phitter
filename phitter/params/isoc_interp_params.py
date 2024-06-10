@@ -315,26 +315,32 @@ class isoc_mist_stellar_params(stellar_params_obj):
         # teff has to be increasing. Flip isochrone if not increasing.
         if self.iso_teff[-1] < self.iso_teff[0]:
             self._flip_isochrone()
-            
+        
+        # Find max teff, and only perform interpolation in regime
+        # from beginning to first max
+        teff_argmax = np.argmax(self.iso_teff)
+        
+        interp_slice = slice(0, teff_argmax)
+        
         # Create star params object for output
         star_params_obj = star_params()
         
         # Interpolate stellar parameters and set
         star_params_obj.mass_init = np.interp(
-            teff, self.iso_teff, self.iso_mass_init,
+            teff, self.iso_teff[interp_slice], self.iso_mass_init[interp_slice],
         ) * u.solMass
         star_params_obj.mass = np.interp(
-            teff, self.iso_teff, self.iso_mass,
+            teff, self.iso_teff[interp_slice], self.iso_mass[interp_slice],
         ) * u.solMass
         star_params_obj.rad = np.interp(
-            teff, self.iso_teff, self.iso_rad,
+            teff, self.iso_teff[interp_slice], self.iso_rad[interp_slice],
         ) * u.solRad
         star_params_obj.lum = np.interp(
-            teff, self.iso_teff, self.iso_lum,
+            teff, self.iso_teff[interp_slice], self.iso_lum[interp_slice],
         ) * u.W
         star_params_obj.teff = teff * u.K
         star_params_obj.logg = np.interp(
-            teff, self.iso_teff, self.iso_logg,
+            teff, self.iso_teff[interp_slice], self.iso_logg[interp_slice],
         )
         
         # Interpolate mags for every filter
@@ -343,13 +349,13 @@ class isoc_mist_stellar_params(stellar_params_obj):
         
         for filt_index, filt in enumerate(self.filts_list):
             filt_mags[filt_index] = np.interp(
-                teff, self.iso_teff,
-                self.iso_mag_filts[filt],
+                teff, self.iso_teff[interp_slice],
+                self.iso_mag_filts[filt][interp_slice],
             )
             
             filt_absMags[filt_index] = np.interp(
-                teff, self.iso_teff,
-                self.iso_absMag_filts[filt],
+                teff, self.iso_teff[interp_slice],
+                self.iso_absMag_filts[filt][interp_slice],
             )
         
         # Calculate passband luminosities
