@@ -1085,10 +1085,6 @@ class single_star_model_obs(object):
         # Setting long rotation period so that large stellar radii can be stable
         sing_star.set_value('period@component', 9e3 * u.yr)
         
-        if self.print_diagnostics:
-            print('Star Parameters in PHOEBE:')
-            print(sing_star.filter('starA@component'))
-        
         # Gravity darkening coefficient
         if star_teff >= 8000 * u.K:    # Radiative
             sing_star.set_value('gravb_bol@component', 1.0)
@@ -1159,6 +1155,10 @@ class single_star_model_obs(object):
                 'pblum@' + filt.phoebe_ds_name,
                 star_filt_pblums[filt_index],
             )
+        
+        if self.print_diagnostics:
+            print('Star Parameters in PHOEBE:')
+            print(sing_star.filter('starA@component'))
         
         # Run compute
         # Determine eclipse method
