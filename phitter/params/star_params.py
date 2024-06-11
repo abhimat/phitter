@@ -75,7 +75,7 @@ class star_params(object):
             out_str += f'filt {filt}:\n'
             out_str += f'mag = {self.mags[filt_index]:.3f}\n'
             out_str += f'mag_abs = {self.mags_abs[filt_index]:.3f}\n'
-            out_str += f'pblum = {self.pblums[filt_index].to(u.solLum):.3f}\n'
+            out_str += f'pblum = {self.pblums[filt].to(u.solLum):.3f}\n'
         
         return out_str    
     
