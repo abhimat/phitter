@@ -51,7 +51,7 @@ class star_params(object):
     filts = []
     mags = np.array([])
     mags_abs = np.array([])
-    pblums = np.array([]) * u.solLum
+    pblums = {}
     
     def __init__(self):
         return
@@ -152,9 +152,10 @@ class stellar_params_obj(object):
             
     def calc_pblums(self, filt_absMags):
         # Calculate luminosities in each filter
-        filt_pblums = np.empty(self.num_filts) * u.solLum
+        filt_pblums = {}
+        np.empty(self.num_filts) * u.solLum
         
-        for cur_filt_index in range(self.num_filts):
+        for cur_filt_index, cur_filt in enumerate(self.filts_list):
             cur_filt_flux_ref = self.filts_flux_ref[cur_filt_index]
             cur_filt_absMag = filt_absMags[cur_filt_index]
             
@@ -166,6 +167,6 @@ class stellar_params_obj(object):
             cur_filt_pblum = (cur_filt_flux *
                               (4. * np.pi * (10. * u.pc)**2.))
             
-            filt_pblums[cur_filt_index] = cur_filt_pblum.to(u.solLum)
+            filt_pblums[cur_filt] = cur_filt_pblum.to(u.solLum)
         
         return filt_pblums

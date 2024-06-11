@@ -555,25 +555,25 @@ class binary_star_model_obs(object):
                 
                 b.set_value(
                     'pblum@primary@' + filt.phoebe_ds_name,
-                    star1_filt_pblums[filt_index],
+                    star1_filt_pblums[filt],
                 )
                 
                 b.set_value(
                     'pblum@secondary@' + filt.phoebe_ds_name,
-                    star2_filt_pblums[filt_index],
+                    star2_filt_pblums[filt],
                 )
         else:
             if star1_overflow:
                 for (filt_index, filt) in enumerate(self.bin_observables.unique_filts_phot):
                     b.set_value(
                         'pblum@primary@' + filt.phoebe_ds_name,
-                        star1_filt_pblums[filt_index],
+                        star1_filt_pblums[filt],
                     )
             elif star2_overflow:
                 for (filt_index, filt) in enumerate(self.bin_observables.unique_filts_phot):
                     b.set_value(
                         'pblum@secondary@' + filt.phoebe_ds_name,
-                        star2_filt_pblums[filt_index],
+                        star2_filt_pblums[filt],
                     )
         
         # Run compute
@@ -1153,7 +1153,7 @@ class single_star_model_obs(object):
             
             sing_star.set_value(
                 'pblum@' + filt.phoebe_ds_name,
-                star_filt_pblums[filt_index],
+                star_filt_pblums[filt],
             )
         
         if self.print_diagnostics:
