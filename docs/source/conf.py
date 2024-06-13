@@ -35,3 +35,13 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 html_theme = 'alabaster'
 html_static_path = ['_static']
+# html_logo = 'Phitter.svg'
+html_theme_options = {
+    'logo': 'Phitter.svg',
+    'logo_name': False,
+    # 'github_button': True,
+    # 'github_type': 'star',
+    # 'github_count': 'true',
+    # 'github_repo': 'phitter',
+    # 'github_user': 'abhimat',
+}

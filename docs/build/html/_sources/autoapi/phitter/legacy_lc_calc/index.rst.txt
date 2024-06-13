@@ -1,0 +1,59 @@
+:py:mod:`phitter.legacy_lc_calc`
+================================
+
+.. py:module:: phitter.legacy_lc_calc
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   phitter.legacy_lc_calc.phased_obs
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   phitter.legacy_lc_calc.kp_filt
+   phitter.legacy_lc_calc.h_filt
+
+
+.. py:data:: kp_filt
+
+   
+
+.. py:data:: h_filt
+
+   
+
+.. py:function:: phased_obs(observation_times, binary_period, t0, filts_list=[kp_filt, h_filt])
+
+   
+   Phase observation times to a given binary period and t0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+

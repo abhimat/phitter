@@ -11,6 +11,7 @@ Submodules
    :maxdepth: 1
 
    filters/index.rst
+   legacy_lc_calc/index.rst
    observables/index.rst
 
 

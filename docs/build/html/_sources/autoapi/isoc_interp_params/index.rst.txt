@@ -198,6 +198,39 @@ Attributes
       ..
           !! processed by numpydoc !!
 
+   .. py:method:: interp_star_params_teff(teff)
+
+      
+      Interpolate stellar parameters from the isochrone, given a T_eff for
+      the star.
+
+
+      :Parameters:
+
+          **teff** : float
+              Stellar T_eff as float, in units of Kelvin.
+
+      :Returns:
+
+          star_params
+              star_params object returned, with stellar parameters interpolated
+              from the MIST isochrone.
+
+
+
+
+
+
+
+
+
+
+
+
+
+      ..
+          !! processed by numpydoc !!
+
    .. py:method:: interp_star_params_mass(mass)
 
       

@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Index &#8212; phitter 0.2 documentation</title>
+    <title>Index &#8212; Phitter 0.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
@@ -14,11 +14,14 @@
     <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="#" />
     <link rel="search" title="Search" href="search.html" />
+
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+<link rel="stylesheet" href="https://use.typekit.net/hxl8tqz.css">
 
   </head><body>
   
@@ -111,6 +114,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="autoapi/phot_adj_calc/index.html#phot_adj_calc.apply_extinction">apply_extinction() (in module phot_adj_calc)</a>
 </li>
+      <li><a href="autoapi/phot_adj_calc/index.html#phot_adj_calc.apply_mag_shift_filt">apply_mag_shift_filt() (in module phot_adj_calc)</a>
+</li>
       <li><a href="autoapi/isoc_interp_params/index.html#isoc_interp_params.atm_funcs">atm_funcs (in module isoc_interp_params)</a>
 </li>
   </ul></td>
@@ -160,7 +165,11 @@
       <li><a href="autoapi/blackbody_params/index.html#blackbody_params.bb_stellar_params.calc_star_params">calc_star_params() (blackbody_params.bb_stellar_params method)</a>
 </li>
       <li><a href="autoapi/model_obs_calc/index.html#model_obs_calc.binary_star_model_obs.compute_obs">compute_obs() (model_obs_calc.binary_star_model_obs method)</a>
+
+      <ul>
+        <li><a href="autoapi/model_obs_calc/index.html#model_obs_calc.single_star_model_obs.compute_obs">(model_obs_calc.single_star_model_obs method)</a>
 </li>
+      </ul></li>
       <li><a href="autoapi/prior/index.html#prior.const_prior">const_prior (class in prior)</a>
 </li>
   </ul></td>
@@ -168,10 +177,6 @@
 
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="autoapi/model_obs_calc/index.html#model_obs_calc.dist_ext_mag_calc">dist_ext_mag_calc() (in module model_obs_calc)</a>
-</li>
-  </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="autoapi/blackbody_params/index.html#blackbody_params.dlambda_Ks">dlambda_Ks (in module blackbody_params)</a>
 
@@ -187,11 +192,11 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="autoapi/binary_params/index.html#binary_params.binary_params.ecc">ecc (binary_params.binary_params attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="autoapi/likelihood/index.html#likelihood.log_likelihood_chisq.evaluate">evaluate() (likelihood.log_likelihood_chisq method)</a>
 
       <ul>
+        <li><a href="autoapi/likelihood/index.html#likelihood.log_likelihood_chisq_weighted_filts_and_obs_type.evaluate">(likelihood.log_likelihood_chisq_weighted_filts_and_obs_type method)</a>
+</li>
         <li><a href="autoapi/likelihood/index.html#likelihood.log_likelihood_chisq_weighted_obs_type.evaluate">(likelihood.log_likelihood_chisq_weighted_obs_type method)</a>
 </li>
       </ul></li>
@@ -248,9 +253,21 @@
 </li>
         <li><a href="autoapi/model_obs_calc/index.html#model_obs_calc.h_filt">(in module model_obs_calc)</a>
 </li>
+        <li><a href="autoapi/phitter/legacy_lc_calc/index.html#phitter.legacy_lc_calc.h_filt">(in module phitter.legacy_lc_calc)</a>
+</li>
         <li><a href="autoapi/star_params/index.html#star_params.h_filt">(in module star_params)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/phitter/filters/index.html#phitter.filters.hst_f105w_filt">hst_f105w_filt (class in phitter.filters)</a>
+</li>
+      <li><a href="autoapi/phitter/filters/index.html#phitter.filters.hst_f127m_filt">hst_f127m_filt (class in phitter.filters)</a>
+</li>
+      <li><a href="autoapi/phitter/filters/index.html#phitter.filters.hst_f139m_filt">hst_f139m_filt (class in phitter.filters)</a>
+</li>
+      <li><a href="autoapi/phitter/filters/index.html#phitter.filters.hst_f153m_filt">hst_f153m_filt (class in phitter.filters)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -263,9 +280,11 @@
 </li>
       <li><a href="autoapi/isoc_interp_params/index.html#isoc_interp_params.isoc_mist_stellar_params.interp_star_params_mass_init">interp_star_params_mass_init() (isoc_interp_params.isoc_mist_stellar_params method)</a>
 </li>
+      <li><a href="autoapi/isoc_interp_params/index.html#isoc_interp_params.isoc_mist_stellar_params.interp_star_params_rad">interp_star_params_rad() (isoc_interp_params.isoc_mist_stellar_params method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="autoapi/isoc_interp_params/index.html#isoc_interp_params.isoc_mist_stellar_params.interp_star_params_rad">interp_star_params_rad() (isoc_interp_params.isoc_mist_stellar_params method)</a>
+      <li><a href="autoapi/isoc_interp_params/index.html#isoc_interp_params.isoc_mist_stellar_params.interp_star_params_teff">interp_star_params_teff() (isoc_interp_params.isoc_mist_stellar_params method)</a>
 </li>
       <li>
     isoc_interp_params
@@ -302,6 +321,8 @@
         <li><a href="autoapi/isoc_interp_params/index.html#isoc_interp_params.kp_filt">(in module isoc_interp_params)</a>
 </li>
         <li><a href="autoapi/model_obs_calc/index.html#model_obs_calc.kp_filt">(in module model_obs_calc)</a>
+</li>
+        <li><a href="autoapi/phitter/legacy_lc_calc/index.html#phitter.legacy_lc_calc.kp_filt">(in module phitter.legacy_lc_calc)</a>
 </li>
         <li><a href="autoapi/star_params/index.html#star_params.kp_filt">(in module star_params)</a>
 </li>
@@ -340,6 +361,8 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="autoapi/likelihood/index.html#likelihood.log_likelihood_chisq">log_likelihood_chisq (class in likelihood)</a>
+</li>
+      <li><a href="autoapi/likelihood/index.html#likelihood.log_likelihood_chisq_weighted_filts_and_obs_type">log_likelihood_chisq_weighted_filts_and_obs_type (class in likelihood)</a>
 </li>
       <li><a href="autoapi/likelihood/index.html#likelihood.log_likelihood_chisq_weighted_obs_type">log_likelihood_chisq_weighted_obs_type (class in likelihood)</a>
 </li>
@@ -387,6 +410,8 @@
         <li><a href="autoapi/phitter/index.html#module-phitter">phitter</a>
 </li>
         <li><a href="autoapi/phitter/filters/index.html#module-phitter.filters">phitter.filters</a>
+</li>
+        <li><a href="autoapi/phitter/legacy_lc_calc/index.html#module-phitter.legacy_lc_calc">phitter.legacy_lc_calc</a>
 </li>
         <li><a href="autoapi/phitter/observables/index.html#module-phitter.observables">phitter.observables</a>
 </li>
@@ -447,7 +472,7 @@
 </li>
       <li><a href="autoapi/binary_params/index.html#binary_params.binary_params.period">period (binary_params.binary_params attribute)</a>
 </li>
-      <li><a href="autoapi/model_obs_calc/index.html#model_obs_calc.phased_obs">phased_obs() (in module model_obs_calc)</a>
+      <li><a href="autoapi/phitter/legacy_lc_calc/index.html#phitter.legacy_lc_calc.phased_obs">phased_obs() (in module phitter.legacy_lc_calc)</a>
 </li>
       <li>
     phitter
@@ -464,14 +489,21 @@
 </li>
       </ul></li>
       <li>
+    phitter.legacy_lc_calc
+
+      <ul>
+        <li><a href="autoapi/phitter/legacy_lc_calc/index.html#module-phitter.legacy_lc_calc">module</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
     phitter.observables
 
       <ul>
         <li><a href="autoapi/phitter/observables/index.html#module-phitter.observables">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     phot_adj_calc
 
@@ -533,7 +565,7 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="autoapi/model_obs_calc/index.html#model_obs_calc.single_star_model_obs">single_star_model_obs() (in module model_obs_calc)</a>
+      <li><a href="autoapi/model_obs_calc/index.html#model_obs_calc.single_star_model_obs">single_star_model_obs (class in model_obs_calc)</a>
 </li>
       <li>
     star_params
@@ -591,7 +623,12 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="index.html">phitter</a></h1>
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/Phitter.svg" alt="Logo"/>
+    
+  </a>
+</p>
 
 
 

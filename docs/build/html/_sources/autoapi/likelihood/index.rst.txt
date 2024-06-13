@@ -14,6 +14,7 @@ Classes
 
    likelihood.log_likelihood_chisq
    likelihood.log_likelihood_chisq_weighted_obs_type
+   likelihood.log_likelihood_chisq_weighted_filts_and_obs_type
 
 
 
@@ -63,6 +64,49 @@ Classes
    log likelihood, while weighing different observation types equally. This
    weighting scheme may be useful for cases where number of a given observation
    type is much larger than that of another.
+
+   The output log likelihood is calculated in the following way:
+   log_like_total = (log_like_t1)/(n_t1) + (log_like_t2)/(n_t2) + ...
+   (see e.g., Lam+ 2022)
+
+   Instantiate this object with an observables object to indicate the observed
+   observables.
+
+   :Parameters:
+
+       **observations** : observables
+           observables object, specified with the observations to be fit.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+   .. py:method:: evaluate(model_observables)
+
+
+
+.. py:class:: log_likelihood_chisq_weighted_filts_and_obs_type(observations, *args, **kwargs)
+
+
+   Bases: :py:obj:`log_likelihood_chisq`
+
+   
+   log_likelihood_chisq_weighted_filts_and_obs_type is an object to obtain chi
+   squared log likelihood, while weighing different observation types, and
+   filters within each observation type equally.
+   This weighting scheme may be useful for cases where number of a given
+   observation type or filt is much larger than that of another.
 
    The output log likelihood is calculated in the following way:
    log_like_total = (log_like_t1)/(n_t1) + (log_like_t2)/(n_t2) + ...

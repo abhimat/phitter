@@ -15,6 +15,7 @@ Functions
 
    phot_adj_calc.apply_distance_modulus
    phot_adj_calc.apply_extinction
+   phot_adj_calc.apply_mag_shift_filt
 
 
 
@@ -76,8 +77,7 @@ Attributes
    :Parameters:
 
        **bin_observables** : observables
-           observables object containing photometry to which to apply distance
-           modulus.
+           observables object containing photometry to which to apply extinction.
 
        **isoc_Ks_ext** : float
            Extinction, in Ks band, for the isochrone object used to generate
@@ -101,7 +101,48 @@ Attributes
    :Returns:
 
        observables
-           observables object, where photometry has distance modulus added.
+           observables object, where photometry has reddening from extinction.
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: apply_mag_shift_filt(bin_observables, filt, mag_shift)
+
+   
+   Modeled observables are calculated without any uncertainties in zeropoint.
+   This function allows adding a shift to account for errors in zeropoint mags.
+
+
+   :Parameters:
+
+       **bin_observables** : observables
+           observables object containing photometry to which to apply mag shift.
+
+       **filt** : filter
+           filter object, for whose photometric observations the mag shift will be
+           applied.
+
+       **mag_shift** : float
+           The shift in mags to apply to photometric observations of ``filt``
+           filter. Positive values indicate a fainter shift, while negative values
+           indicate a brighter shift.
+
+   :Returns:
+
+       observables
+           observables object, where photometry has mag shift in ``filt`` added.
 
 
 

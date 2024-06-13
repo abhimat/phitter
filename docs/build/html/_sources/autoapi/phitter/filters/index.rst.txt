@@ -17,6 +17,10 @@ Classes
    phitter.filters.nirc2_lp_filt
    phitter.filters.nirc2_kp_filt
    phitter.filters.nirc2_h_filt
+   phitter.filters.hst_f127m_filt
+   phitter.filters.hst_f139m_filt
+   phitter.filters.hst_f153m_filt
+   phitter.filters.hst_f105w_filt
    phitter.filters.jwst_115w_filt
    phitter.filters.jwst_212n_filt
    phitter.filters.jwst_323n_filt
@@ -159,6 +163,30 @@ Attributes
 
 
 .. py:class:: nirc2_h_filt
+
+
+   Bases: :py:obj:`filter`
+
+
+.. py:class:: hst_f127m_filt
+
+
+   Bases: :py:obj:`filter`
+
+
+.. py:class:: hst_f139m_filt
+
+
+   Bases: :py:obj:`filter`
+
+
+.. py:class:: hst_f153m_filt
+
+
+   Bases: :py:obj:`filter`
+
+
+.. py:class:: hst_f105w_filt
 
 
    Bases: :py:obj:`filter`

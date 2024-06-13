@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>star_params &#8212; phitter 0.2 documentation</title>
+    <title>star_params &#8212; Phitter 0.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
     <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
@@ -14,11 +14,14 @@
     <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
+
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+<link rel="stylesheet" href="https://use.typekit.net/hxl8tqz.css">
 
   </head><body>
   
@@ -84,7 +87,7 @@
 <div class="viewcode-block" id="star_params.filts"><a class="viewcode-back" href="../autoapi/star_params/index.html#star_params.star_params.filts">[docs]</a>    <span class="n">filts</span> <span class="o">=</span> <span class="p">[]</span></div>
 <div class="viewcode-block" id="star_params.mags"><a class="viewcode-back" href="../autoapi/star_params/index.html#star_params.star_params.mags">[docs]</a>    <span class="n">mags</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span></div>
 <div class="viewcode-block" id="star_params.mags_abs"><a class="viewcode-back" href="../autoapi/star_params/index.html#star_params.star_params.mags_abs">[docs]</a>    <span class="n">mags_abs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span></div>
-<div class="viewcode-block" id="star_params.pblums"><a class="viewcode-back" href="../autoapi/star_params/index.html#star_params.star_params.pblums">[docs]</a>    <span class="n">pblums</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">solLum</span></div>
+<div class="viewcode-block" id="star_params.pblums"><a class="viewcode-back" href="../autoapi/star_params/index.html#star_params.star_params.pblums">[docs]</a>    <span class="n">pblums</span> <span class="o">=</span> <span class="p">{}</span></div>
     
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span>
@@ -108,7 +111,7 @@
             <span class="n">out_str</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;filt </span><span class="si">{</span><span class="n">filt</span><span class="si">}</span><span class="s1">:</span><span class="se">\n</span><span class="s1">&#39;</span>
             <span class="n">out_str</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;mag = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mags</span><span class="p">[</span><span class="n">filt_index</span><span class="p">]</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
             <span class="n">out_str</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;mag_abs = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mags_abs</span><span class="p">[</span><span class="n">filt_index</span><span class="p">]</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
-            <span class="n">out_str</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;pblum = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pblums</span><span class="p">[</span><span class="n">filt_index</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">solLum</span><span class="p">)</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="n">out_str</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;pblum = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pblums</span><span class="p">[</span><span class="n">filt</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">solLum</span><span class="p">)</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
         
         <span class="k">return</span> <span class="n">out_str</span>    </div></div>
     
@@ -185,9 +188,10 @@
             
 <div class="viewcode-block" id="stellar_params_obj.calc_pblums"><a class="viewcode-back" href="../autoapi/star_params/index.html#star_params.stellar_params_obj.calc_pblums">[docs]</a>    <span class="k">def</span> <span class="nf">calc_pblums</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filt_absMags</span><span class="p">):</span>
         <span class="c1"># Calculate luminosities in each filter</span>
-        <span class="n">filt_pblums</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_filts</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">solLum</span>
+        <span class="n">filt_pblums</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_filts</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">solLum</span>
         
-        <span class="k">for</span> <span class="n">cur_filt_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_filts</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">cur_filt_index</span><span class="p">,</span> <span class="n">cur_filt</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filts_list</span><span class="p">):</span>
             <span class="n">cur_filt_flux_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filts_flux_ref</span><span class="p">[</span><span class="n">cur_filt_index</span><span class="p">]</span>
             <span class="n">cur_filt_absMag</span> <span class="o">=</span> <span class="n">filt_absMags</span><span class="p">[</span><span class="n">cur_filt_index</span><span class="p">]</span>
             
@@ -199,7 +203,7 @@
             <span class="n">cur_filt_pblum</span> <span class="o">=</span> <span class="p">(</span><span class="n">cur_filt_flux</span> <span class="o">*</span>
                               <span class="p">(</span><span class="mf">4.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="mf">10.</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">pc</span><span class="p">)</span><span class="o">**</span><span class="mf">2.</span><span class="p">))</span>
             
-            <span class="n">filt_pblums</span><span class="p">[</span><span class="n">cur_filt_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">cur_filt_pblum</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">solLum</span><span class="p">)</span>
+            <span class="n">filt_pblums</span><span class="p">[</span><span class="n">cur_filt</span><span class="p">]</span> <span class="o">=</span> <span class="n">cur_filt_pblum</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">solLum</span><span class="p">)</span>
         
         <span class="k">return</span> <span class="n">filt_pblums</span></div></div>
 </pre></div>
@@ -210,7 +214,12 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="../index.html">phitter</a></h1>
+<p class="logo">
+  <a href="../index.html">
+    <img class="logo" src="../_static/Phitter.svg" alt="Logo"/>
+    
+  </a>
+</p>
 
 
 

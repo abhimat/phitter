@@ -1,0 +1,168 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>phitter.legacy_lc_calc &#8212; Phitter 0.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+<link rel="stylesheet" href="https://use.typekit.net/hxl8tqz.css">
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for phitter.legacy_lc_calc</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Legacy functions for compatibility</span>
+
+<span class="kn">import</span> <span class="nn">phoebe</span>
+<span class="kn">from</span> <span class="nn">phoebe</span> <span class="kn">import</span> <span class="n">u</span>
+<span class="kn">from</span> <span class="nn">phoebe</span> <span class="kn">import</span> <span class="n">c</span> <span class="k">as</span> <span class="n">const</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">phitter</span> <span class="kn">import</span> <span class="n">filters</span>
+
+<span class="c1"># Filters for default filter list</span>
+<div class="viewcode-block" id="kp_filt"><a class="viewcode-back" href="../../autoapi/phitter/legacy_lc_calc/index.html#phitter.legacy_lc_calc.kp_filt">[docs]</a><span class="n">kp_filt</span> <span class="o">=</span> <span class="n">filters</span><span class="o">.</span><span class="n">nirc2_kp_filt</span><span class="p">()</span></div>
+<div class="viewcode-block" id="h_filt"><a class="viewcode-back" href="../../autoapi/phitter/legacy_lc_calc/index.html#phitter.legacy_lc_calc.h_filt">[docs]</a><span class="n">h_filt</span> <span class="o">=</span> <span class="n">filters</span><span class="o">.</span><span class="n">nirc2_h_filt</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="phased_obs"><a class="viewcode-back" href="../../autoapi/phitter/legacy_lc_calc/index.html#phitter.legacy_lc_calc.phased_obs">[docs]</a><span class="k">def</span> <span class="nf">phased_obs</span><span class="p">(</span><span class="n">observation_times</span><span class="p">,</span> <span class="n">binary_period</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span>
+               <span class="n">filts_list</span><span class="o">=</span><span class="p">[</span><span class="n">kp_filt</span><span class="p">,</span> <span class="n">h_filt</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Phase observation times to a given binary period and t0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">num_filts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">filts_list</span><span class="p">)</span>
+    
+    <span class="c1"># Read in observation times, and separate photometry from RVs</span>
+    <span class="n">filt_MJDs</span> <span class="o">=</span> <span class="n">observation_times</span><span class="p">[:</span><span class="n">num_filts</span><span class="p">]</span>
+    <span class="n">rv_MJDs</span> <span class="o">=</span> <span class="n">observation_times</span><span class="p">[</span><span class="n">num_filts</span><span class="p">]</span>
+    
+    <span class="n">out_phased_obs</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="c1"># Phase photometric observation times</span>
+    <span class="k">for</span> <span class="n">filt_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_filts</span><span class="p">):</span>
+        <span class="c1"># Phase the current filter&#39;s MJDs</span>
+        <span class="n">cur_filt_MJDs</span> <span class="o">=</span> <span class="n">filt_MJDs</span><span class="p">[</span><span class="n">filt_index</span><span class="p">]</span>
+        <span class="n">cur_filt_phased_days</span> <span class="o">=</span> <span class="p">(((</span><span class="n">cur_filt_MJDs</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span> <span class="o">%</span>
+                                 <span class="n">binary_period</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">/</span>
+                                <span class="n">binary_period</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        
+        <span class="c1"># Compute phase sorted inds</span>
+        <span class="n">cur_filt_phases_sorted_inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">cur_filt_phased_days</span><span class="p">)</span>
+        
+        <span class="c1"># Compute model times sorted to phase sorted inds</span>
+        <span class="n">cur_filt_model_times</span> <span class="o">=</span> <span class="n">cur_filt_phased_days</span> <span class="o">*</span>\
+                               <span class="n">binary_period</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+        <span class="n">cur_filt_model_times</span> <span class="o">=</span> <span class="n">cur_filt_model_times</span><span class="p">[</span><span class="n">cur_filt_phases_sorted_inds</span><span class="p">]</span>
+        
+        <span class="c1"># Append calculated values to output tuple</span>
+        <span class="n">out_phased_obs</span> <span class="o">=</span> <span class="n">out_phased_obs</span> <span class="o">+</span> \
+                         <span class="p">((</span><span class="n">cur_filt_phased_days</span><span class="p">,</span> <span class="n">cur_filt_phases_sorted_inds</span><span class="p">,</span>
+                           <span class="n">cur_filt_model_times</span><span class="p">),</span> <span class="p">)</span>
+    
+    <span class="c1"># Phase RV observation times</span>
+    <span class="n">rv_phased_days</span> <span class="o">=</span> <span class="p">(((</span><span class="n">rv_MJDs</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span> <span class="o">%</span> <span class="n">binary_period</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">/</span>
+                      <span class="n">binary_period</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+    
+    <span class="n">rv_phases_sorted_inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">rv_phased_days</span><span class="p">)</span>
+    
+    <span class="n">rv_model_times</span> <span class="o">=</span> <span class="p">(</span><span class="n">rv_phased_days</span><span class="p">)</span> <span class="o">*</span> <span class="n">binary_period</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">rv_model_times</span> <span class="o">=</span> <span class="n">rv_model_times</span><span class="p">[</span><span class="n">rv_phases_sorted_inds</span><span class="p">]</span>
+    
+    <span class="c1"># Append RV values to output tuple</span>
+    <span class="n">out_phased_obs</span> <span class="o">=</span> <span class="n">out_phased_obs</span> <span class="o">+</span> \
+                     <span class="p">((</span><span class="n">rv_phased_days</span><span class="p">,</span> <span class="n">rv_phases_sorted_inds</span><span class="p">,</span>
+                       <span class="n">rv_model_times</span><span class="p">),</span> <span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">out_phased_obs</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../../index.html">
+    <img class="logo" src="../../_static/Phitter.svg" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2024, Abhimat K. Gautam.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
