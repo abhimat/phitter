@@ -1,0 +1,7 @@
+/* Customizations to PyData Sphinx Theme */
+
+html {
+    --pst-font-family-base: 'source-sans-pro', -apple-system, Verdana, var(--pst-font-family-base-system);
+    --pst-font-family-heading: 'proxima-nova', -apple-system, 'Helvetica', var(--pst-font-family-base-system);
+    --pst-font-family-monospace: 'source-code-pro', 'SF Mono', var(--pst-font-family-monospace-system);
+}

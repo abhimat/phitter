@@ -21,6 +21,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'autoapi.extension',
     'myst_parser',
+    'sphinx_copybutton',
 ]
 
 autoapi_dirs = ['../../phitter']
@@ -33,15 +34,24 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'alabaster'
+# html_theme = 'alabaster'
+html_theme = 'pydata_sphinx_theme'
 html_static_path = ['_static']
-# html_logo = 'Phitter.svg'
+html_css_files = [
+    'css/custom.css',
+]
 html_theme_options = {
-    'logo': 'Phitter.svg',
-    'logo_name': False,
-    # 'github_button': True,
-    # 'github_type': 'star',
-    # 'github_count': 'true',
-    # 'github_repo': 'phitter',
-    # 'github_user': 'abhimat',
+    "logo": {
+          "image_light": "_static/Phitter.svg",
+          "image_dark": "_static/Phitter_dark.svg",
+    },
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/abhimat/phitter",
+            "icon": "fa-brands fa-square-github",
+            "type": "fontawesome",
+        },
+    ],
+    "navbar_align": "left",
 }

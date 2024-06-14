@@ -13,6 +13,8 @@
 *~
 **/*~
 
+# Ignore html output of sphinx docs
+docs/build/*
 
 # Ignore plots
 **/*.ps

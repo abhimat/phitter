@@ -1,6 +1,6 @@
 % Phitter documentation master file.
 
-# Phitter
+# phitter
 
 [Phitter](https://github.com/abhimat/phitter) is an open-source python package to simulate observables  from stellar binary systems and to fit them to observed data. Observables that can be calculated and fit with phitter include photometry (i.e., observed fluxes) and line-of-sight radial velocities (RVs).
 
