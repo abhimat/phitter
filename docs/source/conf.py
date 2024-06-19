@@ -22,8 +22,10 @@ extensions = [
     'autoapi.extension',
     'myst_parser',
     'sphinx_copybutton',
+    'sphinx_automodapi.automodapi',
 ]
 
+numpydoc_show_class_members = False
 autoapi_dirs = ['../../phitter']
 
 templates_path = ['_templates']

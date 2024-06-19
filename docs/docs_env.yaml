@@ -20,3 +20,5 @@ dependencies:
   - sphinx-markdown-tables
   - myst-parser
   - sphinx-copybutton
+  - sphinx-automodapi
+  - graphviz
