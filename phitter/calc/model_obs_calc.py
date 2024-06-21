@@ -303,8 +303,14 @@ class binary_star_model_obs(object):
                 irrad_frac_refl=irrad_frac_refl,
                 num_triangles=num_triangles,
                 make_mesh_plots=make_mesh_plots,
+                mesh_plot_phases=mesh_plot_phases,
+                animate=animate,
+                mesh_plot_fig=mesh_plot_fig,
+                mesh_plot_subplot_grid=mesh_plot_subplot_grid,
+                mesh_plot_subplot_grid_indexes=mesh_plot_subplot_grid_indexes,
                 mesh_temp=mesh_temp, mesh_temp_cmap=mesh_temp_cmap,
                 plot_name=plot_name,
+                mesh_plot_kwargs=mesh_plot_kwargs,
             )
         
         ## If none of these overflow cases, set variable to store if binary is detached
