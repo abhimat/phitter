@@ -2,11 +2,7 @@
 # ---
 # Abhimat Gautam
 
-import phoebe
-from phoebe import u
-from phoebe import c as const
 import numpy as np
-from astropy.modeling import Model
 
 class log_likelihood_chisq(object):
     """
