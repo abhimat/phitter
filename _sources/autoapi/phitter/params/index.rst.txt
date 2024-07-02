@@ -1,0 +1,18 @@
+:py:mod:`phitter.params`
+========================
+
+.. py:module:: phitter.params
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   binary_params/index.rst
+   blackbody_params/index.rst
+   isoc_interp_params/index.rst
+   star_params/index.rst
+
+

@@ -1,0 +1,17 @@
+:py:mod:`phitter.fit`
+=====================
+
+.. py:module:: phitter.fit
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   likelihood/index.rst
+   phase_bin/index.rst
+   prior/index.rst
+
+

@@ -1,0 +1,156 @@
+:py:mod:`phitter.observables`
+=============================
+
+.. py:module:: phitter.observables
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   phitter.observables.observables
+
+
+
+
+.. py:class:: observables(obs_times=None, obs=None, obs_uncs=None, obs_filts=None, obs_types=None)
+
+
+   Bases: :py:obj:`object`
+
+   
+   observables is an object to store observables, either observed or modeled.
+   Observed observables will typically have uncertainties associated, but
+   modeled observables will typically not.
+
+
+   :Parameters:
+
+       **obs_times** : np.array(dtype=float), default=None
+           Observation times. Phitter assumes times are given in MJD.
+
+       **obs** : np.array(dtype=float), default=None
+           Observables. For photometry, phitter assumes values provided in mags.
+           For RV, phitter assumes values provided in km/s.
+
+       **obs_uncs** : np.array(dtype=float), default=None
+           Uncertainties on observables, with same units as observables. For
+           photometry, phitter assumes values provided in mags. For RV, phitter
+           assumes values provided in km/s.
+
+       **obs_filts** : list of filters, default=None
+           Filters of each observable, provided as a list of filter objects of same
+           length as obs.
+
+       **obs_types** : np.array(dtype=str), default=None
+           Observation type of each observable, provided as an array of same length
+           as obs. Possible types are 'phot' or 'rv'.
+
+
+
+
+
+
+
+
+
+
+
+
+   :Attributes:
+
+       **num_obs** : int
+           Number of total observables in observations object.
+
+       **unique_filts** : list of filters
+           An array of all the unique filters of observables.
+
+       **num_filts** : int
+           Number of unique filters of observables.
+
+       **obs_times_phot** : np.array(dtype=float)
+           obs_times, but only for photometric observations.
+
+       **obs_times_rv** : np.array(dtype=float)
+           obs_times, but only for RV observations.
+
+       **obs_phot** : np.array(dtype=float)
+           obs, but only for photometric observations.
+
+       **obs_rv** : np.array(dtype=float)
+           obs, but only for RV observations.
+
+       **obs_uncs_phot** : np.array(dtype=float)
+           obs_uncs, but only for photometric observations.
+
+       **obs_uncs_rv** : np.array(dtype=float)
+           obs_uncs, but only for RV observations.
+
+
+   ..
+       !! processed by numpydoc !!
+   .. py:attribute:: obs_times
+
+      
+
+   .. py:attribute:: obs
+
+      
+
+   .. py:attribute:: obs_uncs
+
+      
+
+   .. py:attribute:: obs_filts
+
+      
+
+   .. py:attribute:: obs_types
+
+      
+
+   .. py:attribute:: num_obs
+      :value: 0
+
+      
+
+   .. py:method:: set_obs_times(obs_times)
+
+
+   .. py:method:: set_obs(obs, obs_uncs=None)
+
+
+   .. py:method:: set_obs_filts(obs_filts)
+
+
+   .. py:method:: set_obs_types(obs_types)
+
+
+   .. py:method:: _make_filt_search_filters()
+
+      
+      Private function to make search filters for every filter
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      ..
+          !! processed by numpydoc !!
+
+

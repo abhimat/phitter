@@ -1,0 +1,17 @@
+:py:mod:`phitter.calc`
+======================
+
+.. py:module:: phitter.calc
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   model_obs_calc/index.rst
+   phot_adj_calc/index.rst
+   rv_adj_calc/index.rst
+
+

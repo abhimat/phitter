@@ -1,0 +1,99 @@
+:py:mod:`phitter.fit.phase_bin`
+===============================
+
+.. py:module:: phitter.fit.phase_bin
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   phitter.fit.phase_bin.phase_bin
+
+
+
+
+.. py:class:: phase_bin(observations)
+
+
+   Bases: :py:obj:`object`
+
+   
+   `phase_bin` is a class to assist in binning observations by phase.
+   Instantiate this object with an observables object to indicate the
+   observed observables.
+
+
+   :Parameters:
+
+       **observations** : observables
+           observables object, specified with the observations to be fit.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+   .. py:method:: phase_in_bins(phase_period, phase_t0, num_bins=100, normalize_uncs=False)
+
+      
+      Function to perform the phasing of observations.
+
+
+      :Parameters:
+
+          **phase_period** : float
+              Period to phase the observations to.
+
+          **phase_t0** : float
+              t0 to use when performing the phasing.
+
+          **num_bins** : int, default=100
+              Number of bins to use when phasing. Makes `num_bins` equal sized
+              bins between phase of 0 -- 1.
+
+          **normalized_uncs** : boolean, default=False
+              Whether or not to normalize the output uncertainties. If False,
+              output uncertainties reflect number of data points in each phase
+              bin. If True, output uncertainties for each phase bin are normalized
+              so that more observations do not result in smaller uncertainties for
+              a given bin.
+
+      :Returns:
+
+          **phased_observables** : observables
+              A substitute observables object
+
+          **phased_model_observables** : observables
+              ..
+
+
+
+
+
+
+
+
+
+
+
+
+
+      ..
+          !! processed by numpydoc !!
+
+

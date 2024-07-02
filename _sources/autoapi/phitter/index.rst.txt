@@ -1,0 +1,28 @@
+:py:mod:`phitter`
+=================
+
+.. py:module:: phitter
+
+
+Subpackages
+-----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 3
+
+   calc/index.rst
+   fit/index.rst
+   params/index.rst
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   filters/index.rst
+   legacy_lc_calc/index.rst
+   observables/index.rst
+
+
