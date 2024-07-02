@@ -116,14 +116,14 @@ class phase_bin(object):
                     bin_weights = 1. / (bin_obs_uncs ** 2.)
                     
                     # Calculate weighted mean observations and uncertainties
-                    binned_obs = np.average(bin_obs, weights=bin_weights)
+                    binned_mag = np.average(bin_obs, weights=bin_weights)
                     binned_obs_unc = np.sqrt(1./(np.sum(bin_obs_uncs**-2)))
                     binned_phase = np.average(bin_phases, weights=bin_weights)
                     
                     if normalize_uncs:
                         binned_obs_unc = (num_bin_points**0.5) * binned_obs_unc
                     
-                    filt_binned_obs[bin_index] = binned_obs
+                    filt_binned_obs[bin_index] = binned_mag
                     filt_binned_obs_uncs[bin_index] = binned_obs_unc
                     filt_binned_phases[bin_index] = binned_phase
                     
@@ -135,7 +135,7 @@ class phase_bin(object):
                 binned_obs_uncs[filt_slice] = filt_binned_obs_uncs
                 
                 # Make filts array
-                binned_obs_filts[filt_slice] = np.append(binned_obs_filts, np.full(
+                binned_obs_filts = np.append(binned_obs_filts, np.full(
                     num_bins, filt
                 ))
             
@@ -180,8 +180,8 @@ class phase_bin(object):
                 
                 # Cut out obs for current filter
                 cur_filt_filter = np.logical_and(
-                    self.observations.rv_filt_filters[filt],
-                    self.observations.obs_rv_pri_filter,
+                    self.observations.obs_filts == filt,
+                    self.observations.obs_types == 'rv_pri',
                 )
                 
                 cur_filt_obs_times = self.observations.obs_times[cur_filt_filter]
@@ -219,14 +219,14 @@ class phase_bin(object):
                     bin_weights = 1. / (bin_obs_uncs ** 2.)
                     
                     # Calculate weighted mean observations and uncertainties
-                    binned_obs = np.average(bin_obs, weights=bin_weights)
+                    binned_rv = np.average(bin_obs, weights=bin_weights)
                     binned_obs_unc = np.sqrt(1./(np.sum(bin_obs_uncs**-2)))
                     binned_phase = np.average(bin_phases, weights=bin_weights)
                     
                     if normalize_uncs:
                         binned_obs_unc = (num_bin_points**0.5) * binned_obs_unc
                     
-                    filt_binned_obs[bin_index] = binned_obs
+                    filt_binned_obs[bin_index] = binned_rv
                     filt_binned_obs_uncs[bin_index] = binned_obs_unc
                     filt_binned_phases[bin_index] = binned_phase
                     
@@ -241,7 +241,7 @@ class phase_bin(object):
                 )
                 
                 # Make filts array
-                binned_obs_filts[filt_slice] = np.append(binned_obs_filts, np.full(
+                binned_obs_filts = np.append(binned_obs_filts, np.full(
                     num_bins, filt
                 ))
                 
@@ -249,8 +249,8 @@ class phase_bin(object):
                 
                 # Cut out obs for current filter
                 cur_filt_filter = np.logical_and(
-                    self.observations.rv_filt_filters[filt],
-                    self.observations.obs_rv_sec_filter,
+                    self.observations.obs_filts == filt,
+                    self.observations.obs_types == 'rv_sec',
                 )
                 
                 cur_filt_obs_times = self.observations.obs_times[cur_filt_filter]
@@ -288,14 +288,14 @@ class phase_bin(object):
                     bin_weights = 1. / (bin_obs_uncs ** 2.)
                     
                     # Calculate weighted mean observations and uncertainties
-                    binned_obs = np.average(bin_obs, weights=bin_weights)
+                    binned_rv = np.average(bin_obs, weights=bin_weights)
                     binned_obs_unc = np.sqrt(1./(np.sum(bin_obs_uncs**-2)))
                     binned_phase = np.average(bin_phases, weights=bin_weights)
                     
                     if normalize_uncs:
                         binned_obs_unc = (num_bin_points**0.5) * binned_obs_unc
                     
-                    filt_binned_obs[bin_index] = binned_obs
+                    filt_binned_obs[bin_index] = binned_rv
                     filt_binned_obs_uncs[bin_index] = binned_obs_unc
                     filt_binned_phases[bin_index] = binned_phase
                     
@@ -313,7 +313,7 @@ class phase_bin(object):
                 )
                 
                 # Make filts array
-                binned_obs_filts[filt_slice] = np.append(binned_obs_filts, np.full(
+                binned_obs_filts = np.append(binned_obs_filts, np.full(
                     num_bins, filt
                 ))
             
