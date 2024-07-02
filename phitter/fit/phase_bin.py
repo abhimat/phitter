@@ -235,7 +235,7 @@ class phase_bin(object):
                 
                 binned_obs_times[filt_slice] = (filt_binned_phases * phase_period) + phase_t0
                 binned_obs[filt_slice] = filt_binned_obs
-                binned_obs_types[filt_slice] = filt_binned_obs_uncs
+                binned_obs_uncs[filt_slice] = filt_binned_obs_uncs
                 binned_obs_types[filt_slice] = np.full(
                     num_bins, 'rv_pri',
                 )
@@ -307,7 +307,7 @@ class phase_bin(object):
                 
                 binned_obs_times[filt_slice] = (filt_binned_phases * phase_period) + phase_t0
                 binned_obs[filt_slice] = filt_binned_obs
-                binned_obs_types[filt_slice] = filt_binned_obs_uncs
+                binned_obs_uncs[filt_slice] = filt_binned_obs_uncs
                 binned_obs_types[filt_slice] = np.full(
                     num_bins, 'rv_sec',
                 )
