@@ -403,7 +403,7 @@ class binary_star_model_obs(object):
             # Interpolate between the radiative and convective cases
             star2_gravb = ((star2_teff.to(u.K).value - 6600) / (8000 - 6600) *\
                 (1-0.32)) + 0.32
-            b.set_value('gravb_bol@primary@component', star2_gravb)
+            b.set_value('gravb_bol@secondary@component', star2_gravb)
         
         if self.print_diagnostics:
            print('Contact envelope parameters:')
