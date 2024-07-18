@@ -117,7 +117,7 @@ class prior_collection(object):
     
     def prior_transform_ultranest(self, cube):
         """
-        Prior transform function for use with Ultreanest
+        Prior transform function for use with Ultranest
         """
         
         params = cube.copy()
@@ -129,7 +129,7 @@ class prior_collection(object):
     
     def prior_transform_dynesty(self, u):
         """
-        Prior transform function for use with Ultreanest
+        Prior transform function for use with Dynesty
         """
         
         params = np.array(u)
