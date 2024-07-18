@@ -134,12 +134,14 @@ class binary_star_model_obs(object):
         star1_rad = star1_params.rad
         star1_teff = star1_params.teff
         star1_logg = star1_params.logg
+        star1_syncpar = star1_params.syncpar
         star1_filt_pblums = star1_params.pblums
         
         star2_mass = star2_params.mass
         star2_rad = star2_params.rad
         star2_teff = star2_params.teff
         star2_logg = star2_params.logg
+        star2_syncpar = star2_params.syncpar
         star2_filt_pblums = star2_params.pblums
         
         # Read in the parameters of the binary system
@@ -377,6 +379,13 @@ class binary_star_model_obs(object):
                 (1-0.32)) + 0.32
             b.set_value('gravb_bol@primary@component', star1_gravb)
         
+        # syncpar
+        # Defined as the ratio between the (sidereal) orbital and
+        # the rotational period (wrt the sky).
+        # In default binary system, syncpar = 1
+        if star1_syncpar != 1.0:
+            b.set_value('syncpar@primary@component', star1_syncpar)
+        
         ## Secondary
         b.set_value('teff@secondary@component', star2_teff)
         # b.set_value('logg@secondary@component', star2_logg)
@@ -404,6 +413,13 @@ class binary_star_model_obs(object):
             star2_gravb = ((star2_teff.to(u.K).value - 6600) / (8000 - 6600) *\
                 (1-0.32)) + 0.32
             b.set_value('gravb_bol@secondary@component', star2_gravb)
+        
+        # syncpar
+        # Defined as the ratio between the (sidereal) orbital and
+        # the rotational period (wrt the sky).
+        # In default binary system, syncpar = 1
+        if star2_syncpar != 1.0:
+            b.set_value('syncpar@secondary@component', star2_syncpar)
         
         if self.print_diagnostics:
            print('Contact envelope parameters:')

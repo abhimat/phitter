@@ -47,6 +47,7 @@ class star_params(object):
     lum = 0. * u.solLum
     teff = 0. * u.K
     logg = 0.
+    syncpar = 1.0   # ratio between the (sidereal) orbital and rotational period (wrt the sky)
     
     filts = []
     mags = np.array([])
@@ -67,6 +68,7 @@ class star_params(object):
         out_str += f'lum = {self.lum.to(u.solLum):.3f}\n'
         out_str += f'teff = {self.teff.to(u.K):.1f}\n'
         out_str += f'logg = {self.logg:.3f}\n'
+        out_str += f'syncpar = {self.syncpar:.3f}\n'
         
         out_str += '---\n'
         
