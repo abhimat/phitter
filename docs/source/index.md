@@ -15,15 +15,7 @@ Fitting of observables to binary models is conducted with the use of MCMC sampli
 [Structure of Phitter](structure)
 
 ### Tutorials
-[Tutorial: Set up and simulation of a model binary system](notebooks/simulate_model_binary)
 
-\[Including additional effects on photometric observables.\]
-
-\[Including additional effects on RV observables.\]
-
-\[How to derive own passbands and implement into PHOEBE\]
-
-\[How to fit observables with nested sampling.\]
 
 ```{automodapi} phitter.fit
 ``` -->
