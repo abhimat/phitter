@@ -14,7 +14,7 @@ Fitting of observables to binary models is conducted with the use of MCMC sampli
 
 [Structure of Phitter](structure)
 
-\[How to set up a model binary\]
+[Tutorial: Set up and simulation of a model binary system](notebooks/simulate_model_binary)
 
 \[Including additional effects on photometric observables.\]
 
@@ -35,6 +35,7 @@ Fitting of observables to binary models is conducted with the use of MCMC sampli
 :maxdepth: 3
 
 structure
+notebooks/simulate_model_binary
 ```
 
 

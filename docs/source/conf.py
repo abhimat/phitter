@@ -20,10 +20,18 @@ extensions = [
     'numpydoc',
     'sphinx.ext.viewcode',
     'autoapi.extension',
-    'myst_parser',
     'sphinx_copybutton',
     'sphinx_automodapi.automodapi',
+    # 'myst_nb',
+    'myst_parser',
+    'nbsphinx',
 ]
+# source_suffix = {
+#     '.rst': 'restructuredtext',
+#     '.ipynb': 'myst-nb',
+#     '.myst': 'myst-nb',
+#     '.md': 'myst-nb',
+# }
 
 numpydoc_show_class_members = False
 autoapi_dirs = ['../../phitter']
