@@ -8,12 +8,13 @@ Modeling of binary systems and calculation of observables is primarily handled w
 
 Fitting of observables to binary models is conducted with the use of MCMC sampling code. We provide support for sampling with nested sampling codes like [UltraNest](https://johannesbuchner.github.io/UltraNest/), [MultiNest](https://github.com/farhanferoz/MultiNest) (via [PyMultiNest](https://github.com/JohannesBuchner/PyMultiNest)), or [dynesty](https://dynesty.readthedocs.io/en/stable/index.html). Phitter can also be used with non-nested sampling MCMC codes like [emcee](https://emcee.readthedocs.io/en/stable/). Examples to demonstrate how to set up a fitter are provided for UltraNest, dynesty, and emcee.
 
-## Getting started
+<!-- ## Getting started
 
 \[Installation\]
 
 [Structure of Phitter](structure)
 
+### Tutorials
 [Tutorial: Set up and simulation of a model binary system](notebooks/simulate_model_binary)
 
 \[Including additional effects on photometric observables.\]
@@ -25,22 +26,17 @@ Fitting of observables to binary models is conducted with the use of MCMC sampli
 \[How to fit observables with nested sampling.\]
 
 ```{automodapi} phitter.fit
-```
+``` -->
    
-
-## Table of Contents
-
+## Documentation Contents
 ```{toctree}
-:caption: 'Contents:'
-:maxdepth: 3
+:maxdepth: 2
 
 structure
-notebooks/simulate_model_binary
+tutorials
 ```
 
-
-# Indices and tables
-
+## Indices and tables
 - {ref}`genindex`
 - {ref}`modindex`
 - {ref}`search`
