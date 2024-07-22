@@ -14,15 +14,19 @@ This tutorial introduces how to use Phitter to specify stellar parameters for bi
 
 ## Including additional effects on photometric fluxes
 
-In order to match observables to data, additional photometric effects can be included. Examples include reddening from extinction, distance modulus, or flux zero-point uncertainties.
+***(Under construction)*** In order to match observables to data, additional photometric effects can be included. Examples include reddening from extinction, distance modulus, or flux zero-point uncertainties.
 
 ## Including additional effects on radial velocities
 
-Similar to photometric data, additional effects can be included on radial velocities (RVs) simulated from Phitter. Currently this only includes a constant offset for the system's center of mass.
+***(Under construction)*** Similar to photometric data, additional effects can be included on radial velocities (RVs) simulated from Phitter. Currently this only includes a constant offset for the system's center of mass.
 
-## How to incorporate new photometric passbands into Phitter
+## Advanced: how to incorporate new photometric passbands into Phitter
+
+***(Under construction)*** 
 
 ## Fitting simulations to observed data using nested sampling
+
+***(Under construction)***
 
 
 ```{toctree}
