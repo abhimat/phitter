@@ -25,6 +25,7 @@ extensions = [
     # 'myst_nb',
     'myst_parser',
     'nbsphinx',
+    'sphinx_favicon',
 ]
 # source_suffix = {
 #     '.rst': 'restructuredtext',
@@ -50,6 +51,7 @@ html_static_path = ['_static']
 html_css_files = [
     'css/custom.css',
 ]
+
 html_theme_options = {
     "logo": {
           "image_light": "_static/Phitter.svg",
@@ -65,3 +67,12 @@ html_theme_options = {
     ],
     "navbar_align": "left",
 }
+
+favicons = [
+    "phitter_icon_16.png",
+    "phitter_icon_32.png",
+    "phitter_icon_100.png",
+    "phitter_icon_180.png",
+    "phitter_icon.svg",
+    {"rel": "apple-touch-icon", "href": "phitter_icon_180.png"},
+]
