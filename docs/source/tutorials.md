@@ -34,4 +34,5 @@ This tutorial introduces how to use Phitter to specify stellar parameters for bi
 :maxdepth: 1
 
 notebooks/simulate_model_binary
+notebooks/simulate_model_binary_wMIST_star_params
 ```
