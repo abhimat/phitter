@@ -149,6 +149,8 @@ class binary_star_model_obs(object):
         binary_ecc = binary_params.ecc
         binary_inc = binary_params.inc
         t0 = binary_params.t0
+        binary_arg_per0 = binary_params.arg_per0
+        binary_long_an = binary_params.long_an
         
         err_out = observables.observables(
             obs_times=np.array([np.nan]),
@@ -226,10 +228,11 @@ class binary_star_model_obs(object):
         b.set_value('sma@binary@component', binary_sma)
         b.set_value('q@binary@component', binary_q)
         
-        ## Inclination
+        # Binary orbit orientation: inclination, argument of periastron,
+        # longitude of ascending node
         b.set_value('incl@orbit', binary_inc)
-        b.set_value('long_an@orbit', 180.*u.deg)
-        b.set_value('per0@orbit', 180.*u.deg)
+        b.set_value('per0@orbit', binary_arg_per0)
+        b.set_value('long_an@orbit', binary_long_an)
         
         if self.print_diagnostics:
             print("\nBinary orbit characteristics:")
