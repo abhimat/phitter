@@ -20,8 +20,6 @@ class binary_params(object):
     t0 : float
         Binary system's reference time, t0. Specified in MJDs. For eclipsing
         systems, typically minimum of deepest eclipse.
-    rv_com : Astropy Quantity, unit:km/s
-        Binary system's center of mass velocity.
     arg_per0 : Astropy Quantity, unit:deg
         Binary's argument of periastron, in degrees, at time t0.
     long_an : Astropy Quantity, unit:deg
@@ -32,7 +30,6 @@ class binary_params(object):
     ecc = 0.
     inc = 90. * u.deg
     t0 = 48546.0
-    rv_com = 0.0 * u.km / u.s
     arg_per0 = 0. * u.deg
     long_an = 0. * u.deg
     
