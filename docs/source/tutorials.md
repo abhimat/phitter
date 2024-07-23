@@ -24,10 +24,13 @@ This tutorial introduces how to use Phitter to specify stellar parameters for bi
 
 ***(Under construction)*** 
 
-## Fitting simulations to observed data using nested sampling
+## Fitting simulations to observed data using nested sampling via Ultranest
 
 ***(Under construction)***
 
+## Fitting simulations to observed data using emcee
+
+***(Under construction)***
 
 ```{toctree}
 :caption: 'Contents:'
