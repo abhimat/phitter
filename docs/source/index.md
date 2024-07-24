@@ -15,6 +15,7 @@ Fitting of observables to binary models is conducted with the use of MCMC sampli
 installation
 structure
 tutorials
+apidocs/index
 ```
 
 ## Indices and tables
