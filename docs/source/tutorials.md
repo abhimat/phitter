@@ -18,9 +18,9 @@ By default, Phitter's model binaries are located at a distance of 10 parsecs and
 
 This tutorial walks through how to apply a distance modulus and reddening from an extinction law in order to obtain simulated photometry with 
 
-## Including additional effects on radial velocities
+## [Including additional effects on radial velocities](notebooks/add_rv_effects)
 
-***(Under construction)*** Similar to photometric data, additional effects can be included on radial velocities (RVs) simulated from Phitter. Currently this only includes a constant offset for the system's center of mass.
+Similar to photometric data, additional effects can be included on radial velocities (RVs) simulated from Phitter. Currently this only includes a constant offset for the system's center of mass.
 
 ## Advanced: how to incorporate new photometric passbands into Phitter
 
@@ -41,4 +41,5 @@ This tutorial walks through how to apply a distance modulus and reddening from a
 notebooks/simulate_model_binary
 notebooks/simulate_model_binary_wMIST_star_params
 notebooks/add_phot_effects
+notebooks/add_rv_effects
 ```
