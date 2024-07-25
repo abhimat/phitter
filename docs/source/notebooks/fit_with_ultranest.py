@@ -115,7 +115,7 @@ def un_evaluate(model_params, print_like=False):
     # (We're assuming we know the distance, but this can be a fit parameter as well)
     modeled_observables = phot_adj_calc.apply_distance_modulus(
         modeled_observables,
-        7.971e3*u.pc,
+        8e3*u.pc,
     )
     
     # Apply extinction
@@ -191,7 +191,8 @@ sampler = ultranest.ReactiveNestedSampler(
     loglike = un_evaluate,   # Function that we wrote for ultranest to calculate likelihood
     transform = param_priors.prior_transform_ultranest,  # Phitter's prior collection function to transform prior
     log_dir='./un_out/',
-    resume='resume',
+    resume='resume-similar',
+    warmstart_max_tau=0.25,
 )
 
 # Step sampler (A "slice sampler" is often more efficient when fitting many parameters)
