@@ -9,7 +9,7 @@
 project = 'Phitter'
 copyright = '2024, Abhimat K. Gautam'
 author = 'Abhimat K. Gautam'
-release = '0.2'
+release = '1.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
