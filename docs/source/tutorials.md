@@ -32,9 +32,9 @@ This tutorial walks through the process of fitting a binary star model to observ
 
 ***in progress***
 
-## Fitting binary model to observed data using emcee
+## [Fitting binary model to observed data using emcee](notebooks/fit_with_emcee)
 
-***tutorial under construction***
+This tutorial walks through the process of fitting a binary star model to observation data using MCMC sampling with [emcee](https://emcee.readthedocs.io).
 
 ```{toctree}
 :caption: 'Contents:'
@@ -46,4 +46,5 @@ notebooks/add_phot_effects
 notebooks/add_rv_effects
 notebooks/create_mock_data
 notebooks/fit_with_ultranest
+notebooks/fit_with_emcee
 ```
