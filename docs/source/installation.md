@@ -10,16 +10,16 @@ We recommend first installing PHOEBE 2.4+ in a new Python environment. Full inst
 
 SPISEA can then be installed. Installation instructions for SPISEA are [here](https://spisea.readthedocs.io/en/latest/getting_started.html).
 
-## Install via Github
+## Install Phitter via Github
 Clone the [Phitter repository from Github](https://github.com/abhimat/phitter). Next, add the path to the cloned Phitter repository into the `$PYTHONPATH` variable into your shell's corresponding `.zshrc`, `.bash_profile`, or `.bashrc` file:
 ```sh
 export PYTHONPATH=$PYTHONPATH:/local/path/to/phitter/
 ```
 
-## Install via pip & Conda
+## Install Phitter via pip & Conda
 Support for installation via `pip` and `conda` is not currently implemented, but it is planned for the future 😅!
 
-## Test installation
+## Test Phitter installation
 Installation of phitter can be tested via the following line in Python:
 
 ```py
