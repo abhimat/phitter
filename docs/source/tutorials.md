@@ -26,7 +26,7 @@ Similar to photometric data, additional effects can be included on radial veloci
 
 ***tutorial under construction*** 
 
-## [Fitting binary model to observed data using nested sampling via Ultranest](notebooks/fit_with_ultranest)
+## [Fitting binary model to observed data using nested sampling via UltraNest](notebooks/fit_with_ultranest)
 
 This tutorial walks through the process of fitting a binary star model to observation data using nested sampling with [UltraNest](https://johannesbuchner.github.io/UltraNest/).
 
