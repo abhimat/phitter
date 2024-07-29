@@ -10,15 +10,16 @@ Fitting of observables to binary models is conducted with the use of MCMC sampli
 
 ## Documentation Contents
 ```{toctree}
-:maxdepth: 2
+:maxdepth: 1
 
+features
 installation
 structure
 tutorials
 apidocs/index
 ```
 
-## Indices and tables
+## Indices and search
 - {ref}`genindex`
 - {ref}`modindex`
 - {ref}`search`
