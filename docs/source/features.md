@@ -6,7 +6,7 @@
 * Easily integrate stellar parameters from model isochrones ([tutorial](notebooks/simulate_model_binary_wMIST_star_params)).
 * Easily set up binary systems with luminous stellar components or with compact object components.
 * Easily fit stellar models to observations of binary systems using different samplers (tutorial with [UltraNest](notebooks/fit_with_ultranest) and [emcee](notebooks/fit_with_emcee)).
-* Automatically switch between detached, semi-detached, and contact / overflowing binary system models while fitting data to observations.
+* Automatically switch between detached, semi-detached, and contact / overflowing binary system models while fitting models to observations.
 
 
 ## Why use Phitter with PHOEBE, rather than just PHOEBE alone?
