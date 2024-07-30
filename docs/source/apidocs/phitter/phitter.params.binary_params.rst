@@ -23,7 +23,7 @@ Classes
 API
 ~~~
 
-.. py:class:: binary_params()
+.. py:class:: binary_params(period=0.0 * u.d, ecc=0.0, inc=90.0 * u.deg, t0=48546.0, arg_per0=0.0 * u.deg, long_an=0.0 * u.deg)
    :canonical: phitter.params.binary_params.binary_params
 
    Bases: :py:obj:`object`

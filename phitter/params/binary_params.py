@@ -33,5 +33,17 @@ class binary_params(object):
     arg_per0 = 0. * u.deg
     long_an = 0. * u.deg
     
-    def __init__(self):
+    def __init__(
+        self,
+        period=0. * u.d, ecc=0.,
+        inc=90.*u.deg, t0=48546.0,
+        arg_per0=0.*u.deg, long_an=0.*u.deg
+    ):
+        self.period = period
+        self.ecc = ecc
+        self.inc = inc
+        self.t0 = t0
+        self.arg_per0 = arg_per0
+        self.long_an = long_an
+        
         return

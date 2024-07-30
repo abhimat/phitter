@@ -55,7 +55,7 @@ Data
 API
 ~~~
 
-.. py:class:: star_params()
+.. py:class:: star_params(mass_init=0.0 * u.solMass, mass=0.0 * u.solMass, rad=0.0 * u.solRad, lum=0.0 * u.solLum, teff=0.0 * u.K, logg=0.0, syncpar=1.0)
    :canonical: phitter.params.star_params.star_params
 
    Bases: :py:obj:`object`
