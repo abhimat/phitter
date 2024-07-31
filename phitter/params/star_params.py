@@ -29,6 +29,9 @@ class star_params(object):
     logg : float
         Current surface gravity of star, specified as a unitless quantity as
         log_10 (g / [1 * cm s^-2])
+    syncpar : float
+        The ratio between the (sidereal) orbital and rotational period
+        (wrt the sky).
     filts : list_like
         List of phitter filters / passbands that mags and pblums are generated for.
     mags : array_like(dtype=float)
@@ -47,14 +50,31 @@ class star_params(object):
     lum = 0. * u.solLum
     teff = 0. * u.K
     logg = 0.
-    syncpar = 1.0   # ratio between the (sidereal) orbital and rotational period (wrt the sky)
+    syncpar = 1.0   # 
     
     filts = []
     mags = np.array([])
     mags_abs = np.array([])
     pblums = {}
     
-    def __init__(self):
+    def __init__(
+        self,
+        mass_init = 0. * u.solMass,
+        mass = 0. * u.solMass,
+        rad = 0. * u.solRad,
+        lum = 0. * u.solLum,
+        teff = 0. * u.K,
+        logg = 0.,
+        syncpar = 1.0,
+    ):
+        self.mass_init = mass_init
+        self.mass = mass
+        self.rad = rad
+        self.lum = lum
+        self.teff = teff
+        self.logg = logg
+        self.syncpar = syncpar
+        
         return
     
     def __str__(self):

@@ -10,25 +10,25 @@ We recommend first installing PHOEBE 2.4+ in a new Python environment. Full inst
 
 SPISEA can then be installed. Installation instructions for SPISEA are [here](https://spisea.readthedocs.io/en/latest/getting_started.html).
 
-## Install via Github
-Clone the Phitter repository from Github. Next, add path to the cloned repository into the `$PYTHONPATH` variable into your shell's corresponding `.zshrc`, `.bash_profile`, or `.bashrc` file:
+## Install Phitter via Github
+Clone the [Phitter repository from Github](https://github.com/abhimat/phitter). Next, add the path to the cloned Phitter repository into the `$PYTHONPATH` variable into your shell's corresponding `.zshrc`, `.bash_profile`, or `.bashrc` file:
 ```sh
-export PYTHONPATH=$PYTHONPATH:[/local/path/to/phitter/]
+export PYTHONPATH=$PYTHONPATH:/local/path/to/phitter/
 ```
 
-## Install via pip & Conda
-Support for installation via `pip` and `conda` is not currently supported, but planned for the future 😅. 
+## Install Phitter via pip & Conda
+Support for installation via `pip` and `conda` is not currently implemented, but it is planned for the future 😅!
 
-## Test installation
+## Test Phitter installation
 Installation of phitter can be tested via the following line in Python:
 
 ```py
-In [1]: from phitter.calc import model_obs_calc
-
-/Users/abhimat/Software/miniforge3/envs/phoebe_py38/lib/python3.8/site-packages/pysynphot/locations.py:345: UserWarning: Extinction files not found in /Users/abhimat/models/cdbs/extinction
-  warnings.warn('Extinction files not found in %s' % (extdir, ))
-
+from phitter.calc import model_obs_calc
 ```
 
-A user warning output about missing extinction files may be generated from pysynphot via SPISEA, but this can be safely ignored. The functionality being warned about is not implemented in SPISEA.
+```sh
+/Users/abhimat/Software/miniforge3/envs/phoebe_py38/lib/python3.8/site-packages/pysynphot/locations.py:345: UserWarning: Extinction files not found in /Users/abhimat/models/cdbs/extinction
+  warnings.warn('Extinction files not found in %s' % (extdir, ))
+```
 
+A user warning output about missing extinction files may be generated from pysynphot via SPISEA. The functionality being warned about is not used by Phitter or SPISEA, and can be safely ignored.

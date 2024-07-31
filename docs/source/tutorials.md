@@ -24,15 +24,17 @@ Similar to photometric data, additional effects can be included on radial veloci
 
 ## Advanced: how to incorporate new photometric passbands into Phitter
 
-***(Under construction)*** 
+***tutorial under construction*** 
 
-## Fitting simulations to observed data using nested sampling via Ultranest
+## [Fitting binary model to observed data using nested sampling via UltraNest](notebooks/fit_with_ultranest)
 
-***(Under construction)***
+This tutorial walks through the process of fitting a binary star model to observation data using nested sampling with [UltraNest](https://johannesbuchner.github.io/UltraNest/).
 
-## Fitting simulations to observed data using emcee
+***in progress***
 
-***(Under construction)***
+## [Fitting binary model to observed data using emcee](notebooks/fit_with_emcee)
+
+This tutorial walks through the process of fitting a binary star model to observation data using MCMC sampling with [emcee](https://emcee.readthedocs.io).
 
 ```{toctree}
 :caption: 'Contents:'
@@ -42,4 +44,7 @@ notebooks/simulate_model_binary
 notebooks/simulate_model_binary_wMIST_star_params
 notebooks/add_phot_effects
 notebooks/add_rv_effects
+notebooks/create_mock_data
+notebooks/fit_with_ultranest
+notebooks/fit_with_emcee
 ```
