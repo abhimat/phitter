@@ -195,15 +195,16 @@ sampler = ultranest.ReactiveNestedSampler(
     warmstart_max_tau=0.25,
 )
 
-# Step sampler (A "slice sampler" is often more efficient when fitting many parameters)
-sampler.stepsampler = ultranest.stepsampler.SliceSampler(
-    nsteps=(2**3)*len(param_names),
-    generate_direction=ultranest.stepsampler.generate_mixture_random_direction,
-)
+# # Step sampler (A "slice sampler" can be more efficient when fitting many parameters)
+# sampler.stepsampler = ultranest.stepsampler.SliceSampler(
+#     nsteps=(2**3)*len(param_names),
+#     generate_direction=ultranest.stepsampler.generate_mixture_random_direction,
+# )
 
 result = sampler.run(
     show_status=True,
     update_interval_volume_fraction=0.98,
+    frac_remain=0.25,
 )
 
 # Results runs in main process only
