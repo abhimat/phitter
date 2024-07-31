@@ -24,13 +24,11 @@ Similar to photometric data, additional effects can be included on radial veloci
 
 ## Advanced: how to incorporate new photometric passbands into Phitter
 
-***tutorial under construction*** 
+***tutorial under construction***
 
 ## [Fitting binary model to observed data using nested sampling via UltraNest](notebooks/fit_with_ultranest)
 
 This tutorial walks through the process of fitting a binary star model to observation data using nested sampling with [UltraNest](https://johannesbuchner.github.io/UltraNest/).
-
-***in progress***
 
 ## [Fitting binary model to observed data using emcee](notebooks/fit_with_emcee)
 
