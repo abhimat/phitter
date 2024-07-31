@@ -27,3 +27,6 @@ docs/build/*
 
 # Ignore IDEA files
 **/.idea/*
+
+# Ignore UltraNest outputs
+**/un_out/*

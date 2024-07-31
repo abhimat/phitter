@@ -14338,3 +14338,4 @@
 12:38:39 [ultranest] [DEBUG] iteration=135, ncalls=2299355, regioncalls=0, ndraw=40, logz=-239166.59, remainder_fraction=100.0000%, Lmin=-237498.97, Lmax=-1154.00
 12:39:18 [ultranest] [DEBUG] iteration=136, ncalls=2299436, regioncalls=0, ndraw=40, logz=-237505.27, remainder_fraction=100.0000%, Lmin=-237431.71, Lmax=-1154.00
 12:40:11 [ultranest] [DEBUG] iteration=137, ncalls=2299544, regioncalls=0, ndraw=40, logz=-237438.01, remainder_fraction=100.0000%, Lmin=-236619.93, Lmax=-1154.00
+12:42:34 [ultranest] [DEBUG] iteration=138, ncalls=2299832, regioncalls=0, ndraw=40, logz=-236626.23, remainder_fraction=100.0000%, Lmin=-234633.66, Lmax=-1154.00
