@@ -204,7 +204,7 @@ sampler = ultranest.ReactiveNestedSampler(
 result = sampler.run(
     show_status=True,
     update_interval_volume_fraction=0.98,
-    frac_remain=0.25,
+    frac_remain=0.1,
 )
 
 # Results runs in main process only
