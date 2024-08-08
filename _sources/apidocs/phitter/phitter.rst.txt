@@ -1,0 +1,29 @@
+:py:mod:`phitter`
+=================
+
+.. py:module:: phitter
+
+.. autodoc2-docstring:: phitter
+   :allowtitles:
+
+Subpackages
+-----------
+
+.. toctree::
+   :titlesonly:
+   :maxdepth: 3
+
+   phitter.calc
+   phitter.fit
+   phitter.params
+
+Submodules
+----------
+
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   phitter.observables
+   phitter.filters
+   phitter.legacy_lc_calc
