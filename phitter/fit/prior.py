@@ -158,6 +158,7 @@ class prior_collection(object):
         
         # Calculate number of parameters from the priors
         self.num_params = 0
+        self.num_prior_objs = len(priors_list)
         
         for prior in self.priors_list:
             self.num_params += prior.param_count
@@ -171,12 +172,12 @@ class prior_collection(object):
         
         cur_param_index = 0
         
-        for prior_index in range(self.num_params):
+        for prior in self.priors_list:
             # Determine number of parameters current prior object is handling
-            prior_num_params = self.priors_list[prior_index].param_count
+            prior_num_params = prior.param_count
             
             cube[cur_param_index:cur_param_index + prior_num_params] =\
-                self.priors_list[prior_index](
+                prior(
                     cube[cur_param_index:cur_param_index + prior_num_params],
                 )
             
@@ -191,12 +192,12 @@ class prior_collection(object):
         
         cur_param_index = 0
         
-        for prior_index in range(self.num_params):
+        for prior in self.priors_list:
             # Determine number of parameters current prior object is handling
-            prior_num_params = self.priors_list[prior_index].param_count
+            prior_num_params = prior.param_count
             
             params[cur_param_index:cur_param_index + prior_num_params] =\
-                self.priors_list[prior_index](
+                prior(
                     cube[cur_param_index:cur_param_index + prior_num_params],
                 )
             
@@ -213,12 +214,12 @@ class prior_collection(object):
         
         cur_param_index = 0
         
-        for prior_index in range(self.num_params):
+        for prior in self.priors_list:
             # Determine number of parameters current prior object is handling
-            prior_num_params = self.priors_list[prior_index].param_count
+            prior_num_params = prior.param_count
             
             params[cur_param_index:cur_param_index + prior_num_params] =\
-                self.priors_list[prior_index](
+                prior(
                     u[cur_param_index:cur_param_index + prior_num_params],
                 )
             
