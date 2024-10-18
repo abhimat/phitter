@@ -175,7 +175,7 @@ class prior_collection(object):
             # Determine number of parameters current prior object is handling
             prior_num_params = self.priors_list[prior_index].num_params
             
-            cube[cur_param_index:cur_param_index + prior_num_params] \=
+            cube[cur_param_index:cur_param_index + prior_num_params] =\
                 self.priors_list[prior_index](
                     cube[cur_param_index:cur_param_index + prior_num_params],
                 )
@@ -195,7 +195,7 @@ class prior_collection(object):
             # Determine number of parameters current prior object is handling
             prior_num_params = self.priors_list[prior_index].num_params
             
-            params[cur_param_index:cur_param_index + prior_num_params] \=
+            params[cur_param_index:cur_param_index + prior_num_params] =\
                 self.priors_list[prior_index](
                     cube[cur_param_index:cur_param_index + prior_num_params],
                 )
@@ -217,7 +217,7 @@ class prior_collection(object):
             # Determine number of parameters current prior object is handling
             prior_num_params = self.priors_list[prior_index].num_params
             
-            params[cur_param_index:cur_param_index + prior_num_params] \=
+            params[cur_param_index:cur_param_index + prior_num_params] =\
                 self.priors_list[prior_index](
                     u[cur_param_index:cur_param_index + prior_num_params],
                 )
