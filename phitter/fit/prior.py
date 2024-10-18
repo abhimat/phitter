@@ -173,7 +173,7 @@ class prior_collection(object):
         
         for prior_index in range(self.num_params):
             # Determine number of parameters current prior object is handling
-            prior_num_params = self.priors_list[prior_index].num_params
+            prior_num_params = self.priors_list[prior_index].param_count
             
             cube[cur_param_index:cur_param_index + prior_num_params] =\
                 self.priors_list[prior_index](
@@ -193,7 +193,7 @@ class prior_collection(object):
         
         for prior_index in range(self.num_params):
             # Determine number of parameters current prior object is handling
-            prior_num_params = self.priors_list[prior_index].num_params
+            prior_num_params = self.priors_list[prior_index].param_count
             
             params[cur_param_index:cur_param_index + prior_num_params] =\
                 self.priors_list[prior_index](
@@ -215,7 +215,7 @@ class prior_collection(object):
         
         for prior_index in range(self.num_params):
             # Determine number of parameters current prior object is handling
-            prior_num_params = self.priors_list[prior_index].num_params
+            prior_num_params = self.priors_list[prior_index].param_count
             
             params[cur_param_index:cur_param_index + prior_num_params] =\
                 self.priors_list[prior_index](
