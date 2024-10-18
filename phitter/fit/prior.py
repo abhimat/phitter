@@ -67,11 +67,14 @@ class multivariate_gaussian_prior(object):
     Parameters
     ----------
     means : np.array(dtype=float)
-        Means of the distribution
+        Means of the distribution for each parameter
     sigmas : np.array(dtype=float)
-        Sigmas of the distribution
+        Sigmas of the distribution for each parameter
     covar : np.array(dtype=float)
-        Covariance matrix between the quantities
+        Covariance matrix between the quantities, of shape
+        [parameter x parameter]. Assume this has been calculated for the
+        quantities after normalization. i.e.: calculated for each quantity
+        after: (quant - mean(quant))/sigma(quant)
     """
     
     def __init__(self, means, sigmas, covar):
