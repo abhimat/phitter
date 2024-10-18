@@ -103,17 +103,17 @@ class multivariate_gaussian_prior(object):
         return
     
     def __call__(self, cube):
-        independent_gaussian = stats.norm.ppf(cube)
+        independent_gaussian = np.array([stats.norm.ppf(cube)])
         
         # Use rotation matrix to transform multidimensional gaussian,
         # following method described by Johannes Buchner at
         # https://johannesbuchner.github.io/UltraNest/priors.html
         
-        return self.means + self.sigmas*np.einsum(
+        return (self.means + self.sigmas*np.einsum(
             'ij,kj->ki',
             self.rotation_matrix,
             independent_gaussian,
-        )
+        ))[0]
     
     def __repr__(self):
         return f'<multivariate_gaussian_prior:\nmeans {self.means} sigmas {self.sigmas} covar {self.covar} >'
