@@ -165,10 +165,19 @@ class prior_collection(object):
         """
         Prior transform function for use with PyMultiNest
         """
-        for i in range(nparam):
-            cube[i] = self.priors_list[i](cube[i])
         
-        # TODO: Add support for dependent priors
+        cur_param_index = 0
+        
+        for prior_index in range(self.num_params):
+            # Determine number of parameters current prior object is handling
+            prior_num_params = self.priors_list[prior_index].num_params
+            
+            cube[cur_param_index:cur_param_index + prior_num_params] \=
+                self.priors_list[prior_index](
+                    cube[cur_param_index:cur_param_index + prior_num_params],
+                )
+            
+            cur_param_index += prior_num_params
     
     def prior_transform_ultranest(self, cube):
         """
@@ -177,8 +186,18 @@ class prior_collection(object):
         
         params = cube.copy()
         
-        for i in range(self.num_params):
-            params[i] = self.priors_list[i](cube[i])
+        cur_param_index = 0
+        
+        for prior_index in range(self.num_params):
+            # Determine number of parameters current prior object is handling
+            prior_num_params = self.priors_list[prior_index].num_params
+            
+            params[cur_param_index:cur_param_index + prior_num_params] \=
+                self.priors_list[prior_index](
+                    cube[cur_param_index:cur_param_index + prior_num_params],
+                )
+            
+            cur_param_index += prior_num_params
         
         return params
     
@@ -189,8 +208,18 @@ class prior_collection(object):
         
         params = np.array(u)
         
-        for i in range(self.num_params):
-            params[i] = self.priors_list[i](u[i])
+        cur_param_index = 0
+        
+        for prior_index in range(self.num_params):
+            # Determine number of parameters current prior object is handling
+            prior_num_params = self.priors_list[prior_index].num_params
+            
+            params[cur_param_index:cur_param_index + prior_num_params] \=
+                self.priors_list[prior_index](
+                    u[cur_param_index:cur_param_index + prior_num_params],
+                )
+            
+            cur_param_index += prior_num_params
         
         return params
     
