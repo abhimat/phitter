@@ -60,6 +60,61 @@ class gaussian_prior(object):
     def __repr__(self):
         return f'<gaussian_prior: mean {self.mean} sigma {self.sigma}>'
 
+class multivariate_gaussian_prior(object):
+    """
+    Multivariate Gaussian / normal distribution prior
+    
+    Parameters
+    ----------
+    means : np.array(dtype=float)
+        Means of the distribution
+    sigmas : np.array(dtype=float)
+        Sigmas of the distribution
+    covar : np.array(dtype=float)
+        Covariance matrix between the quantities
+    """
+    
+    def __init__(self, means, sigmas, covar):
+        self.means = means
+        self.sigmas = sigmas
+        self.covar = covar
+        
+        num_params = len(means)
+        
+        self.param_count = num_params
+        
+        # Perform necessary matrix calculations in order to calculate
+        # rotation matrix,
+        # following method described by Johannes Buchner at
+        # https://johannesbuchner.github.io/UltraNest/priors.html
+        
+        a = np.linalg.inv(covar)
+        l, v = np.linalg.eigh(a)
+        rotation_matrix = np.dot(v, np.diag(1. / np.sqrt(l)))
+        
+        self.a_mat = a
+        self.l_mat = l
+        self.v_mat = v
+        self.rotation_matrix = rotation_matrix
+        
+        return
+    
+    def __call__(self, cube):
+        independent_gaussian = stats.norm.ppf(cube)
+        
+        # Use rotation matrix to transform multidimensional gaussian,
+        # following method described by Johannes Buchner at
+        # https://johannesbuchner.github.io/UltraNest/priors.html
+        
+        return self.means + self.sigmas*np.einsum(
+            'ij,kj->ki',
+            self.rotation_matrix,
+            independent_gaussian,
+        )
+    
+    def __repr__(self):
+        return f'<multivariate_gaussian_prior:\nmeans {self.means} sigmas {self.sigmas} covar {self.covar} >'
+
 class const_prior(object):
     """
     Constant value prior
