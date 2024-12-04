@@ -645,10 +645,19 @@ class binary_star_model_obs(object):
             
             if animate:
                 # Save out animation
+                additional_kwargs = {}
+                
+                # Add kwargs if coloring mesh plot by Teff
+                if mesh_temp:
+                    additional_kwargs['fc'] = 'teffs'
+                    additional_kwargs['fcmap'] = mesh_temp_cmap
+                    additional_kwargs['ec'] = 'face'
+                
                 b['mod_mesh@model'].plot(
                     animate=True,
                     save='./binary_mesh{0}.gif'.format(plot_name_suffix),
                     save_kwargs={'writer': 'imagemagick'},
+                    **additional_kwargs,
                 )
                         
             calls_list = []
