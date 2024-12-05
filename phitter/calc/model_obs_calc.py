@@ -826,14 +826,27 @@ class binary_star_model_obs(object):
                         
                         mesh_sec_table = Table(mesh_quants_sec)
                         mesh_sec_table.sort(['us'], reverse=True)
-                        with open('mesh_sec.txt', 'w') as out_file:
+                        with open('mesh_sec{0}{1}.txt'.format(
+                            plot_name_suffix, plot_phase_suffix,
+                        ), 'w') as out_file:
                             for line in mesh_sec_table.pformat_all():
                                 out_file.write(line + '\n')
-                        mesh_sec_table.write('mesh_sec.h5', format='hdf5',
-                                             path='data', serialize_meta=True,
-                                             overwrite=True)
-                        mesh_sec_table.write('mesh_sec.fits', format='fits',
-                                             overwrite=True)
+                        
+                        mesh_sec_table.write(
+                            'mesh_sec{0}{1}.h5'.format(
+                                plot_name_suffix, plot_phase_suffix,
+                            ),
+                            format='hdf5',
+                            path='data', serialize_meta=True,
+                            overwrite=True,
+                        )
+                        mesh_sec_table.write(
+                            'mesh_sec{0}{1}.fits'.format(
+                                plot_name_suffix, plot_phase_suffix,
+                            ),
+                            format='fits',
+                            overwrite=True,
+                        )
             
             if mesh_plot_fig is not None:
                 additional_kwargs = {}
