@@ -660,8 +660,6 @@ class binary_star_model_obs(object):
                     save_kwargs={'writer': 'imagemagick'},
                     **additional_kwargs,
                 )
-                        
-            calls_list = []
             
             # Go through each mesh model time and save
             for mesh_index, mesh_plot_time in enumerate(mesh_plot_times):
@@ -705,29 +703,27 @@ class binary_star_model_obs(object):
                 mesh_plot_out.append(mesh_plt_fig)
                 
                 if mesh_quants_output:
-                    print("Mesh quant implementation to go here")
-                    
                     # Extract mesh quantities
                     
                     mesh_quant_names = [
                         'us', 'vs', 'ws', 'rprojs',
                         'teffs', 'loggs', 'rs', 'areas',
-                        'abs_intensities',
+                        'abs_intensities', 'normal_intensities', 'intensities',
                     ]
                     mesh_quant_filt_specific = [
                         False, False, False, False,
                         False, False, False, False,
-                        True,
+                        True, True, True,
                     ]
                     mesh_quant_units = [
                         u.solRad, u.solRad, u.solRad, u.solRad,
                         u.K, 1.0, u.solRad, u.solRad**2,
-                        u.W / (u.m**3),
+                        u.W / (u.m**3), u.W / (u.m**3), u.W / (u.m**3),
                     ]
                     
                     mesh_quant_filts = []
                     for filt in self.bin_observables.unique_filts_phot:
-                        mesh_quant_filts.append(filt.phoebe_ds_name)
+                        mesh_quant_filts.append(filt)
                     
                     mesh_quants_pri = {}
                     mesh_quants_sec = {}
@@ -742,37 +738,35 @@ class binary_star_model_obs(object):
                             # Quantity is specified for each filter
                             # Go through each filter and save out separately
                             for filt in mesh_quant_filts:
-                                quant_pri = b[f'{quant}@primary@{filt}'].value *\
-                                            quant_unit
-                                quant_sec = b[f'{quant}@secondary@{filt}'].value *\
-                                            quant_unit
+                                quant_pri = b[
+                                    f'{mesh_plot_time:09.6f}@{quant}@primary@{filt.phoebe_ds_name}'
+                                ].value * quant_unit
+                                quant_sec = b[
+                                    f'{mesh_plot_time:09.6f}@{quant}@secondary@{filt.phoebe_ds_name}'
+                                ].value * quant_unit
                             
-                                mesh_quants_pri[f'{quant}_{filt}'] = quant_pri
-                                mesh_quants_sec[f'{quant}_{filt}'] = quant_sec
+                                mesh_quants_pri[f'{quant}_{filt.filter_name}'] = quant_pri
+                                mesh_quants_sec[f'{quant}_{filt.filter_name}'] = quant_sec
                         else:
                             # Quantity is not filter specific
-                            quant_pri = b[f'{quant}@primary'].value * quant_unit
-                            quant_sec = b[f'{quant}@secondary'].value * quant_unit
+                            quant_pri = b[
+                                f'{mesh_plot_time:09.6f}@{quant}@primary'
+                            ].value * quant_unit
+                            quant_sec = b[
+                                f'{mesh_plot_time:09.6f}@{quant}@secondary'
+                            ].value * quant_unit
                             
                             mesh_quants_pri[quant] = quant_pri
                             mesh_quants_sec[quant] = quant_sec
                         
                         # Get u, v, w (sky) coordinates of each vertex
                         # for the triangles in mesh
-                        uvw_elements_pri = b.get_parameter(
-                            qualifier='uvw_elements', 
-                            component='primary', 
-                            dataset='mod_mesh',
-                            kind='mesh', 
-                            context='model',
-                        ).value * u.solRad
-                        uvw_elements_sec = b.get_parameter(
-                            qualifier='uvw_elements', 
-                            component='secondary', 
-                            dataset='mod_mesh',
-                            kind='mesh', 
-                            context='model',
-                        ).value * u.solRad
+                        uvw_elements_pri = b[
+                            f'{mesh_plot_time:09.6f}@uvw_elements@primary@mod_mesh'
+                        ].value * u.solRad
+                        uvw_elements_sec = b[
+                            f'{mesh_plot_time:09.6f}@uvw_elements@secondary@mod_mesh'
+                        ].value * u.solRad
                         
                         mesh_quants_pri['v1_us'] = uvw_elements_pri[:,0,0]
                         mesh_quants_pri['v1_vs'] = uvw_elements_pri[:,0,1]
@@ -847,23 +841,7 @@ class binary_star_model_obs(object):
                             format='fits',
                             overwrite=True,
                         )
-            
-            if mesh_plot_fig is not None:
-                additional_kwargs = {}
-                
-                # Have to turn off sidebar if making subplots with Teff faces
-                if mesh_temp and mesh_plot_subplot_grid is not None:
-                    additional_kwargs['draw_sidebars'] = False
-                
-                (mesh_af_fig, mesh_plt_fig) = b['mod_mesh@model'].show(
-                    save='./binary_mesh{0}{1}.pdf'.format(
-                        plot_name_suffix, plot_phase_suffix,
-                    ),
-                    show=False,
-                    **additional_kwargs,
-                    **mesh_plot_kwargs,
-                )
-        
+         
         # Get fluxes
         phot_model_fluxes = {}
         phot_model_mags = {}
@@ -1272,8 +1250,6 @@ class single_star_model_obs(object):
             if plot_name is not None:
                 plot_name_suffix = f'_{plot_name}'
             
-            calls_list = []
-            
             # Go through each mesh model time and save
             for mesh_index, mesh_plot_time in enumerate([0]):
                 plot_phase_suffix = ''
@@ -1313,7 +1289,7 @@ class single_star_model_obs(object):
                 
                 mesh_plot_out.append(mesh_plt_fig)
             
-            if mesh_plot_fig is not None:
+            if mesh_plot_fig is None:
                 additional_kwargs = {}
                 
                 # Have to turn off sidebar if making subplots with Teff faces
