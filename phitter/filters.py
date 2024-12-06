@@ -9,6 +9,29 @@ from spisea import synthetic, reddening
 lambda_Ks = 2.18e-6 * u.m
 
 class filter(object):
+    """
+    filter is an object to represent observation filters / passbands.
+    
+    Attributes
+    ----------
+    filter_name : str
+        Name of filter / passband
+    phoebe_ds_name : str
+        Name of filter / passband used in PHOEBE for creating datasets
+    phoebe_pb_name : str
+        Name of filter / passband in named in PHOEBE's list of passbands
+    spisea_name : str
+        Name of filter / passband as named in SPISEA's list of filters
+    lambda_filt : Astropy Quantity, unit:length
+        Reference wavelength for the filter / passband
+    dlambda_filt : Astropy Quantity, unit:length
+        Width of the filter / passband
+    filt_info
+        Filter / passband information from SPISEA
+    flux_ref_filt : Astropy Quantity, unit:flux (energy / time / area)
+        Reference flux for filter in Vega magnitudes, as calculated by SPISEA
+    """
+    
     def __init__(self):
         self.filter_name = 'filt'
         self.phoebe_ds_name = 'mod_lc_filt'
