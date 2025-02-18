@@ -648,6 +648,8 @@ class binary_star_model_obs(object):
                 # Save out animation
                 additional_kwargs = {}
                 
+                # Add additional kwargs for animation
+                
                 # Add kwargs if coloring mesh plot by Teff
                 if mesh_temp:
                     additional_kwargs['fc'] = 'teffs'
@@ -658,11 +660,24 @@ class binary_star_model_obs(object):
                     animate=True,
                     save='./binary_mesh{0}.gif'.format(plot_name_suffix),
                     save_kwargs={'writer': 'imagemagick'},
+                    tight_layout=True,
                     **additional_kwargs,
+                    **mesh_plot_kwargs,
+                )
+                b['mod_mesh@model'].plot(
+                    animate=True,
+                    save='./binary_mesh{0}.mp4'.format(plot_name_suffix),
+                    save_kwargs={'writer': 'ffmpeg'},
+                    tight_layout=True,
+                    **additional_kwargs,
+                    **mesh_plot_kwargs,
                 )
             
             # Go through each mesh model time and save
             for mesh_index, mesh_plot_time in enumerate(mesh_plot_times):
+                if animate:
+                    break
+                
                 plot_phase_suffix = '_{0}'.format(
                     f'{mesh_plot_phases[mesh_index]:.3f}'.replace('.', 'p')
                 )
