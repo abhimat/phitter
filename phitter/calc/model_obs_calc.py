@@ -941,7 +941,7 @@ class binary_star_model_obs(object):
                 rv_pri_phases = ((bin_observables_out.obs_times_rv_pri - t0) %
                     binary_period.to(u.d).value) / binary_period.to(u.d).value
                 
-                rv_sec_phases = ((bin_observables_out.obs_times_rv_pri - t0) %
+                rv_sec_phases = ((bin_observables_out.obs_times_rv_sec - t0) %
                     binary_period.to(u.d).value) / binary_period.to(u.d).value
                 
                 # Get phases of the times that were modeled in model order
