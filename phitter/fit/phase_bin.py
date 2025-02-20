@@ -301,8 +301,8 @@ class phase_bin(object):
                     
                 # Store current filter's binned values in output
                 filt_slice = slice(
-                    self.observations.num_filts_rv + filt_index*num_bins,
-                    self.observations.num_filts_rv + (filt_index+1)*num_bins,
+                    (self.observations.num_filts_rv*num_bins) + filt_index*num_bins,
+                    (self.observations.num_filts_rv*num_bins) + (filt_index+1)*num_bins,
                 )
                 
                 binned_obs_times[filt_slice] = (filt_binned_phases * phase_period) + phase_t0
