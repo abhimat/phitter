@@ -16,11 +16,6 @@ import numpy as np
 import sys
 import copy
 from astropy.table import Table
-from astropy import modeling
-from astropy.modeling import Model
-import matplotlib.pyplot as plt
-import matplotlib.font_manager as font_manager
-from matplotlib.ticker import MultipleLocator
 import autofig
 
 # Filters for default filter list
@@ -629,17 +624,6 @@ class binary_star_model_obs(object):
         # Save out mesh plot
         mesh_plot_out = []
         if make_mesh_plots:
-            ## Plot Nerdery
-            plt.rc('font', family='serif')
-            plt.rc('font', serif='Computer Modern Roman')
-            plt.rc('text', usetex=True)
-            plt.rc('text.latex', preamble=r"\usepackage{gensymb}")
-            
-            plt.rc('xtick', direction = 'out')
-            plt.rc('ytick', direction = 'out')
-            # plt.rc('xtick', top = True)
-            # plt.rc('ytick', right = True)
-            
             plot_name_suffix = ''
             if plot_name is not None:
                 plot_name_suffix = f'_{plot_name}'
@@ -1250,17 +1234,6 @@ class single_star_model_obs(object):
         # Save out mesh plot
         mesh_plot_out = []
         if make_mesh_plots:
-            ## Plot Nerdery
-            plt.rc('font', family='serif')
-            plt.rc('font', serif='Computer Modern Roman')
-            plt.rc('text', usetex=True)
-            plt.rc('text.latex', preamble=r"\usepackage{gensymb}")
-            
-            plt.rc('xtick', direction = 'out')
-            plt.rc('ytick', direction = 'out')
-            # plt.rc('xtick', top = True)
-            # plt.rc('ytick', right = True)
-            
             plot_name_suffix = ''
             if plot_name is not None:
                 plot_name_suffix = f'_{plot_name}'
