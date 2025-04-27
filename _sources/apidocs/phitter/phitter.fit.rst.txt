@@ -1,0 +1,18 @@
+:py:mod:`phitter.fit`
+=====================
+
+.. py:module:: phitter.fit
+
+.. autodoc2-docstring:: phitter.fit
+   :allowtitles:
+
+Submodules
+----------
+
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   phitter.fit.likelihood
+   phitter.fit.phase_bin
+   phitter.fit.prior

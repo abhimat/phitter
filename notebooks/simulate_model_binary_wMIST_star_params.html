@@ -1,0 +1,1078 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="../_static/phitter_icon_16.png" sizes="16x16" rel="icon" type="image/png">
+    <link href="../_static/phitter_icon_32.png" sizes="32x32" rel="icon" type="image/png">
+    <link href="../_static/phitter_icon_100.png" sizes="100x100" rel="icon" type="image/png">
+    <link href="../_static/phitter_icon_180.png" sizes="180x180" rel="icon" type="image/png">
+    <link href="../_static/phitter_icon.svg" rel="icon" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="../_static/phitter_icon_180.png" sizes="180x180" type="image/png">
+    <title>Tutorial: Simulate a model binary using stellar parameters from an isochrone &#8212; Phitter 1.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=372c55ee" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=f2a433a1"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/simulate_model_binary_wMIST_star_params';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Tutorial: Add additional effects to simulated photometric fluxes" href="add_phot_effects.html" />
+    <link rel="prev" title="Tutorial: Simulate a model binary" href="simulate_model_binary.html" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+<link rel="stylesheet" href="https://use.typekit.net/hxl8tqz.css">
+
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class=" navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/Phitter.svg" class="logo__image only-light" alt="Phitter 1.0 documentation - Home"/>
+    <img src="../_static/Phitter_dark.svg" class="logo__image only-dark pst-js-only" alt="Phitter 1.0 documentation - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class=" navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../features.html">
+    Features
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../structure.html">
+    Structure of Phitter
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../apidocs/index.html">
+    API Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/abhimat/phitter" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../features.html">
+    Features
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../structure.html">
+    Structure of Phitter
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../apidocs/index.html">
+    API Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/abhimat/phitter" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="simulate_model_binary.html">Tutorial: Simulate a model binary</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Tutorial: Simulate a model binary using stellar parameters from an isochrone</a></li>
+<li class="toctree-l1"><a class="reference internal" href="add_phot_effects.html">Tutorial: Add additional effects to simulated photometric fluxes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="add_rv_effects.html">Tutorial: Add additional effects to simulated radial velocities</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="create_mock_data.html">Simulate mock observations data for fitting</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="fit_with_ultranest.html">Tutorial: Fit binary model to observed data using nested sampling via UltraNest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fit_with_emcee.html">Tutorial: Fit binary model to observed data with emcee</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../tutorials.html" class="nav-link">Tutorials</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Tutorial: Simulate a model binary using stellar parameters from an isochrone</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="tutorial-simulate-a-model-binary-using-stellar-parameters-from-an-isochrone">
+<h1>Tutorial: Simulate a model binary using stellar parameters from an isochrone<a class="headerlink" href="#tutorial-simulate-a-model-binary-using-stellar-parameters-from-an-isochrone" title="Link to this heading">#</a></h1>
+<p>Phitter allows interpolating the stellar parameters in a model binary system from MIST isochrones.</p>
+<p>This may be useful if the age of a binary or the host star population is well constrained. In these cases, all stellar parameters necessary for successful light curve calculation don’t need to be specified: Phitter can interpolate along the MIST isochrone given just one parameter for a star (e.g.: initial mass).</p>
+<section id="imports">
+<h2>Imports<a class="headerlink" href="#imports" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">phitter</span><span class="w"> </span><span class="kn">import</span> <span class="n">observables</span><span class="p">,</span> <span class="n">filters</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">phitter.params</span><span class="w"> </span><span class="kn">import</span> <span class="n">star_params</span><span class="p">,</span> <span class="n">binary_params</span><span class="p">,</span> <span class="n">isoc_interp_params</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">phitter.calc</span><span class="w"> </span><span class="kn">import</span> <span class="n">model_obs_calc</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">phoebe</span><span class="w"> </span><span class="kn">import</span> <span class="n">u</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">phoebe</span><span class="w"> </span><span class="kn">import</span> <span class="n">c</span> <span class="k">as</span> <span class="n">const</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mpl</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="o">%</span><span class="k">matplotlib</span> inline
+
+<span class="c1"># The following warning regarding extinction originates from SPISEA and can be ignored.</span>
+<span class="c1"># The functionality being warned about is not used by SPISEA.</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Users/abhimat/Software/miniforge3/envs/phoebe_py38/lib/python3.8/site-packages/pysynphot/locations.py:345: UserWarning: Extinction files not found in /Volumes/Noh/models/cdbs/extinction
+  warnings.warn(&#39;Extinction files not found in %s&#39; % (extdir, ))
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="set-up-observation-filters-passbands">
+<h2>Set up observation filters / passbands<a class="headerlink" href="#set-up-observation-filters-passbands" title="Link to this heading">#</a></h2>
+<p>For this example, let’s generate photometry and RVs in HST’s WFC3IR F153M and F127M passbands.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">filter_153m</span> <span class="o">=</span> <span class="n">filters</span><span class="o">.</span><span class="n">hst_f153m_filt</span><span class="p">()</span>
+<span class="n">filter_127m</span> <span class="o">=</span> <span class="n">filters</span><span class="o">.</span><span class="n">hst_f127m_filt</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="set-up-stellar-and-binary-system-parameters">
+<h2>Set up stellar and binary system parameters<a class="headerlink" href="#set-up-stellar-and-binary-system-parameters" title="Link to this heading">#</a></h2>
+<section id="set-up-isochrone-object">
+<h3>Set up isochrone object<a class="headerlink" href="#set-up-isochrone-object" title="Link to this heading">#</a></h3>
+<p>We’re going to set up parameters for the component stars interpolated from a MIST isochrone. Let’s choose an isochrone for an old star population located at the Galactic center…</p>
+<p>Let’s walk through all the keywords:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">age=8e9</span></code> specifies an 8 Gyr old isochrone to be used</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">met=0.0</span></code> specifies an [M/H] = 0 metallicity (i.e. solar)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">use_atm_func='merged'</span></code> specifies which atmosphere model to use from SPISEA. Here we use the <em>merged</em> atmosphere model. The atmosphere models available in SPISEA are detailed more <a class="reference external" href="https://spisea.readthedocs.io/en/latest/atmo_models.html">here</a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">phase='RGB'</span></code> specifies to cut out stars on the isochrone that are identified to be on the Red Giant Branch only.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ext_Ks=2.3</span></code> specifies the K_s band extinction to derive synthetic photometry with SPISEA for the isochrone stars.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dist=8e3*u.pc</span></code> specifies the distance where we want the synthetic photometry derived. Here we specify 8 kpc for the Galactic center. Changing this does not affect the output synthetic flux for Phitter’s binaries, and those can be modified later.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">filts_list=[filter_153m,</span> <span class="pre">filter_127m]</span></code> specifies the list of filters for SPISEA to derive the synthetic fluxes. This should include all filters where fluxes are being simulated.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ext_law='NL18'</span></code> specifies the extinction law to use when deriving synthetic photometry. Here we use <code class="docutils literal notranslate"><span class="pre">NL18</span></code> referring to Nogueras-Lara+ 2018.</p></li>
+</ul>
+<p>Phitter and SPISEA will now generate two isochrone objects with synthetic photometry. One at 10 pc with no extinction (for absolute magnitudes) and one at the target distance and extinction. This process can take a few minutes but the resulting isochrones are saved in the working directory and can be reused later.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Object for interpolating stellar parameters from an isochrone</span>
+
+<span class="n">isoc_stellar_params_obj</span> <span class="o">=</span> <span class="n">isoc_interp_params</span><span class="o">.</span><span class="n">isoc_mist_stellar_params</span><span class="p">(</span>
+    <span class="n">age</span><span class="o">=</span><span class="mf">8e9</span><span class="p">,</span>
+    <span class="n">met</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">use_atm_func</span><span class="o">=</span><span class="s1">&#39;merged&#39;</span><span class="p">,</span>
+    <span class="n">phase</span><span class="o">=</span><span class="s1">&#39;RGB&#39;</span><span class="p">,</span>
+    <span class="n">ext_Ks</span><span class="o">=</span><span class="mf">2.2</span><span class="p">,</span>
+    <span class="n">dist</span><span class="o">=</span><span class="mf">8e3</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">pc</span><span class="p">,</span>
+    <span class="n">filts_list</span><span class="o">=</span><span class="p">[</span><span class="n">filter_153m</span><span class="p">,</span> <span class="n">filter_127m</span><span class="p">],</span>
+    <span class="n">ext_law</span><span class="o">=</span><span class="s1">&#39;NL18&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Since we are using the red giant branch stars in this isochrone, we can select for stars by specifying a stellar radius. Along the red giant branch, we can typically uniquely select a star using radius. Here Phitter will interpolate all other stellar parameters based on the specified stellar radii of our component stars.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">star1_params</span> <span class="o">=</span> <span class="n">isoc_stellar_params_obj</span><span class="o">.</span><span class="n">interp_star_params_rad</span><span class="p">(</span>
+    <span class="mi">15</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;== Star 1 Parameters&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">star1_params</span><span class="p">)</span>
+
+<span class="n">star2_params</span> <span class="o">=</span> <span class="n">isoc_stellar_params_obj</span><span class="o">.</span><span class="n">interp_star_params_rad</span><span class="p">(</span>
+    <span class="mi">12</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;== Star 2 Parameters&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">star2_params</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>== Star 1 Parameters
+mass_init = 1.103 solMass
+mass = 1.100 solMass
+rad = 15.000 solRad
+lum = 70.325 solLum
+teff = 4315.7 K
+logg = 2.127
+syncpar = 1.000
+---
+filt &lt;phitter.filters.hst_f153m_filt object at 0x105016940&gt;:
+mag = 17.457
+mag_abs = -1.909
+pblum = 0.975 solLum
+filt &lt;phitter.filters.hst_f127m_filt object at 0x105016f40&gt;:
+mag = 20.483
+mag_abs = -1.431
+pblum = 1.181 solLum
+
+== Star 2 Parameters
+mass_init = 1.102 solMass
+mass = 1.100 solMass
+rad = 12.000 solRad
+lum = 49.434 solLum
+teff = 4418.1 K
+logg = 2.321
+syncpar = 1.000
+---
+filt &lt;phitter.filters.hst_f153m_filt object at 0x105016940&gt;:
+mag = 17.883
+mag_abs = -1.483
+pblum = 0.659 solLum
+filt &lt;phitter.filters.hst_f127m_filt object at 0x105016f40&gt;:
+mag = 20.887
+mag_abs = -1.028
+pblum = 0.815 solLum
+</pre></div>
+</div>
+</div>
+</div>
+<p>The remainder of the binary set up and calculation of simulated observables is similar to before.</p>
+</section>
+</section>
+<section id="set-up-a-binary-parameters-object">
+<h2>Set up a binary parameters object<a class="headerlink" href="#set-up-a-binary-parameters-object" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Binary parameters</span>
+<span class="n">bin_params</span> <span class="o">=</span> <span class="n">binary_params</span><span class="o">.</span><span class="n">binary_params</span><span class="p">(</span>
+    <span class="n">period</span> <span class="o">=</span> <span class="mf">30.0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">d</span><span class="p">,</span>
+    <span class="n">ecc</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
+    <span class="n">inc</span> <span class="o">=</span> <span class="mf">80.0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
+    <span class="n">t0</span> <span class="o">=</span> <span class="mf">53_800.0</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="set-up-of-observables-to-be-calculated">
+<h2>Set up of observables to be calculated<a class="headerlink" href="#set-up-of-observables-to-be-calculated" title="Link to this heading">#</a></h2>
+<p>We need to set up an observables object to specify the times and types of observables that need to be computed. For this example, let’s compute flux in Keck K-band and RVs uniformly over the entire orbital phase of the binary.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set up model times</span>
+<span class="c1"># Model times are in MJD here</span>
+<span class="n">model_phases</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">model_times</span> <span class="o">=</span> <span class="n">model_phases</span> <span class="o">*</span> <span class="n">bin_params</span><span class="o">.</span><span class="n">period</span><span class="o">.</span><span class="n">value</span> <span class="o">+</span> <span class="n">bin_params</span><span class="o">.</span><span class="n">t0</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set up filter and observation type arrays for the model fluxes and RVs</span>
+
+<span class="n">flux_153m_filt_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">model_phases</span><span class="p">),</span> <span class="n">filter_153m</span><span class="p">)</span>
+<span class="n">flux_153m_type_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">model_phases</span><span class="p">),</span> <span class="s1">&#39;phot&#39;</span><span class="p">)</span>
+
+<span class="n">flux_127m_filt_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">model_phases</span><span class="p">),</span> <span class="n">filter_127m</span><span class="p">)</span>
+<span class="n">flux_127m_type_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">model_phases</span><span class="p">),</span> <span class="s1">&#39;phot&#39;</span><span class="p">)</span>
+
+<span class="n">rv_pri_filt_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">model_phases</span><span class="p">),</span> <span class="n">filter_153m</span><span class="p">)</span>
+<span class="n">rv_pri_type_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">model_phases</span><span class="p">),</span> <span class="s1">&#39;rv_pri&#39;</span><span class="p">)</span>
+
+<span class="n">rv_sec_filt_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">model_phases</span><span class="p">),</span> <span class="n">filter_153m</span><span class="p">)</span>
+<span class="n">rv_sec_type_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">model_phases</span><span class="p">),</span> <span class="s1">&#39;rv_sec&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Now make arrays for all the times, filters, and observation types by concatenating the above arrays</span>
+
+<span class="n">obs_times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+    <span class="p">(</span><span class="n">model_times</span><span class="p">,</span> <span class="n">model_times</span><span class="p">,</span> <span class="n">model_times</span><span class="p">,</span> <span class="n">model_times</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">obs_filts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+    <span class="p">(</span><span class="n">flux_153m_filt_arr</span><span class="p">,</span> <span class="n">flux_127m_filt_arr</span><span class="p">,</span> <span class="n">rv_pri_filt_arr</span><span class="p">,</span> <span class="n">rv_sec_filt_arr</span><span class="p">,),</span>
+<span class="p">)</span>
+<span class="n">obs_types</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+    <span class="p">(</span><span class="n">flux_153m_type_arr</span><span class="p">,</span> <span class="n">flux_127m_type_arr</span><span class="p">,</span> <span class="n">rv_pri_type_arr</span><span class="p">,</span> <span class="n">rv_sec_type_arr</span><span class="p">,),</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Finally, construct the observables object</span>
+
+<span class="n">model_observables</span> <span class="o">=</span> <span class="n">observables</span><span class="o">.</span><span class="n">observables</span><span class="p">(</span>
+    <span class="n">obs_times</span><span class="o">=</span><span class="n">obs_times</span><span class="p">,</span>
+    <span class="n">obs_filts</span><span class="o">=</span><span class="n">obs_filts</span><span class="p">,</span> <span class="n">obs_types</span><span class="o">=</span><span class="n">obs_types</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="compute-the-observables">
+<h2>Compute the observables<a class="headerlink" href="#compute-the-observables" title="Link to this heading">#</a></h2>
+<p>Observables are computed as before. However, one difference here is that we can specify <code class="docutils literal notranslate"><span class="pre">use_blackbody_atm=False</span></code> which will allow PHOEBE to calculate photometry with Phoenix or Castelli and Kurucz model atmospheres rather than with a blackbody atmosphere.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Object to perform the computation of flux and RVs</span>
+
+<span class="n">binary_model_obj</span> <span class="o">=</span> <span class="n">model_obs_calc</span><span class="o">.</span><span class="n">binary_star_model_obs</span><span class="p">(</span>
+    <span class="n">model_observables</span><span class="p">,</span>
+    <span class="n">use_blackbody_atm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">print_diagnostics</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The modeled observables can then be simulated by inputting the stellar and binary parameters.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">modeled_observables</span> <span class="o">=</span> <span class="n">binary_model_obj</span><span class="o">.</span><span class="n">compute_obs</span><span class="p">(</span>
+    <span class="n">star1_params</span><span class="p">,</span> <span class="n">star2_params</span><span class="p">,</span> <span class="n">bin_params</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="process-and-plot-the-modeled-observables">
+<h2>Process and plot the modeled observables<a class="headerlink" href="#process-and-plot-the-modeled-observables" title="Link to this heading">#</a></h2>
+<p>Note that the mags here are Absolute mags. By default, Phitter’s simulated output fluxes are absolute mags in a given passband.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Fluxes in mags</span>
+<span class="n">modeled_mags_153m</span> <span class="o">=</span> <span class="n">modeled_observables</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">modeled_observables</span><span class="o">.</span><span class="n">phot_filt_filters</span><span class="p">[</span><span class="n">filter_153m</span><span class="p">]]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;F153M-band mags: </span><span class="si">{</span><span class="n">modeled_mags_153m</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+<span class="n">modeled_mags_127m</span> <span class="o">=</span> <span class="n">modeled_observables</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">modeled_observables</span><span class="o">.</span><span class="n">phot_filt_filters</span><span class="p">[</span><span class="n">filter_127m</span><span class="p">]]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;F127M-band mags: </span><span class="si">{</span><span class="n">modeled_mags_127m</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+<span class="c1"># RVs in km/s</span>
+<span class="n">modeled_rvs_star1</span> <span class="o">=</span> <span class="n">modeled_observables</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">modeled_observables</span><span class="o">.</span><span class="n">obs_rv_pri_filter</span><span class="p">]</span>
+<span class="n">modeled_rvs_star2</span> <span class="o">=</span> <span class="n">modeled_observables</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">modeled_observables</span><span class="o">.</span><span class="n">obs_rv_sec_filter</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Star 1 RVs: </span><span class="si">{</span><span class="n">modeled_rvs_star1</span><span class="si">}</span><span class="s1"> km/s&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Star 2 RVs: </span><span class="si">{</span><span class="n">modeled_rvs_star2</span><span class="si">}</span><span class="s1"> km/s&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>F153M-band mags: [-2.07376567 -2.08993976 -2.07376567 -2.0991852  -2.15546044 -2.22491996
+ -2.29432003 -2.35605566 -2.40597907 -2.44065194 -2.45367517 -2.45532707
+ -2.45694645 -2.45838347 -2.45975778 -2.46113128 -2.46246321 -2.46355262
+ -2.46466413 -2.46551129 -2.46661306 -2.46746037 -2.46813665 -2.46887976
+ -2.46934813 -2.46992754 -2.47032046 -2.47075715 -2.47111439 -2.47116211
+ -2.47125951 -2.47146599 -2.47156202 -2.47144126 -2.47138685 -2.47122224
+ -2.4710011  -2.47067124 -2.47037411 -2.46992726 -2.46946711 -2.46882896
+ -2.46829054 -2.46757638 -2.46683257 -2.46607895 -2.46515359 -2.46414984
+ -2.46315754 -2.46204834 -2.46092315 -2.45969034 -2.45854065 -2.45706278
+ -2.45585042 -2.45425752 -2.45295641 -2.43933153 -2.40171927 -2.34732274
+ -2.28018805 -2.20541217 -2.13148578 -2.07237965 -2.04551215 -2.06079345
+ -2.11251267 -2.1830001  -2.25757472 -2.32613203 -2.38318912 -2.42531764
+ -2.44893931 -2.45376083 -2.45831062 -2.46348046 -2.46939025 -2.47568068
+ -2.48202544 -2.48831559 -2.49376575 -2.49793381 -2.50065025 -2.50143559
+ -2.50034338 -2.49730215 -2.49264282 -2.48698856 -2.480567   -2.47378547
+ -2.46718838 -2.46100953 -2.45576449 -2.45046806 -2.42884237 -2.39063833
+ -2.33887726 -2.27620657 -2.20714624 -2.14024233]
+F127M-band mags: [-1.61029623 -1.62663852 -1.61029623 -1.6358076  -1.69236212 -1.76215011
+ -1.83174369 -1.89339615 -1.94295009 -1.97704608 -1.98969145 -1.991178
+ -1.99262742 -1.99389067 -1.995116   -1.9963313  -1.99752277 -1.9984585
+ -1.99943488 -2.00015402 -2.00112902 -2.00186989 -2.00244946 -2.00309186
+ -2.00346717 -2.00397875 -2.00429888 -2.00467477 -2.00495985 -2.00496719
+ -2.00502061 -2.00518325 -2.00526509 -2.00513824 -2.00506564 -2.00490904
+ -2.00468997 -2.00437908 -2.00410685 -2.00369562 -2.00327324 -2.00268483
+ -2.00220894 -2.00155544 -2.00088769 -2.00022402 -1.99938824 -1.99848681
+ -1.9976092  -1.9966183  -1.99562672 -1.9945315  -1.99353002 -1.99219404
+ -1.99114931 -1.98971947 -1.9885937  -1.97502378 -1.93688921 -1.88109288
+ -1.81178367 -1.73429714 -1.65765666 -1.59648019 -1.56870949 -1.58448922
+ -1.63805517 -1.71128967 -1.78887502 -1.86011626 -1.91920457 -1.9625175
+ -1.9865371  -1.99139327 -1.99594195 -2.00110355 -2.0069787  -2.01325522
+ -2.01956889 -2.02586643 -2.03135186 -2.03557172 -2.03838394 -2.03929201
+ -2.03833485 -2.03543336 -2.03091259 -2.02538485 -2.01905831 -2.01233145
+ -2.00576286 -1.99957858 -1.9942999  -1.9889204  -1.96743857 -1.92933243
+ -1.87744592 -1.81440613 -1.74479348 -1.67735338]
+Star 1 RVs: [  8.96024086   2.97751958  -1.39149639  -4.21128267  -6.09344816
+  -7.5183564   -8.8026365  -10.18734265 -12.04716593 -14.17764211
+ -16.18991268 -18.09975825 -19.89607594 -21.58312924 -23.17086209
+ -24.65291747 -26.0322593  -27.31479824 -28.49566213 -29.58421983
+ -30.57638853 -31.48088871 -32.29518447 -33.0157848  -33.65197489
+ -34.20112844 -34.66339391 -35.04120352 -35.3371882  -35.54753077
+ -35.67686475 -35.72245268 -35.68198257 -35.56143318 -35.35962008
+ -35.07093973 -34.69899518 -34.24248534 -33.69986432 -33.06749555
+ -32.35266198 -31.54534657 -30.64944889 -29.6586031  -28.57184277
+ -27.39574907 -26.11709733 -24.73822599 -23.2579385  -21.67107733
+ -19.98379735 -18.18802279 -16.27909515 -14.26118298 -12.12920207
+  -9.88891019  -7.52917459  -5.05870009  -2.47672279   0.21543058
+   3.0094463    5.90776867   8.89393551  11.96827608  15.11012602
+  18.31058181  21.546962    24.80048393  28.04178532  31.24491701
+  34.37740099  37.3977694   40.26679173  42.94130402  45.38398488
+  47.54845591  49.39806855  50.90399364  52.04906128  52.81064614
+  53.18160126  53.16197407  52.75450554  51.96699174  50.80770409
+  49.29845861  47.45617257  45.31163347  42.89543312  40.24094938
+  37.39531831  34.41645618  31.90529969  29.74010527  27.72571683
+  25.6573344   23.22869333  19.92575285  15.1431524    8.96024086] km/s
+Star 2 RVs: [ -8.95730242  -5.97482556  -3.08288617  -0.2911698    2.39978047
+   4.97957723   7.45210215   9.80974942  12.0583038   14.19236517
+  16.21592921  18.1279848   19.93144006  21.6244964   23.21596394
+  24.70345701  26.08612369  27.37265643  28.55939528  29.65072143
+  30.64559812  31.54753219  32.36080101  33.08216947  33.71641412
+  34.26392634  34.72487233  35.09893597  35.39125574  35.59523685
+  35.71834294  35.7586531   35.7137181   35.58581399  35.37533122
+  35.07850611  34.70000296  34.23405824  33.68181207  33.0447911
+  32.31875224  31.50433461  30.59606969  29.59791278  28.50495013
+  27.31746457  26.03279422  24.64694678  23.16235509  21.57226084
+  19.87879755  18.07803786  16.17169235  14.15472151  12.02468016
+  10.24656637   9.09500849   8.0965509    6.96559123   5.34313697
+   2.63092808  -2.01757293  -8.8063555  -15.89326698 -21.10352454
+ -24.35624001 -26.53371829 -28.28584588 -29.98835273 -31.88380026
+ -34.22173561 -37.19538834 -40.0688389  -42.76530832 -45.24034591
+ -47.45406972 -49.37433155 -50.96284924 -52.18731059 -53.02825494
+ -53.46522424 -53.48644931 -53.09644481 -52.29983376 -51.10968411
+ -49.55318678 -47.65469077 -45.45009213 -42.98386752 -40.28472383
+ -37.40464532 -34.38062868 -31.25383689 -28.05531361 -24.81956821
+ -21.57576276 -18.34787864 -15.1584592  -12.02461219  -8.95730242] km/s
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now that we have the modeled observables, we can plot them for this model binary</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+
+<span class="c1"># F153M mags subplot</span>
+<span class="n">ax_mag_153m</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">ax_mag_153m</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">model_phases</span><span class="p">,</span> <span class="n">modeled_mags_153m</span><span class="p">,</span>
+    <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;C1&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">ax_mag_153m</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+<span class="n">ax_mag_153m</span><span class="o">.</span><span class="n">invert_yaxis</span><span class="p">()</span>
+<span class="n">ax_mag_153m</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$M_</span><span class="si">{F153M}</span><span class="s2">$&quot;</span><span class="p">)</span>
+
+<span class="c1"># F153M mags subplot</span>
+<span class="n">ax_mag_127m</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">ax_mag_127m</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">model_phases</span><span class="p">,</span> <span class="n">modeled_mags_127m</span><span class="p">,</span>
+    <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;C0&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">ax_mag_127m</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+<span class="n">ax_mag_127m</span><span class="o">.</span><span class="n">invert_yaxis</span><span class="p">()</span>
+<span class="n">ax_mag_127m</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$M_</span><span class="si">{F127M}</span><span class="s2">$&quot;</span><span class="p">)</span>
+
+<span class="c1"># RVs subplot</span>
+<span class="n">ax_rvs</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="n">ax_rvs</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">model_phases</span><span class="p">,</span> <span class="n">modeled_rvs_star1</span><span class="p">,</span>
+    <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;C9&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Star 1&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">ax_rvs</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">model_phases</span><span class="p">,</span> <span class="n">modeled_rvs_star2</span><span class="p">,</span>
+    <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;C3&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Star 2&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">ax_rvs</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Phase (period = </span><span class="si">{</span><span class="n">bin_params</span><span class="o">.</span><span class="n">period</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+<span class="n">ax_rvs</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+<span class="n">ax_rvs</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Radial Velocity (km/s)&quot;</span><span class="p">)</span>
+
+<span class="n">ax_rvs</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;lower center&#39;</span><span class="p">,</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.legend.Legend at 0x15d0e5cd0&gt;
+</pre></div>
+</div>
+<img alt="../_images/5ec5f5f0f99e84e5f87dd246581beb479c5484a28f78cd03d8d94a5441ed474b.png" src="../_images/5ec5f5f0f99e84e5f87dd246581beb479c5484a28f78cd03d8d94a5441ed474b.png" />
+</div>
+</div>
+</section>
+<section id="bonus-make-mesh-plots-to-aide-visualization">
+<h2>Bonus: make mesh plots to aide visualization<a class="headerlink" href="#bonus-make-mesh-plots-to-aide-visualization" title="Link to this heading">#</a></h2>
+<p>Once again, we can add some panels for mesh visualizations of the stars. For this eccentric binary example, we can change the phase values for where to draw the meshes. Photometric max happens at ~0.85 and an eclipse happens at ~0.65 so let’s include those.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set up figure and specificy mesh plot outputs</span>
+
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span>
+
+<span class="n">mesh_plot_phases</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.65</span><span class="p">,</span> <span class="mf">0.85</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>
+
+<span class="n">modeled_observables</span><span class="p">,</span> <span class="n">mesh_plot_out</span><span class="p">,</span> <span class="n">fig</span> <span class="o">=</span> <span class="n">binary_model_obj</span><span class="o">.</span><span class="n">compute_obs</span><span class="p">(</span>
+    <span class="n">star1_params</span><span class="p">,</span> <span class="n">star2_params</span><span class="p">,</span> <span class="n">bin_params</span><span class="p">,</span>
+    <span class="n">make_mesh_plots</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">mesh_plot_phases</span><span class="o">=</span><span class="n">mesh_plot_phases</span><span class="p">,</span>
+    <span class="n">mesh_plot_fig</span><span class="o">=</span><span class="n">fig</span><span class="p">,</span>
+    <span class="n">mesh_plot_subplot_grid</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span>
+    <span class="n">mesh_plot_subplot_grid_indexes</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,]),</span>
+    <span class="n">num_triangles</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># The mesh subplots show here since we have matplotlib inline enabled</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/6776a6b02fbc856ce4897637a0221e27a4a833ee5ff4e8728b9dfc3c77b9a7bd.png" src="../_images/6776a6b02fbc856ce4897637a0221e27a4a833ee5ff4e8728b9dfc3c77b9a7bd.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Finish constructing the whole figure</span>
+
+<span class="c1"># Fluxes in mags</span>
+<span class="n">modeled_mags</span> <span class="o">=</span> <span class="n">modeled_observables</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">modeled_observables</span><span class="o">.</span><span class="n">phot_filt_filters</span><span class="p">[</span><span class="n">filter_153m</span><span class="p">]]</span>
+
+<span class="c1"># RVs in km/s</span>
+<span class="n">modeled_rvs_star1</span> <span class="o">=</span> <span class="n">modeled_observables</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">modeled_observables</span><span class="o">.</span><span class="n">obs_rv_pri_filter</span><span class="p">]</span>
+<span class="n">modeled_rvs_star2</span> <span class="o">=</span> <span class="n">modeled_observables</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">modeled_observables</span><span class="o">.</span><span class="n">obs_rv_sec_filter</span><span class="p">]</span>
+
+<span class="c1"># Label the mesh subplots</span>
+<span class="c1"># # Remove empty axes</span>
+<span class="c1"># for ax in fig.axes:</span>
+<span class="c1">#     if ax.get_xlabel() == &#39;&#39;:</span>
+<span class="c1">#         ax.remove()</span>
+
+<span class="c1"># # Make mesh axes share axes</span>
+<span class="c1"># mesh_axes = []</span>
+
+<span class="k">for</span> <span class="n">ax_index</span><span class="p">,</span> <span class="n">phase</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mesh_plot_phases</span><span class="p">):</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="n">ax_index</span><span class="p">]</span>
+    
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Phase = </span><span class="si">{</span><span class="n">phase</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Decrease linewidths of the triangles in the mesh, for legibility in final plot</span>
+    <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_children</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">mpl</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">PolyCollection</span><span class="p">):</span>
+            <span class="n">child</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">lw</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
+    
+    <span class="c1"># mesh_axes.append(ax)</span>
+
+<span class="c1"># Draw observables subplots</span>
+<span class="c1"># F153m mags subplot</span>
+<span class="n">ax_mag_153m</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">ax_mag_153m</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">model_phases</span><span class="p">,</span> <span class="n">modeled_mags_153m</span><span class="p">,</span>
+    <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;C1&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">ax_mag_153m</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+<span class="n">ax_mag_153m</span><span class="o">.</span><span class="n">invert_yaxis</span><span class="p">()</span>
+<span class="n">ax_mag_153m</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$M_</span><span class="si">{F153M}</span><span class="s2">$&quot;</span><span class="p">)</span>
+
+<span class="c1"># F127m mags subplot</span>
+<span class="n">ax_mag_127m</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="n">ax_mag_127m</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">model_phases</span><span class="p">,</span> <span class="n">modeled_mags_127m</span><span class="p">,</span>
+    <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;C0&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">ax_mag_127m</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+<span class="n">ax_mag_127m</span><span class="o">.</span><span class="n">invert_yaxis</span><span class="p">()</span>
+<span class="n">ax_mag_127m</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$M_</span><span class="si">{F127M}</span><span class="s2">$&quot;</span><span class="p">)</span>
+
+<span class="c1"># RVs subplot</span>
+<span class="n">ax_rvs</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
+
+<span class="n">ax_rvs</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">model_phases</span><span class="p">,</span> <span class="n">modeled_rvs_star1</span><span class="p">,</span>
+    <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;C9&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Star 1&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">ax_rvs</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">model_phases</span><span class="p">,</span> <span class="n">modeled_rvs_star2</span><span class="p">,</span>
+    <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;C3&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Star 2&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">ax_rvs</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Phase (period = </span><span class="si">{</span><span class="n">bin_params</span><span class="o">.</span><span class="n">period</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+<span class="n">ax_rvs</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+<span class="n">ax_rvs</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Radial Velocity (km/s)&quot;</span><span class="p">)</span>
+
+<span class="n">ax_rvs</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;lower center&#39;</span><span class="p">,</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">set_size_inches</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+<span class="n">fig</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/d849506ce5664b46f83462376aff467ea25163fc0b7db70fc0608dadd65bddb2.png" src="../_images/d849506ce5664b46f83462376aff467ea25163fc0b7db70fc0608dadd65bddb2.png" />
+</div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="simulate_model_binary.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Tutorial: Simulate a model binary</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="add_phot_effects.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Tutorial: Add additional effects to simulated photometric fluxes</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#imports">Imports</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#set-up-observation-filters-passbands">Set up observation filters / passbands</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#set-up-stellar-and-binary-system-parameters">Set up stellar and binary system parameters</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#set-up-isochrone-object">Set up isochrone object</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#set-up-a-binary-parameters-object">Set up a binary parameters object</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#set-up-of-observables-to-be-calculated">Set up of observables to be calculated</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#compute-the-observables">Compute the observables</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#process-and-plot-the-modeled-observables">Process and plot the modeled observables</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bonus-make-mesh-plots-to-aide-visualization">Bonus: make mesh plots to aide visualization</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/notebooks/simulate_model_binary_wMIST_star_params.ipynb.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2024, Abhimat K. Gautam.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

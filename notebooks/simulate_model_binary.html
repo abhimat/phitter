@@ -1,0 +1,956 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="../_static/phitter_icon_16.png" sizes="16x16" rel="icon" type="image/png">
+    <link href="../_static/phitter_icon_32.png" sizes="32x32" rel="icon" type="image/png">
+    <link href="../_static/phitter_icon_100.png" sizes="100x100" rel="icon" type="image/png">
+    <link href="../_static/phitter_icon_180.png" sizes="180x180" rel="icon" type="image/png">
+    <link href="../_static/phitter_icon.svg" rel="icon" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="../_static/phitter_icon_180.png" sizes="180x180" type="image/png">
+    <title>Tutorial: Simulate a model binary &#8212; Phitter 1.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=372c55ee" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=f2a433a1"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/simulate_model_binary';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Tutorial: Simulate a model binary using stellar parameters from an isochrone" href="simulate_model_binary_wMIST_star_params.html" />
+    <link rel="prev" title="Tutorials" href="../tutorials.html" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+<link rel="stylesheet" href="https://use.typekit.net/hxl8tqz.css">
+
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class=" navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/Phitter.svg" class="logo__image only-light" alt="Phitter 1.0 documentation - Home"/>
+    <img src="../_static/Phitter_dark.svg" class="logo__image only-dark pst-js-only" alt="Phitter 1.0 documentation - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class=" navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../features.html">
+    Features
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../structure.html">
+    Structure of Phitter
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../apidocs/index.html">
+    API Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/abhimat/phitter" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../features.html">
+    Features
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../structure.html">
+    Structure of Phitter
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../apidocs/index.html">
+    API Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/abhimat/phitter" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Tutorial: Simulate a model binary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulate_model_binary_wMIST_star_params.html">Tutorial: Simulate a model binary using stellar parameters from an isochrone</a></li>
+<li class="toctree-l1"><a class="reference internal" href="add_phot_effects.html">Tutorial: Add additional effects to simulated photometric fluxes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="add_rv_effects.html">Tutorial: Add additional effects to simulated radial velocities</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="create_mock_data.html">Simulate mock observations data for fitting</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="fit_with_ultranest.html">Tutorial: Fit binary model to observed data using nested sampling via UltraNest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fit_with_emcee.html">Tutorial: Fit binary model to observed data with emcee</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../tutorials.html" class="nav-link">Tutorials</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Tutorial: Simulate a model binary</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="tutorial-simulate-a-model-binary">
+<h1>Tutorial: Simulate a model binary<a class="headerlink" href="#tutorial-simulate-a-model-binary" title="Link to this heading">#</a></h1>
+<p>This tutorial walks through the basics of using phitter to compute light curves and RVs for a model stellar binary.</p>
+<section id="imports">
+<h2>Imports<a class="headerlink" href="#imports" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">phitter</span><span class="w"> </span><span class="kn">import</span> <span class="n">observables</span><span class="p">,</span> <span class="n">filters</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">phitter.params</span><span class="w"> </span><span class="kn">import</span> <span class="n">star_params</span><span class="p">,</span> <span class="n">binary_params</span><span class="p">,</span> <span class="n">blackbody_params</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">phitter.calc</span><span class="w"> </span><span class="kn">import</span> <span class="n">model_obs_calc</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">phoebe</span><span class="w"> </span><span class="kn">import</span> <span class="n">u</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">phoebe</span><span class="w"> </span><span class="kn">import</span> <span class="n">c</span> <span class="k">as</span> <span class="n">const</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mpl</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="o">%</span><span class="k">matplotlib</span> inline
+
+<span class="c1"># The following warning regarding extinction originates from SPISEA and can be ignored.</span>
+<span class="c1"># The functionality being warned about is not used by SPISEA.</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Users/abhimat/Software/miniforge3/envs/phoebe_py38/lib/python3.8/site-packages/pysynphot/locations.py:345: UserWarning: Extinction files not found in /Volumes/Noh/models/cdbs/extinction
+  warnings.warn(&#39;Extinction files not found in %s&#39; % (extdir, ))
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="set-up-observation-filters-passbands">
+<h2>Set up observation filters / passbands<a class="headerlink" href="#set-up-observation-filters-passbands" title="Link to this heading">#</a></h2>
+<p>For this example, we’re going to generate photometry and RVs in Keck Kp band. Any passband set up in both PHOEBE and SPISEA can be used by Phitter for simulating fluxes and RVs.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">filter_kp</span> <span class="o">=</span> <span class="n">filters</span><span class="o">.</span><span class="n">nirc2_kp_filt</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="set-up-stellar-and-binary-system-parameters">
+<h2>Set up stellar and binary system parameters<a class="headerlink" href="#set-up-stellar-and-binary-system-parameters" title="Link to this heading">#</a></h2>
+<section id="stellar-parameters">
+<h3>Stellar parameters<a class="headerlink" href="#stellar-parameters" title="Link to this heading">#</a></h3>
+<p>We’re going to set up parameters for the component stars in the binary system with photometry derived from a blackbody. This requires providing mass, radius, and temperature for each star.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Star parameters</span>
+
+<span class="n">bb_stellar_params_obj</span> <span class="o">=</span> <span class="n">blackbody_params</span><span class="o">.</span><span class="n">bb_stellar_params</span><span class="p">()</span>
+
+<span class="n">star1_params</span> <span class="o">=</span> <span class="n">bb_stellar_params_obj</span><span class="o">.</span><span class="n">calc_star_params</span><span class="p">(</span>
+    <span class="mi">50</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">solMass</span><span class="p">,</span> <span class="mi">52</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">solRad</span><span class="p">,</span> <span class="mi">30_000</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">K</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">star2_params</span> <span class="o">=</span> <span class="n">bb_stellar_params_obj</span><span class="o">.</span><span class="n">calc_star_params</span><span class="p">(</span>
+    <span class="mi">45</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">solMass</span><span class="p">,</span> <span class="mi">45</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">solRad</span><span class="p">,</span> <span class="mi">25_000</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">K</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="set-up-a-binary-parameters-object">
+<h2>Set up a binary parameters object<a class="headerlink" href="#set-up-a-binary-parameters-object" title="Link to this heading">#</a></h2>
+<p>A separate object is set up to specify the parameters of the binary system</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Binary parameters</span>
+<span class="n">bin_params</span> <span class="o">=</span> <span class="n">binary_params</span><span class="o">.</span><span class="n">binary_params</span><span class="p">(</span>
+    <span class="n">period</span> <span class="o">=</span> <span class="mf">20.0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">d</span><span class="p">,</span>
+    <span class="n">ecc</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span>
+    <span class="n">inc</span> <span class="o">=</span> <span class="mf">80.0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span>
+    <span class="n">t0</span> <span class="o">=</span> <span class="mf">53_800.0</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="set-up-of-observables-to-be-calculated">
+<h2>Set up of observables to be calculated<a class="headerlink" href="#set-up-of-observables-to-be-calculated" title="Link to this heading">#</a></h2>
+<p>We need to set up an observables object to specify the times and types of observables that need to be computed. For this example, let’s compute flux in Keck K-band and RVs uniformly over the entire orbital phase of the binary.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set up model times</span>
+<span class="c1"># Model times are in MJD here</span>
+<span class="n">model_phases</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">model_times</span> <span class="o">=</span> <span class="n">model_phases</span> <span class="o">*</span> <span class="n">bin_params</span><span class="o">.</span><span class="n">period</span><span class="o">.</span><span class="n">value</span> <span class="o">+</span> <span class="n">bin_params</span><span class="o">.</span><span class="n">t0</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set up filter and observation type arrays for the model fluxes and RVs</span>
+
+<span class="n">kp_filt_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">model_phases</span><span class="p">),</span> <span class="n">filter_kp</span><span class="p">)</span>
+<span class="n">kp_type_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">model_phases</span><span class="p">),</span> <span class="s1">&#39;phot&#39;</span><span class="p">)</span>
+
+<span class="n">rv_pri_filt_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">model_phases</span><span class="p">),</span> <span class="n">filter_kp</span><span class="p">)</span>
+<span class="n">rv_pri_type_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">model_phases</span><span class="p">),</span> <span class="s1">&#39;rv_pri&#39;</span><span class="p">)</span>
+
+<span class="n">rv_sec_filt_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">model_phases</span><span class="p">),</span> <span class="n">filter_kp</span><span class="p">)</span>
+<span class="n">rv_sec_type_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">model_phases</span><span class="p">),</span> <span class="s1">&#39;rv_sec&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Now make arrays for all the times, filters, and observation types by concatenating the above arrays</span>
+
+<span class="n">obs_times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+    <span class="p">(</span><span class="n">model_times</span><span class="p">,</span> <span class="n">model_times</span><span class="p">,</span> <span class="n">model_times</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">obs_filts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+    <span class="p">(</span><span class="n">kp_filt_arr</span><span class="p">,</span> <span class="n">rv_pri_filt_arr</span><span class="p">,</span> <span class="n">rv_sec_filt_arr</span><span class="p">,),</span>
+<span class="p">)</span>
+<span class="n">obs_types</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+    <span class="p">(</span><span class="n">kp_type_arr</span><span class="p">,</span> <span class="n">rv_pri_type_arr</span><span class="p">,</span> <span class="n">rv_sec_type_arr</span><span class="p">,),</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Finally, construct the observables object</span>
+
+<span class="n">model_observables</span> <span class="o">=</span> <span class="n">observables</span><span class="o">.</span><span class="n">observables</span><span class="p">(</span>
+    <span class="n">obs_times</span><span class="o">=</span><span class="n">obs_times</span><span class="p">,</span>
+    <span class="n">obs_filts</span><span class="o">=</span><span class="n">obs_filts</span><span class="p">,</span> <span class="n">obs_types</span><span class="o">=</span><span class="n">obs_types</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="compute-the-observables">
+<h2>Compute the observables<a class="headerlink" href="#compute-the-observables" title="Link to this heading">#</a></h2>
+<p>First a model observation calculation object (<code class="docutils literal notranslate"><span class="pre">model_obs_calc</span></code>) has to be instantiated, with the observables as input parameters. This object will be carrying out the calculations.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Object to perform the computation of flux and RVs</span>
+
+<span class="n">binary_model_obj</span> <span class="o">=</span> <span class="n">model_obs_calc</span><span class="o">.</span><span class="n">binary_star_model_obs</span><span class="p">(</span>
+    <span class="n">model_observables</span><span class="p">,</span>
+    <span class="n">use_blackbody_atm</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">print_diagnostics</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The modeled observables can then be simulated by inputting the stellar and binary parameters.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">modeled_observables</span> <span class="o">=</span> <span class="n">binary_model_obj</span><span class="o">.</span><span class="n">compute_obs</span><span class="p">(</span>
+    <span class="n">star1_params</span><span class="p">,</span> <span class="n">star2_params</span><span class="p">,</span> <span class="n">bin_params</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="process-and-plot-the-modeled-observables">
+<h2>Process and plot the modeled observables<a class="headerlink" href="#process-and-plot-the-modeled-observables" title="Link to this heading">#</a></h2>
+<p>We can extract the different observables (flux and RVs of the primary and secondary object) from the output observables object. The observables object has numpy filters for each passband and data types that we can use for this.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Fluxes in mags</span>
+<span class="n">modeled_kp_mags</span> <span class="o">=</span> <span class="n">modeled_observables</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">modeled_observables</span><span class="o">.</span><span class="n">phot_filt_filters</span><span class="p">[</span><span class="n">filter_kp</span><span class="p">]]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Kp-band mags: </span><span class="si">{</span><span class="n">modeled_kp_mags</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+<span class="c1"># RVs in km/s</span>
+<span class="n">modeled_rvs_star1</span> <span class="o">=</span> <span class="n">modeled_observables</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">modeled_observables</span><span class="o">.</span><span class="n">obs_rv_pri_filter</span><span class="p">]</span>
+<span class="n">modeled_rvs_star2</span> <span class="o">=</span> <span class="n">modeled_observables</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">modeled_observables</span><span class="o">.</span><span class="n">obs_rv_sec_filter</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Star 1 RVs: </span><span class="si">{</span><span class="n">modeled_rvs_star1</span><span class="si">}</span><span class="s1"> km/s&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Star 2 RVs: </span><span class="si">{</span><span class="n">modeled_rvs_star2</span><span class="si">}</span><span class="s1"> km/s&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Kp-band mags: [-7.5216657  -7.53732926 -7.5216657  -7.53973471 -7.58422804 -7.6434513
+ -7.70671535 -7.76850532 -7.82567567 -7.87684326 -7.92123227 -7.9589559
+ -7.98949251 -8.01222054 -8.02392512 -8.02926534 -8.03464135 -8.03978097
+ -8.04512171 -8.05026785 -8.05499389 -8.05965313 -8.06381118 -8.06742234
+ -8.0707711  -8.07336674 -8.0753406  -8.07691355 -8.07784988 -8.07791415
+ -8.07786586 -8.07681172 -8.07544044 -8.07313791 -8.0702784  -8.06746169
+ -8.0638797  -8.05981414 -8.05567433 -8.05147333 -8.04686716 -8.04234265
+ -8.03770362 -8.03263123 -8.0182408  -7.99586114 -7.96713968 -7.93223797
+ -7.89169488 -7.8463103  -7.79686441 -7.74500755 -7.69428287 -7.65015828
+ -7.62135114 -7.61633102 -7.63662295 -7.6757046  -7.7243426  -7.77576576
+ -7.82591875 -7.8724258  -7.91454599 -7.95108773 -7.98218025 -8.00744218
+ -8.0265221  -8.0384456  -8.04556605 -8.05304594 -8.06062383 -8.06820929
+ -8.0752654  -8.08167704 -8.08702932 -8.09139645 -8.09415882 -8.09548854
+ -8.09522449 -8.09383937 -8.09062861 -8.08629899 -8.08040402 -8.0734608
+ -8.0655998  -8.05723694 -8.04857565 -8.03984411 -8.03170232 -8.02326546
+ -8.00664823 -7.98281403 -7.95231821 -7.91482576 -7.87066209 -7.81978953
+ -7.76289086 -7.70152922 -7.63835483 -7.5803122 ]
+Star 1 RVs: [   8.3645588   -20.72126128  -42.78321712  -57.33403586  -66.82057916
+  -73.40743418  -78.48141781  -82.79790172  -86.81473427  -90.87297976
+  -95.17329818  -99.99513811 -106.16950658 -113.14473386 -119.59989517
+ -125.55295565 -130.9919105  -135.88108371 -140.29568743 -144.16538332
+ -147.52139283 -150.36323497 -152.68049597 -154.49586261 -155.82593365
+ -156.57922333 -156.8680753  -156.64458017 -155.90614339 -154.67592131
+ -152.94370496 -150.70965628 -147.98012086 -144.7153373  -140.9567258
+ -136.76601174 -132.00254521 -126.75365832 -121.01008446 -114.81700743
+ -108.12273938 -100.99997401  -93.39910259  -85.3842781   -76.97976576
+  -68.19792792  -59.04069552  -49.57086978  -39.81711275  -29.78706422
+  -19.55885966   -9.12678602    1.43364637   12.08601054   22.81407832
+   33.53972245   44.20659904   54.80346614   65.23094339   75.44727086
+   85.41728951   95.06716457  104.33120411  113.18878257  121.53341727
+  129.32082842  136.53697068  143.07943596  148.97988595  154.18420839
+  158.71292283  162.53692469  165.69212759  168.21006382  170.04745492
+  171.21145367  171.69995938  171.45932309  170.53705681  168.93993298
+  166.63771821  163.6308055   159.89544385  155.42984771  150.22590561
+  144.2864683   137.58360979  130.33004141  124.0580466   118.38509998
+  113.12074107  108.10089376  103.18221374   98.07183948   92.31597699
+   85.15214354   75.16779889   60.16406811   37.64145169    8.3645588 ] km/s
+Star 2 RVs: [  -9.30041204    2.50410814   14.16562647   25.67206929   36.94494359
+   47.97531301   58.69174249   69.12035131   79.16694275   88.81417575
+   98.04413382  106.83285253  115.15213351  122.9893872   130.30413878
+  137.10017692  143.35255178  149.07128874  154.20704145  158.79735648
+  162.80580603  166.2663088   169.10218567  171.38539398  173.06966805
+  174.16508265  174.6643893   174.57883199  173.89271835  172.63868982
+  170.74759035  168.30877263  165.28297836  161.68059288  157.46400701
+  152.71996893  147.38982022  141.50576497  135.06435162  128.10485559
+  120.60515754  112.70100092  106.69837965  101.79244882   97.47733391
+   93.4133502    89.33096789   84.87011687   79.39775618   71.8552754
+   60.31299594   41.65245503   13.26456234  -21.70464555  -53.21215397
+  -75.12448441  -88.92807004  -97.94153472 -104.53558441 -109.95958671
+ -114.98414704 -119.97830835 -125.2164007  -130.86963335 -137.18480064
+ -144.68052272 -152.87248756 -160.38885062 -167.16675609 -173.20117313
+ -178.45298833 -182.88248841 -186.48124599 -189.23931305 -191.19961314
+ -192.243635   -192.49423607 -191.85823293 -190.38154407 -188.05011772
+ -184.87109601 -180.90651511 -176.11474404 -170.55151307 -164.21340472
+ -157.14966866 -149.38135158 -140.9742126  -131.96817453 -122.39822833
+ -112.33723958 -101.83936398  -90.97014566  -79.7680786   -68.32052664
+  -56.69329864  -44.903312    -33.03154919  -21.13607745   -9.30041204] km/s
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now that we have the modeled observables, we can plot them for this model binary</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+
+<span class="c1"># Kp mags subplot</span>
+<span class="n">ax_mag_kp</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">ax_mag_kp</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">model_phases</span><span class="p">,</span> <span class="n">modeled_kp_mags</span><span class="p">,</span>
+    <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;C1&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">ax_mag_kp</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+<span class="n">ax_mag_kp</span><span class="o">.</span><span class="n">invert_yaxis</span><span class="p">()</span>
+<span class="n">ax_mag_kp</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$M_{K&#39;}$&quot;</span><span class="p">)</span>
+
+<span class="c1"># RVs subplot</span>
+<span class="n">ax_rvs</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">ax_rvs</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">model_phases</span><span class="p">,</span> <span class="n">modeled_rvs_star1</span><span class="p">,</span>
+    <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;C9&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Star 1&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">ax_rvs</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">model_phases</span><span class="p">,</span> <span class="n">modeled_rvs_star2</span><span class="p">,</span>
+    <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;C3&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Star 2&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">ax_rvs</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Phase (period = </span><span class="si">{</span><span class="n">bin_params</span><span class="o">.</span><span class="n">period</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+<span class="n">ax_rvs</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+<span class="n">ax_rvs</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Radial Velocity (km/s)&quot;</span><span class="p">)</span>
+
+<span class="n">ax_rvs</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;lower center&#39;</span><span class="p">,</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.legend.Legend at 0x16c180100&gt;
+</pre></div>
+</div>
+<img alt="../_images/fcf6bddb7864e9fc348b723e0242391094955bafac02d1c97d895f1458fd9807.png" src="../_images/fcf6bddb7864e9fc348b723e0242391094955bafac02d1c97d895f1458fd9807.png" />
+</div>
+</div>
+</section>
+<section id="bonus-make-mesh-plots-to-aide-visualization">
+<h2>Bonus: make mesh plots to aide visualization<a class="headerlink" href="#bonus-make-mesh-plots-to-aide-visualization" title="Link to this heading">#</a></h2>
+<p>The above plot is great to see the modeled observables. But it can be helpful to see what the modeled binary system looks like. Let’s add simulate some mesh outlines of the stellar surfaces to see what this model binary looks like…</p>
+<p>We need to make a figure first where we’ll do the plotting. We can be extra specific about the layout of the mesh plots in this figure, so let’s do that!</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set up figure and specificy mesh plot outputs</span>
+
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span>
+<span class="n">gs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">GridSpec</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,)</span>
+
+<span class="n">mesh_plot_phases</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>
+
+<span class="n">modeled_observables</span><span class="p">,</span> <span class="n">mesh_plot_out</span><span class="p">,</span> <span class="n">fig</span> <span class="o">=</span> <span class="n">binary_model_obj</span><span class="o">.</span><span class="n">compute_obs</span><span class="p">(</span>
+    <span class="n">star1_params</span><span class="p">,</span> <span class="n">star2_params</span><span class="p">,</span> <span class="n">bin_params</span><span class="p">,</span>
+    <span class="n">make_mesh_plots</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">mesh_plot_phases</span><span class="o">=</span><span class="n">mesh_plot_phases</span><span class="p">,</span>
+    <span class="n">mesh_plot_fig</span><span class="o">=</span><span class="n">fig</span><span class="p">,</span>
+    <span class="n">mesh_plot_subplot_grid</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span>
+    <span class="n">mesh_plot_subplot_grid_indexes</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,]),</span>
+    <span class="n">num_triangles</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># The mesh subplots show here since we have matplotlib inline enabled</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/5c291a4b8b42780fa84af4f041e91562c285b08e0ce6dcec0f5c6e1d01499d10.png" src="../_images/5c291a4b8b42780fa84af4f041e91562c285b08e0ce6dcec0f5c6e1d01499d10.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Finish constructing the whole figure</span>
+
+<span class="c1"># Fluxes in mags</span>
+<span class="n">modeled_kp_mags</span> <span class="o">=</span> <span class="n">modeled_observables</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">modeled_observables</span><span class="o">.</span><span class="n">phot_filt_filters</span><span class="p">[</span><span class="n">filter_kp</span><span class="p">]]</span>
+
+<span class="c1"># RVs in km/s</span>
+<span class="n">modeled_rvs_star1</span> <span class="o">=</span> <span class="n">modeled_observables</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">modeled_observables</span><span class="o">.</span><span class="n">obs_rv_pri_filter</span><span class="p">]</span>
+<span class="n">modeled_rvs_star2</span> <span class="o">=</span> <span class="n">modeled_observables</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">modeled_observables</span><span class="o">.</span><span class="n">obs_rv_sec_filter</span><span class="p">]</span>
+
+<span class="c1"># Label the mesh subplots</span>
+<span class="c1"># # Remove empty axes</span>
+<span class="c1"># for ax in fig.axes:</span>
+<span class="c1">#     if ax.get_xlabel() == &#39;&#39;:</span>
+<span class="c1">#         ax.remove()</span>
+
+<span class="c1"># # Make mesh axes share axes</span>
+<span class="c1"># mesh_axes = []</span>
+
+<span class="k">for</span> <span class="n">ax_index</span><span class="p">,</span> <span class="n">phase</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mesh_plot_phases</span><span class="p">):</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="n">ax_index</span><span class="p">]</span>
+    
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Phase = </span><span class="si">{</span><span class="n">phase</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Decrease linewidths of the triangles in the mesh, for legibility in final plot</span>
+    <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_children</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">mpl</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">PolyCollection</span><span class="p">):</span>
+            <span class="n">child</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">lw</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
+    
+    <span class="c1"># mesh_axes.append(ax)</span>
+
+<span class="c1"># Draw observables subplots</span>
+<span class="c1"># Kp mags subplot</span>
+<span class="n">ax_mag_kp</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">ax_mag_kp</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">model_phases</span><span class="p">,</span> <span class="n">modeled_kp_mags</span><span class="p">,</span>
+    <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;C1&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">ax_mag_kp</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+<span class="n">ax_mag_kp</span><span class="o">.</span><span class="n">invert_yaxis</span><span class="p">()</span>
+<span class="n">ax_mag_kp</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$M_{K&#39;}$&quot;</span><span class="p">)</span>
+
+<span class="c1"># RVs subplot</span>
+<span class="n">ax_rvs</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="n">ax_rvs</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">model_phases</span><span class="p">,</span> <span class="n">modeled_rvs_star1</span><span class="p">,</span>
+    <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;C9&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Star 1&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">ax_rvs</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">model_phases</span><span class="p">,</span> <span class="n">modeled_rvs_star2</span><span class="p">,</span>
+    <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;C3&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Star 2&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">ax_rvs</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Phase (period = </span><span class="si">{</span><span class="n">bin_params</span><span class="o">.</span><span class="n">period</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+<span class="n">ax_rvs</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+<span class="n">ax_rvs</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Radial Velocity (km/s)&quot;</span><span class="p">)</span>
+
+<span class="n">ax_rvs</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;lower center&#39;</span><span class="p">,</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">set_size_inches</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+<span class="n">fig</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/56889391545416f7e7b3cc43a873a97f899ed96a0e79439eee3fadc6391347d4.png" src="../_images/56889391545416f7e7b3cc43a873a97f899ed96a0e79439eee3fadc6391347d4.png" />
+</div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../tutorials.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Tutorials</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="simulate_model_binary_wMIST_star_params.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Tutorial: Simulate a model binary using stellar parameters from an isochrone</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#imports">Imports</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#set-up-observation-filters-passbands">Set up observation filters / passbands</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#set-up-stellar-and-binary-system-parameters">Set up stellar and binary system parameters</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stellar-parameters">Stellar parameters</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#set-up-a-binary-parameters-object">Set up a binary parameters object</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#set-up-of-observables-to-be-calculated">Set up of observables to be calculated</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#compute-the-observables">Compute the observables</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#process-and-plot-the-modeled-observables">Process and plot the modeled observables</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bonus-make-mesh-plots-to-aide-visualization">Bonus: make mesh plots to aide visualization</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/notebooks/simulate_model_binary.ipynb.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2024, Abhimat K. Gautam.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

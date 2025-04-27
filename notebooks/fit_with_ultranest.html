@@ -1,0 +1,1044 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="../_static/phitter_icon_16.png" sizes="16x16" rel="icon" type="image/png">
+    <link href="../_static/phitter_icon_32.png" sizes="32x32" rel="icon" type="image/png">
+    <link href="../_static/phitter_icon_100.png" sizes="100x100" rel="icon" type="image/png">
+    <link href="../_static/phitter_icon_180.png" sizes="180x180" rel="icon" type="image/png">
+    <link href="../_static/phitter_icon.svg" rel="icon" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="../_static/phitter_icon_180.png" sizes="180x180" type="image/png">
+    <title>Tutorial: Fit binary model to observed data using nested sampling via UltraNest &#8212; Phitter 1.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=372c55ee" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=f2a433a1"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/fit_with_ultranest';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Tutorial: Fit binary model to observed data with emcee" href="fit_with_emcee.html" />
+    <link rel="prev" title="Simulate mock observations data for fitting" href="create_mock_data.html" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+<link rel="stylesheet" href="https://use.typekit.net/hxl8tqz.css">
+
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class=" navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/Phitter.svg" class="logo__image only-light" alt="Phitter 1.0 documentation - Home"/>
+    <img src="../_static/Phitter_dark.svg" class="logo__image only-dark pst-js-only" alt="Phitter 1.0 documentation - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class=" navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../features.html">
+    Features
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../structure.html">
+    Structure of Phitter
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../apidocs/index.html">
+    API Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/abhimat/phitter" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../features.html">
+    Features
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../structure.html">
+    Structure of Phitter
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../apidocs/index.html">
+    API Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/abhimat/phitter" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="simulate_model_binary.html">Tutorial: Simulate a model binary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulate_model_binary_wMIST_star_params.html">Tutorial: Simulate a model binary using stellar parameters from an isochrone</a></li>
+<li class="toctree-l1"><a class="reference internal" href="add_phot_effects.html">Tutorial: Add additional effects to simulated photometric fluxes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="add_rv_effects.html">Tutorial: Add additional effects to simulated radial velocities</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="create_mock_data.html">Simulate mock observations data for fitting</a></li>
+
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Tutorial: Fit binary model to observed data using nested sampling via UltraNest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fit_with_emcee.html">Tutorial: Fit binary model to observed data with emcee</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../tutorials.html" class="nav-link">Tutorials</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Tutorial: Fit binary model to observed data using nested sampling via UltraNest</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="tutorial-fit-binary-model-to-observed-data-using-nested-sampling-via-ultranest">
+<h1>Tutorial: Fit binary model to observed data using nested sampling via UltraNest<a class="headerlink" href="#tutorial-fit-binary-model-to-observed-data-using-nested-sampling-via-ultranest" title="Link to this heading">#</a></h1>
+<p>In this tutorial we go through the procedure of fitting observations to a binary star model using the nested sampling code <a class="reference external" href="https://johannesbuchner.github.io/UltraNest/">UltraNest</a>.</p>
+<section id="imports-and-filter-setup">
+<h2>Imports and Filter Setup<a class="headerlink" href="#imports-and-filter-setup" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">phitter</span><span class="w"> </span><span class="kn">import</span> <span class="n">observables</span><span class="p">,</span> <span class="n">filters</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">phitter.params</span><span class="w"> </span><span class="kn">import</span> <span class="n">star_params</span><span class="p">,</span> <span class="n">binary_params</span><span class="p">,</span> <span class="n">isoc_interp_params</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">phitter.calc</span><span class="w"> </span><span class="kn">import</span> <span class="n">model_obs_calc</span><span class="p">,</span> <span class="n">phot_adj_calc</span><span class="p">,</span> <span class="n">rv_adj_calc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">phitter.fit</span><span class="w"> </span><span class="kn">import</span> <span class="n">likelihood</span><span class="p">,</span> <span class="n">prior</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">phoebe</span><span class="w"> </span><span class="kn">import</span> <span class="n">u</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">phoebe</span><span class="w"> </span><span class="kn">import</span> <span class="n">c</span> <span class="k">as</span> <span class="n">const</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mpl</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pickle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">astropy.table</span><span class="w"> </span><span class="kn">import</span> <span class="n">Table</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">ultranest</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ultranest.stepsampler</span>
+
+<span class="o">%</span><span class="k">matplotlib</span> inline
+
+<span class="c1"># The following warning regarding extinction originates from SPISEA and can be ignored.</span>
+<span class="c1"># The functionality being warned about is not used by SPISEA.</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Users/abhimatlocal/software/miniforge3/envs/phoebe_py38/lib/python3.8/site-packages/pysynphot/locations.py:345: UserWarning: Extinction files not found in /Users/abhimatlocal/models/cdbs/extinction
+  warnings.warn(&#39;Extinction files not found in %s&#39; % (extdir, ))
+/Users/abhimatlocal/software/miniforge3/envs/phoebe_py38/lib/python3.8/site-packages/pysynphot/refs.py:124: UserWarning: No thermal tables found, no thermal calculations can be performed. No files found for /Users/abhimatlocal/models/cdbs/mtab/*_tmt.fits
+  warnings.warn(&#39;No thermal tables found, &#39;
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">filter_153m</span> <span class="o">=</span> <span class="n">filters</span><span class="o">.</span><span class="n">hst_f153m_filt</span><span class="p">()</span>
+<span class="n">filter_127m</span> <span class="o">=</span> <span class="n">filters</span><span class="o">.</span><span class="n">hst_f127m_filt</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="prepare-observations-data">
+<h2>Prepare observations data<a class="headerlink" href="#prepare-observations-data" title="Link to this heading">#</a></h2>
+<p>Let’s read in the mock data generated in a <a class="reference internal" href="create_mock_data.html"><span class="doc std std-doc">separate example here</span></a>. Let’s assume this data is for a red giant binary star belonging to an 8 Gyr old star population at the Galactic center.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;./mock_obs_table.pkl&#39;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">in_file</span><span class="p">:</span>
+    <span class="n">obs_table</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">obs_table</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>    obs_times             obs         obs_uncs obs_types                       obs_filts                       
+------------------ ------------------ -------- --------- ------------------------------------------------------
+53800.714762925796 16.769110541124228    0.015      phot &lt;phitter.filters.hst_f153m_filt object at 0x1041bd6a0&gt;
+ 53802.78887450278 16.569960382011555    0.015      phot &lt;phitter.filters.hst_f153m_filt object at 0x1041bd6a0&gt;
+ 53804.08607971392 16.523859319835843    0.015      phot &lt;phitter.filters.hst_f153m_filt object at 0x1041bd6a0&gt;
+ 53804.64136070461  16.54425287095397    0.015      phot &lt;phitter.filters.hst_f153m_filt object at 0x1041bd6a0&gt;
+53805.203583377115 16.551835703948942    0.015      phot &lt;phitter.filters.hst_f153m_filt object at 0x1041bd6a0&gt;
+ 53805.96328097839 16.559083907180494    0.015      phot &lt;phitter.filters.hst_f153m_filt object at 0x1041bd6a0&gt;
+53806.315847597616 16.526208341236522    0.015      phot &lt;phitter.filters.hst_f153m_filt object at 0x1041bd6a0&gt;
+53806.333495717256 16.549137149396568    0.015      phot &lt;phitter.filters.hst_f153m_filt object at 0x1041bd6a0&gt;
+53807.488405082564  16.54357246902387    0.015      phot &lt;phitter.filters.hst_f153m_filt object at 0x1041bd6a0&gt;
+ 53807.67541617193 16.512582058125357    0.015      phot &lt;phitter.filters.hst_f153m_filt object at 0x1041bd6a0&gt;
+53809.991688679045  16.57630387875109    0.015      phot &lt;phitter.filters.hst_f153m_filt object at 0x1041bd6a0&gt;
+  53810.3952177884 16.571876780401222    0.015      phot &lt;phitter.filters.hst_f153m_filt object at 0x1041bd6a0&gt;
+ 53810.56053852182   16.5629106720859    0.015      phot &lt;phitter.filters.hst_f153m_filt object at 0x1041bd6a0&gt;
+ 53812.06192493336  16.79990290964248    0.015      phot &lt;phitter.filters.hst_f153m_filt object at 0x1041bd6a0&gt;
+53814.764347052136 16.577347274346987    0.015      phot &lt;phitter.filters.hst_f153m_filt object at 0x1041bd6a0&gt;
+53814.870873942076 16.584590478742268    0.015      phot &lt;phitter.filters.hst_f153m_filt object at 0x1041bd6a0&gt;
+ 53815.35036219548  16.55250309097789    0.015      phot &lt;phitter.filters.hst_f153m_filt object at 0x1041bd6a0&gt;
+53816.915279343724  16.55815171414512    0.015      phot &lt;phitter.filters.hst_f153m_filt object at 0x1041bd6a0&gt;
+ 53817.22147451534  16.56401507633422    0.015      phot &lt;phitter.filters.hst_f153m_filt object at 0x1041bd6a0&gt;
+53818.297738065274 16.527494721029015    0.015      phot &lt;phitter.filters.hst_f153m_filt object at 0x1041bd6a0&gt;
+ 53822.21481869134  16.55859419544436    0.015      phot &lt;phitter.filters.hst_f153m_filt object at 0x1041bd6a0&gt;
+ 53823.32369330329  16.60712912435184    0.015      phot &lt;phitter.filters.hst_f153m_filt object at 0x1041bd6a0&gt;
+ 53823.33777948042 16.631108542728825    0.015      phot &lt;phitter.filters.hst_f153m_filt object at 0x1041bd6a0&gt;
+               ...                ...      ...       ...                                                    ...
+ 53811.39251280399 19.466756200612434    0.015      phot &lt;phitter.filters.hst_f127m_filt object at 0x169a462e0&gt;
+ 53812.36929572477  19.60648938621428    0.015      phot &lt;phitter.filters.hst_f127m_filt object at 0x169a462e0&gt;
+53813.378127665645 19.529182837164768    0.015      phot &lt;phitter.filters.hst_f127m_filt object at 0x169a462e0&gt;
+ 53814.38351959213  19.31805797850974    0.015      phot &lt;phitter.filters.hst_f127m_filt object at 0x169a462e0&gt;
+ 53814.39102396979 19.342402712730358    0.015      phot &lt;phitter.filters.hst_f127m_filt object at 0x169a462e0&gt;
+ 53815.47248701535 19.324506542981187    0.015      phot &lt;phitter.filters.hst_f127m_filt object at 0x169a462e0&gt;
+ 53815.71319961314 19.301216716218455    0.015      phot &lt;phitter.filters.hst_f127m_filt object at 0x169a462e0&gt;
+ 53818.81438132841 19.238703441352225    0.015      phot &lt;phitter.filters.hst_f127m_filt object at 0x169a462e0&gt;
+ 53821.48902609574  19.29472566814667    0.015      phot &lt;phitter.filters.hst_f127m_filt object at 0x169a462e0&gt;
+ 53822.61199465376  19.28945924040662    0.015      phot &lt;phitter.filters.hst_f127m_filt object at 0x169a462e0&gt;
+ 53822.83753761046 19.346641516593092    0.015      phot &lt;phitter.filters.hst_f127m_filt object at 0x169a462e0&gt;
+53824.797307830486 19.601928270465987    0.015      phot &lt;phitter.filters.hst_f127m_filt object at 0x169a462e0&gt;
+ 53824.82761134125 19.606919387014845    0.015      phot &lt;phitter.filters.hst_f127m_filt object at 0x169a462e0&gt;
+53824.827858456956  19.58491117884066    0.015      phot &lt;phitter.filters.hst_f127m_filt object at 0x169a462e0&gt;
+53802.139836776325   130.228146222555     10.0    rv_pri &lt;phitter.filters.hst_f153m_filt object at 0x1041bd6a0&gt;
+ 53803.32979530006 114.02051863903269     10.0    rv_pri &lt;phitter.filters.hst_f153m_filt object at 0x1041bd6a0&gt;
+ 53804.46291200766 114.54568517998948     10.0    rv_pri &lt;phitter.filters.hst_f153m_filt object at 0x1041bd6a0&gt;
+53813.273397048906 163.65481126090992     10.0    rv_pri &lt;phitter.filters.hst_f153m_filt object at 0x1041bd6a0&gt;
+ 53819.03215627737 175.28898537909566     10.0    rv_pri &lt;phitter.filters.hst_f153m_filt object at 0x1041bd6a0&gt;
+53802.139836776325 164.33130628324724     10.0    rv_sec &lt;phitter.filters.hst_f153m_filt object at 0x1041bd6a0&gt;
+ 53803.32979530006 176.97897304376025     10.0    rv_sec &lt;phitter.filters.hst_f153m_filt object at 0x1041bd6a0&gt;
+ 53804.46291200766 190.80797816955624     10.0    rv_sec &lt;phitter.filters.hst_f153m_filt object at 0x1041bd6a0&gt;
+53813.273397048906 129.70047968985767     10.0    rv_sec &lt;phitter.filters.hst_f153m_filt object at 0x1041bd6a0&gt;
+ 53819.03215627737  97.50308377106813     10.0    rv_sec &lt;phitter.filters.hst_f153m_filt object at 0x1041bd6a0&gt;
+Length = 60 rows
+</pre></div>
+</div>
+</div>
+</div>
+<p>We create two new <a class="reference internal" href="../apidocs/phitter/phitter.observables.html#module-phitter.observables" title="phitter.observables"><code class="xref py py-obj docutils literal notranslate"><span class="pre">phitter.observables</span></code></a> objects, one for modeling containing only the times, filters, and types of observations, and another for computing the likelihood, which will also contain the observations and associated uncertainties as well.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Model observables object, which only contains times and types of observations</span>
+<span class="n">model_observables</span> <span class="o">=</span> <span class="n">observables</span><span class="o">.</span><span class="n">observables</span><span class="p">(</span>
+    <span class="n">obs_times</span><span class="o">=</span><span class="n">obs_table</span><span class="p">[</span><span class="s1">&#39;obs_times&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+    <span class="n">obs_filts</span><span class="o">=</span><span class="n">obs_table</span><span class="p">[</span><span class="s1">&#39;obs_filts&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">obs_types</span><span class="o">=</span><span class="n">obs_table</span><span class="p">[</span><span class="s1">&#39;obs_types&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># An observables object for the observations, used when computing likelihoods</span>
+<span class="n">observations</span> <span class="o">=</span> <span class="n">observables</span><span class="o">.</span><span class="n">observables</span><span class="p">(</span>
+    <span class="n">obs_times</span><span class="o">=</span><span class="n">obs_table</span><span class="p">[</span><span class="s1">&#39;obs_times&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">obs</span><span class="o">=</span><span class="n">obs_table</span><span class="p">[</span><span class="s1">&#39;obs&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">obs_uncs</span><span class="o">=</span><span class="n">obs_table</span><span class="p">[</span><span class="s1">&#39;obs_uncs&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+    <span class="n">obs_filts</span><span class="o">=</span><span class="n">obs_table</span><span class="p">[</span><span class="s1">&#39;obs_filts&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">obs_types</span><span class="o">=</span><span class="n">obs_table</span><span class="p">[</span><span class="s1">&#39;obs_types&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="make-stellar-parameters-and-binary-parameters-objects-for-fitting">
+<h2>Make stellar parameters and binary parameters objects for fitting<a class="headerlink" href="#make-stellar-parameters-and-binary-parameters-objects-for-fitting" title="Link to this heading">#</a></h2>
+<p>Now we can make a stellar parameters object that we will use to derive the stellar parameters from an isochrone while fitting. Let’s use our previous assumptions about what type of star this is: red giant in an 8 Gyr old star population.</p>
+<p>We also can create a binary parameters object that will store the binary parameters.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">isoc_stellar_params_obj</span> <span class="o">=</span> <span class="n">isoc_interp_params</span><span class="o">.</span><span class="n">isoc_mist_stellar_params</span><span class="p">(</span>
+    <span class="n">age</span><span class="o">=</span><span class="mf">8e9</span><span class="p">,</span>
+    <span class="n">met</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">use_atm_func</span><span class="o">=</span><span class="s1">&#39;merged&#39;</span><span class="p">,</span>
+    <span class="n">phase</span><span class="o">=</span><span class="s1">&#39;RGB&#39;</span><span class="p">,</span>
+    <span class="n">ext_Ks</span><span class="o">=</span><span class="mf">2.2</span><span class="p">,</span>
+    <span class="n">dist</span><span class="o">=</span><span class="mf">8e3</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">pc</span><span class="p">,</span>
+    <span class="n">filts_list</span><span class="o">=</span><span class="p">[</span><span class="n">filter_153m</span><span class="p">,</span> <span class="n">filter_127m</span><span class="p">],</span>
+    <span class="n">ext_law</span><span class="o">=</span><span class="s1">&#39;NL18&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Make binary params objects</span>
+<span class="n">bin_params</span> <span class="o">=</span> <span class="n">binary_params</span><span class="o">.</span><span class="n">binary_params</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="set-up-model-and-likelihood-objects">
+<h2>Set up model and likelihood objects<a class="headerlink" href="#set-up-model-and-likelihood-objects" title="Link to this heading">#</a></h2>
+<p>In order to carry out our fitting, we will generate two more objects: a model object that will be used to compute observables and a likelihood object that will compute the likelihood from our observations.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set up a binary model object</span>
+<span class="n">binary_model_obj</span> <span class="o">=</span> <span class="n">model_obs_calc</span><span class="o">.</span><span class="n">binary_star_model_obs</span><span class="p">(</span>
+    <span class="n">model_observables</span><span class="p">,</span>
+    <span class="n">use_blackbody_atm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">print_diagnostics</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Set up likelihood object for fitting parameters</span>
+<span class="n">log_like_obj</span> <span class="o">=</span> <span class="n">likelihood</span><span class="o">.</span><span class="n">log_likelihood_chisq</span><span class="p">(</span>
+    <span class="n">observations</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="set-up-function-for-ultranest-to-return-likelihood-from-fit-parameters">
+<h2>Set up function for UltraNest to return likelihood from fit parameters<a class="headerlink" href="#set-up-function-for-ultranest-to-return-likelihood-from-fit-parameters" title="Link to this heading">#</a></h2>
+<p>Now we need to write a function that will be used by Ultranest for its sampling. This function will provide Ultranest with a likelihood for a given set of fit parameters.</p>
+<p>For our fitting, we’ll fit our data to eight parameters:</p>
+<ol class="arabic simple">
+<li><p>radius of star 1</p></li>
+<li><p>radius of star 2</p></li>
+<li><p>binary orbital period</p></li>
+<li><p>binary inclination</p></li>
+<li><p>system t0</p></li>
+<li><p>binary CoM velocity</p></li>
+<li><p>extinction in F153M passband</p></li>
+<li><p>extinction law alpha</p></li>
+</ol>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">un_evaluate</span><span class="p">(</span><span class="n">model_params</span><span class="p">):</span>
+    <span class="p">(</span>
+        <span class="n">star1_radius</span><span class="p">,</span>
+        <span class="n">star2_radius</span><span class="p">,</span>
+        <span class="n">bin_period</span><span class="p">,</span>
+        <span class="n">bin_inc</span><span class="p">,</span>
+        <span class="n">bin_t0</span><span class="p">,</span>
+        <span class="n">bin_rv_com</span><span class="p">,</span>
+        <span class="n">ext_153m</span><span class="p">,</span>
+        <span class="n">ext_alpha</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">=</span> <span class="n">model_params</span>
+    
+    <span class="c1"># Obtain stellar params by interpolating along the isochrone</span>
+    <span class="n">star1_params</span> <span class="o">=</span> <span class="n">isoc_stellar_params_obj</span><span class="o">.</span><span class="n">interp_star_params_rad</span><span class="p">(</span>
+        <span class="n">star1_radius</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">star2_params</span> <span class="o">=</span> <span class="n">isoc_stellar_params_obj</span><span class="o">.</span><span class="n">interp_star_params_rad</span><span class="p">(</span>
+        <span class="n">star2_radius</span><span class="p">,</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># Set binary params</span>
+    <span class="n">bin_params</span><span class="o">.</span><span class="n">period</span> <span class="o">=</span> <span class="n">bin_period</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">d</span>
+    <span class="n">bin_params</span><span class="o">.</span><span class="n">inc</span> <span class="o">=</span> <span class="n">bin_inc</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span>
+    <span class="n">bin_params</span><span class="o">.</span><span class="n">t0</span> <span class="o">=</span> <span class="n">bin_t0</span>
+    
+    <span class="c1"># Run binary model</span>
+    <span class="n">modeled_observables</span> <span class="o">=</span> <span class="n">binary_model_obj</span><span class="o">.</span><span class="n">compute_obs</span><span class="p">(</span>
+        <span class="n">star1_params</span><span class="p">,</span> <span class="n">star2_params</span><span class="p">,</span> <span class="n">bin_params</span><span class="p">,</span>
+        <span class="n">num_triangles</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># Check for situation where binary model fails</span>
+    <span class="c1"># (i.e., unphysical conditions not able to be modeled)</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">modeled_observables</span><span class="o">.</span><span class="n">obs_times</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mf">1e300</span>
+    
+    <span class="c1"># Apply distance modulus</span>
+    <span class="c1"># (We&#39;re assuming we know the distance, but this can be a fit parameter as well)</span>
+    <span class="n">modeled_observables</span> <span class="o">=</span> <span class="n">phot_adj_calc</span><span class="o">.</span><span class="n">apply_distance_modulus</span><span class="p">(</span>
+        <span class="n">modeled_observables</span><span class="p">,</span>
+        <span class="mf">8e3</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">pc</span><span class="p">,</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># Apply extinction</span>
+    <span class="n">modeled_observables</span> <span class="o">=</span> <span class="n">phot_adj_calc</span><span class="o">.</span><span class="n">apply_extinction</span><span class="p">(</span>
+        <span class="n">modeled_observables</span><span class="p">,</span>
+        <span class="mf">2.2</span><span class="p">,</span> <span class="n">filter_153m</span><span class="p">,</span>
+        <span class="n">ext_153m</span><span class="p">,</span>
+        <span class="n">isoc_red_law</span><span class="o">=</span><span class="s1">&#39;NL18&#39;</span><span class="p">,</span>
+        <span class="n">ext_alpha</span><span class="o">=</span><span class="n">ext_alpha</span><span class="p">,</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># Add RV center of mass velocity</span>
+    <span class="n">modeled_observables</span> <span class="o">=</span> <span class="n">rv_adj_calc</span><span class="o">.</span><span class="n">apply_com_velocity</span><span class="p">(</span>
+        <span class="n">modeled_observables</span><span class="p">,</span>
+        <span class="n">bin_rv_com</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">km</span> <span class="o">/</span> <span class="n">u</span><span class="o">.</span><span class="n">s</span><span class="p">,</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># Compute and return log likelihood</span>
+    <span class="n">log_like</span> <span class="o">=</span> <span class="n">log_like_obj</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">modeled_observables</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">log_like</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s test out our <code class="docutils literal notranslate"><span class="pre">un_evaluate()</span></code> function on some mock binary parameters</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">test_params</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="mf">18.</span><span class="p">,</span> <span class="mf">10.</span><span class="p">,</span>
+    <span class="mf">23.</span><span class="p">,</span> <span class="mf">85.</span><span class="p">,</span>
+    <span class="mf">53_801.</span><span class="p">,</span>
+    <span class="mf">140.</span><span class="p">,</span>
+    <span class="mf">4.4</span><span class="p">,</span> <span class="mf">2.22</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">log_like_test</span> <span class="o">=</span> <span class="n">un_evaluate</span><span class="p">(</span><span class="n">test_params</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;log likelihood from test parameters = </span><span class="si">{</span><span class="n">log_like_test</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+<span class="c1"># Since we simulated these mock data ourselves, we know what the &quot;truth&quot; is here. So we can check that as well</span>
+<span class="n">truth_params</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="mf">15.</span><span class="p">,</span> <span class="mf">12.</span><span class="p">,</span>
+    <span class="mf">25.</span><span class="p">,</span> <span class="mf">75.</span><span class="p">,</span>
+    <span class="mf">53_800.</span><span class="p">,</span>
+    <span class="mf">150.</span><span class="p">,</span>
+    <span class="mf">4.5</span><span class="p">,</span> <span class="mf">2.23</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">log_like_truth</span> <span class="o">=</span> <span class="n">un_evaluate</span><span class="p">(</span><span class="n">truth_params</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;log likelihood from &quot;truth&quot; parameters = </span><span class="si">{</span><span class="n">log_like_truth</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>log likelihood from test parameters = -43318.653
+log likelihood from &quot;truth&quot; parameters = -64.610
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="set-up-priors">
+<h2>Set up priors<a class="headerlink" href="#set-up-priors" title="Link to this heading">#</a></h2>
+<p>We need to set up a prior for each of our fit parameters. <a class="reference internal" href="../apidocs/phitter/phitter.fit.prior.html#module-phitter.fit.prior" title="phitter.fit.prior"><code class="xref py py-obj docutils literal notranslate"><span class="pre">phitter.fit.prior</span></code></a> provides some useful functions to create priors and then put them into a collection that can be passed to Ultranest or other sampling codes.</p>
+<p>Using the function <a class="reference internal" href="../apidocs/phitter/phitter.fit.prior.html#phitter.fit.prior.prior_collection.prior_transform_ultranest" title="phitter.fit.prior.prior_collection.prior_transform_ultranest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">phitter.fit.prior.prior_collection.prior_transform_ultranest</span></code></a>, we can transform the unit cube passed in by UltraNest into physical parameters to use during fitting.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">star1_rad_prior</span> <span class="o">=</span> <span class="n">prior</span><span class="o">.</span><span class="n">uniform_prior</span><span class="p">(</span><span class="mf">10.0</span><span class="p">,</span> <span class="mf">25.0</span><span class="p">)</span>
+<span class="n">star2_rad_prior</span> <span class="o">=</span> <span class="n">prior</span><span class="o">.</span><span class="n">uniform_prior</span><span class="p">(</span><span class="mf">8.0</span><span class="p">,</span> <span class="mf">15.0</span><span class="p">)</span>
+
+<span class="n">bin_period_prior</span> <span class="o">=</span> <span class="n">prior</span><span class="o">.</span><span class="n">uniform_prior</span><span class="p">(</span><span class="mf">24.0</span><span class="p">,</span> <span class="mf">26.0</span><span class="p">)</span>
+<span class="n">bin_inc_prior</span> <span class="o">=</span> <span class="n">prior</span><span class="o">.</span><span class="n">uniform_prior</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">180.0</span><span class="p">)</span>
+<span class="n">bin_t0_prior</span> <span class="o">=</span> <span class="n">prior</span><span class="o">.</span><span class="n">uniform_prior</span><span class="p">(</span><span class="mf">53_795.0</span><span class="p">,</span> <span class="mf">53_805.0</span><span class="p">)</span>
+<span class="n">bin_rv_com_prior</span> <span class="o">=</span> <span class="n">prior</span><span class="o">.</span><span class="n">uniform_prior</span><span class="p">(</span><span class="mf">100.</span><span class="p">,</span> <span class="mf">200.</span><span class="p">)</span>
+
+<span class="n">ext_f153m_prior</span> <span class="o">=</span> <span class="n">prior</span><span class="o">.</span><span class="n">uniform_prior</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+<span class="c1"># We have a constraint on the extinction law (from Nogueras-Lara et al., 2019 here),</span>
+<span class="c1"># so we can set Gaussian prior on the extinction law alpha</span>
+<span class="n">ext_alpha_prior</span> <span class="o">=</span> <span class="n">prior</span><span class="o">.</span><span class="n">gaussian_prior</span><span class="p">(</span><span class="mf">2.23</span><span class="p">,</span> <span class="mf">0.03</span><span class="p">)</span>
+
+<span class="n">param_priors</span> <span class="o">=</span> <span class="n">prior</span><span class="o">.</span><span class="n">prior_collection</span><span class="p">([</span>
+    <span class="n">star1_rad_prior</span><span class="p">,</span>
+    <span class="n">star2_rad_prior</span><span class="p">,</span>
+    <span class="n">bin_period_prior</span><span class="p">,</span>
+    <span class="n">bin_inc_prior</span><span class="p">,</span>
+    <span class="n">bin_t0_prior</span><span class="p">,</span>
+    <span class="n">bin_rv_com_prior</span><span class="p">,</span>
+    <span class="n">ext_f153m_prior</span><span class="p">,</span>
+    <span class="n">ext_alpha_prior</span><span class="p">,</span>
+<span class="p">])</span>
+
+<span class="n">param_names</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;star1_rad&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;star2_rad&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;bin_period&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;bin_inc&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;bin_t0&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;bin_rv_com&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;ext_f153m&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;ext_alpha&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="c1"># Ultranest supports wrapped / circular parameters, which inclination is in this example.</span>
+<span class="c1"># So we need to make a list to pass to Ultranest for which parameters are wrapped so that</span>
+<span class="c1"># it can appropriately handle it during sampling.</span>
+<span class="n">wrapped_params</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="kc">False</span><span class="p">,</span>  <span class="c1"># Star 1 Rad</span>
+    <span class="kc">False</span><span class="p">,</span>  <span class="c1"># Star 2 Rad</span>
+    <span class="kc">False</span><span class="p">,</span>  <span class="c1"># Binary period</span>
+    <span class="kc">True</span><span class="p">,</span>   <span class="c1"># Binary inclination</span>
+    <span class="kc">False</span><span class="p">,</span>  <span class="c1"># Binary t0</span>
+    <span class="kc">False</span><span class="p">,</span>  <span class="c1"># Binary CoM RV</span>
+    <span class="kc">False</span><span class="p">,</span>  <span class="c1"># F153M-band extinction</span>
+    <span class="kc">False</span><span class="p">,</span>  <span class="c1"># Extinction law alpha</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="set-up-ultranest-sampler-and-run-sampler">
+<h2>Set up UltraNest Sampler and Run Sampler<a class="headerlink" href="#set-up-ultranest-sampler-and-run-sampler" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sampler</span> <span class="o">=</span> <span class="n">ultranest</span><span class="o">.</span><span class="n">ReactiveNestedSampler</span><span class="p">(</span>
+    <span class="n">param_names</span><span class="p">,</span>
+    <span class="n">loglike</span> <span class="o">=</span> <span class="n">un_evaluate</span><span class="p">,</span>   <span class="c1"># Function that we wrote for ultranest to calculate likelihood</span>
+    <span class="n">transform</span> <span class="o">=</span> <span class="n">param_priors</span><span class="o">.</span><span class="n">prior_transform_ultranest</span><span class="p">,</span>  <span class="c1"># Phitter&#39;s prior collection function to transform prior</span>
+    <span class="n">log_dir</span><span class="o">=</span><span class="s1">&#39;./un_out/&#39;</span><span class="p">,</span>
+    <span class="n">resume</span><span class="o">=</span><span class="s1">&#39;resume-similar&#39;</span><span class="p">,</span>
+    <span class="n">warmstart_max_tau</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Below is an example of how to set up a slice sampler in UltraNest.</span>
+<span class="c1"># We won&#39;t use it here since it is less efficient for this example, but a</span>
+<span class="c1"># &quot;slice sampler&quot; may be more efficient when fitting a large number</span>
+<span class="c1"># of parameters (i.e., &gt;~ 10).</span>
+
+<span class="c1"># sampler.stepsampler = ultranest.stepsampler.SliceSampler(</span>
+<span class="c1">#     nsteps=(2**3)*len(param_names),</span>
+<span class="c1">#     generate_direction=ultranest.stepsampler.generate_mixture_random_direction,</span>
+<span class="c1"># )</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The syntax below shows how to run the sampler. However for speed, I wrote a <a class="reference download internal" download="" href="../_downloads/2d0eaacd9d6b9512c89866aad5a18850/fit_with_ultranest.py"><span class="xref download myst">separate script</span></a> that can be parallelized with MPI. In order to run the example script, the following syntax can be used in the shell:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>mpiexec<span class="w"> </span>-np<span class="w"> </span><span class="o">[</span>num_cores<span class="o">]</span><span class="w"> </span>./fit_with_ultranest.py
+</pre></div>
+</div>
+<p>Importantly, the script demonstrates how to parallelize Ultranest’s sampling and turn off parallelization in PHOEBE which can interfere with parallelization in Ultranest:</p>
+<div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="c1"># Turn off parallelisation in phoebe</span>
+<span class="c1"># Needs to be done *before* phoebe is imported</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;OMP_NUM_THREADS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;PHOEBE_ENABLE_MPI&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;FALSE&quot;</span>
+</pre></div>
+</div>
+<p>Since Ultranest can resume from previous runs, the code block below picks up on the samples from the parallelized script.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+    <span class="n">show_status</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">update_interval_volume_fraction</span><span class="o">=</span><span class="mf">0.98</span><span class="p">,</span>
+    <span class="n">frac_remain</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[ultranest] Resuming from 11417 stored points
+[ultranest] Widening roots to 452 live points (have 400 already) ...
+[ultranest] Widening roots to 512 live points (have 452 already) ...
+</pre></div>
+</div>
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "110bc909cf6841b5a19acfe641e81826", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[ultranest] Explored until L=-4e+01   [-39.2230..-39.2198]*| it/evals=10984/3029824 eff=inf% N=400         0  
+[ultranest] Likelihood function evaluations: 3029824
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Users/abhimatlocal/software/miniforge3/envs/phoebe_py38/lib/python3.8/site-packages/numpy/core/_methods.py:239: RuntimeWarning: overflow encountered in multiply
+  x = um.multiply(x, x, out=x)
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[ultranest] Writing samples and results to disk ...
+[ultranest] Writing samples and results to disk ... done
+[ultranest]   logZ = -64.05 +- 0.1572
+[ultranest] Effective samples strategy satisfied (ESS = 2665.6, need &gt;400)
+[ultranest] Posterior uncertainty strategy is satisfied (KL: 0.46+-0.09 nat, need &lt;0.50 nat)
+[ultranest] Evidency uncertainty strategy is satisfied (dlogz=0.18, need &lt;0.5)
+[ultranest]   logZ error budget: single: 0.24 bs:0.16 tail:0.10 total:0.18 required:&lt;0.50
+[ultranest] done iterating.
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="examine-the-fit-results">
+<h2>Examine the fit results<a class="headerlink" href="#examine-the-fit-results" title="Link to this heading">#</a></h2>
+<p>UltraNest offers several outputs and plots to examine the results of our fit. Let’s run those here.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sampler</span><span class="o">.</span><span class="n">print_results</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>logZ = -63.978 +- 0.274
+  single instance: logZ = -63.978 +- 0.237
+  bootstrapped   : logZ = -64.051 +- 0.257
+  tail           : logZ = +- 0.095
+insert order U test : converged: True correlation: inf iterations
+
+    star1_rad           : 11.66 │ ▁▁▁▁▁▁▁▁▁▁▂▃▃▃▃▅▅▆▆▆▇▇▆▆▅▄▄▃▂▁▁▁▁▁▁ ▁ │16.07     14.02 +- 0.59
+    star2_rad           : 10.18 │ ▁▁▁▁▁▁▁▁▁▁▁▁▂▂▂▂▃▃▄▅▅▅▆▇▇▇▇▆▇▆▆▅▅▅▄▃▃▃│15.00     13.47 +- 0.80
+    bin_period          : 24.61 │ ▁ ▁▁▁▁▁▂▂▄▃▅▅▅▇▇▇▇▇▇▇▄▄▄▃▂▂▁▁▁▁▁▁▁▁▁▁ │25.59     25.07 +- 0.13
+    bin_inc             : 71    │ ▁▁▇▅▁                           ▁▂▇▃▁ │109       89 +- 16
+    bin_t0              : 53799.664│ ▁ ▁  ▁▁▁▁▁▁▂▂▃▃▅▆▇▇▇▆▆▅▅▄▃▃▂▁▁▁▁▁▁▁▁▁ │53800.249    53799.976 +- 0.067
+    bin_rv_com          : 132.6 │ ▁ ▁▁▁▁▁▁▁▂▂▃▃▄▅▆▆▇▇▇▆▆▆▅▃▃▂▂▁▁▁▁▁▁▁ ▁ │159.3     146.1 +- 3.1
+    ext_f153m           : 4.389 │ ▁▁ ▁▁▁▁▁▁▂▂▂▂▃▅▅▆▇▇▇▇▇▇▆▅▅▄▃▂▂▁▁▁▁▁▁▁ │4.664     4.537 +- 0.036
+    ext_alpha           : 2.166 │ ▁ ▁▁▁▁▁▁▂▃▃▄▄▅▇▇▇▆▆▆▆▅▄▃▂▂▂▂▁▁▁▁▁▁▁▁▁ │2.294     2.225 +- 0.017
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sampler</span><span class="o">.</span><span class="n">log_to_disk</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">sampler</span><span class="o">.</span><span class="n">plot_run</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/7935e8dcc75ceda0d9ee0dc89b582d10ec43ea513e0b22241f2b76ac40bfb93b.png" src="../_images/7935e8dcc75ceda0d9ee0dc89b582d10ec43ea513e0b22241f2b76ac40bfb93b.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sampler</span><span class="o">.</span><span class="n">plot_trace</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/2494f3b4bb47b38c310472e5c85d6cfc21083ef0d9113d6b532975bf5191a940.png" src="../_images/2494f3b4bb47b38c310472e5c85d6cfc21083ef0d9113d6b532975bf5191a940.png" />
+</div>
+</div>
+<p>The corner plot may be particularly useful to examine the constraints on the parameters from our fit. We’ll also put in the “truth” values in here (shown as blue lines), corresponding to the value of each parameter with which we generated the mock data.</p>
+<p>The fit recovers the generated parameters. For the stellar radii and the center of mass RV, our “truth” value appears to be slightly out of 1 sigma, but still within the 95% confidence bounds. Also note the degeneracy in inclination, which is to be expected. The UltraNest fit recovers a peak at both the mock inclination, $i$, and a peak at $(180\degree - i)$.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ultranest</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">cornerplot</span><span class="p">(</span><span class="n">sampler</span><span class="o">.</span><span class="n">results</span><span class="p">,</span> <span class="n">truths</span><span class="o">=</span><span class="n">truth_params</span><span class="p">,)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/8afc2d1a5d47c2f67f6fc77700535bc20fe7d29a07023ea1e8d9264ca9095381.png" src="../_images/8afc2d1a5d47c2f67f6fc77700535bc20fe7d29a07023ea1e8d9264ca9095381.png" />
+<img alt="../_images/8afc2d1a5d47c2f67f6fc77700535bc20fe7d29a07023ea1e8d9264ca9095381.png" src="../_images/8afc2d1a5d47c2f67f6fc77700535bc20fe7d29a07023ea1e8d9264ca9095381.png" />
+</div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="create_mock_data.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Simulate mock observations data for fitting</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="fit_with_emcee.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Tutorial: Fit binary model to observed data with emcee</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#imports-and-filter-setup">Imports and Filter Setup</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prepare-observations-data">Prepare observations data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#make-stellar-parameters-and-binary-parameters-objects-for-fitting">Make stellar parameters and binary parameters objects for fitting</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#set-up-model-and-likelihood-objects">Set up model and likelihood objects</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#set-up-function-for-ultranest-to-return-likelihood-from-fit-parameters">Set up function for UltraNest to return likelihood from fit parameters</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#set-up-priors">Set up priors</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#set-up-ultranest-sampler-and-run-sampler">Set up UltraNest Sampler and Run Sampler</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#examine-the-fit-results">Examine the fit results</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/notebooks/fit_with_ultranest.ipynb.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2024, Abhimat K. Gautam.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
