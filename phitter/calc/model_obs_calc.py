@@ -840,6 +840,38 @@ class binary_star_model_obs(object):
                             format='fits',
                             overwrite=True,
                         )
+                        
+                if mesh_plot_fig is not None:
+                    additional_kwargs = {}
+
+                    # Have to turn off sidebar if making subplots with Teff faces
+                    if mesh_temp and mesh_plot_subplot_grid is not None:
+                        additional_kwargs['draw_sidebars'] = False
+                
+                    (mesh_af_fig, mesh_plt_fig) = b['mod_mesh@model'].show(
+                        save='./binary_mesh{0}{1}.pdf'.format(
+                            plot_name_suffix, plot_phase_suffix,
+                        ),
+                        show=False,
+                        **additional_kwargs,
+                        **mesh_plot_kwargs,
+                    )
+                
+            if mesh_plot_fig is not None:
+                additional_kwargs = {}
+
+                # Have to turn off sidebar if making subplots with Teff faces
+                if mesh_temp and mesh_plot_subplot_grid is not None:
+                    additional_kwargs['draw_sidebars'] = False
+                
+                (mesh_af_fig, mesh_plt_fig) = b['mod_mesh@model'].show(
+                    save='./binary_mesh{0}.pdf'.format(
+                        plot_name_suffix,
+                    ),
+                    show=False,
+                    **additional_kwargs,
+                    **mesh_plot_kwargs,
+                )
          
         # Get fluxes
         phot_model_fluxes = {}
