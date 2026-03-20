@@ -1,0 +1,37 @@
+[project]
+name = "Phitter"
+description = "Package to simulate observables from stellar binary systems and to fit them to observed data."
+readme = "README.md"
+authors = [
+    { name = "Abhimat K. Gautam", email = "abhimat@abhimat.net" }
+]
+license = { text = "BSD 3-Clause License" }
+dependencies = [
+    "numpy",
+    "astropy>=3.2",
+    "phoebe>=2.4",
+    "python>=3.8",
+]
+dynamic = ["version"]
+
+[project.urls]
+homepage = "https://abhimat.net/phitter/"
+
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = 'setuptools.build_meta'
+
+[tool.setuptools]
+zip_safe = false
+
+[tool.setuptools.packages.find]
+
+[tool.setuptools_scm]
+write_to = "phitter/_version.py"
+
+[project.optional-dependencies]
+docs = [
+    "sphinx",
+    "sphinx-automodapi",
+    "numpydoc",
+]
