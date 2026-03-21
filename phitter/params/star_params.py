@@ -1,8 +1,10 @@
 # Objects for star parameters
 
 from phoebe import u
+from astropy.units import Quantity
 from phoebe import c as const
 import numpy as np
+import numpy.typing as npt
 from spisea import synthetic, reddening
 from phitter import filters
 from astropy import modeling
@@ -44,28 +46,28 @@ class star_params(object):
         passband is defined as the luminosity of the star only in that passband.
     """
     
-    mass_init = 0. * u.solMass
-    mass = 0. * u.solMass
-    rad = 0. * u.solRad
-    lum = 0. * u.solLum
-    teff = 0. * u.K
-    logg = 0.
-    syncpar = 1.0   # 
+    mass_init: Quantity[u.solMass] = 0. * u.solMass
+    mass: Quantity[u.solMass] = 0. * u.solMass
+    rad: Quantity[u.solRad] = 0. * u.solRad
+    lum: Quantity[u.solLum] = 0. * u.solLum
+    teff: Quantity[u.K] = 0. * u.K
+    logg: float = 0.
+    syncpar: float = 1.0
     
-    filts = []
-    mags = np.array([])
-    mags_abs = np.array([])
-    pblums = {}
+    filts: list[filters.filter] = []
+    mags: npt.NDArray[float] = np.array([])
+    mags_abs: npt.NDArray[float] = np.array([])
+    pblums: dict[filters.filter, Quantity[u.solLum]] = {}
     
     def __init__(
         self,
-        mass_init = 0. * u.solMass,
-        mass = 0. * u.solMass,
-        rad = 0. * u.solRad,
-        lum = 0. * u.solLum,
-        teff = 0. * u.K,
-        logg = 0.,
-        syncpar = 1.0,
+        mass_init: Quantity[u.solMass] = 0. * u.solMass,
+        mass: Quantity[u.solMass] = 0. * u.solMass,
+        rad: Quantity[u.solRad] = 0. * u.solRad,
+        lum: Quantity[u.solLum] = 0. * u.solLum,
+        teff: Quantity[u.K] = 0. * u.K,
+        logg: float = 0.,
+        syncpar: float = 1.0,
     ):
         self.mass_init = mass_init
         self.mass = mass
