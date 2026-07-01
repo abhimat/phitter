@@ -79,11 +79,18 @@ class isoc_mist_stellar_params(stellar_params_obj):
         Options are 'PMS', 'MS', 'RGB', 'CHeB', 'EAGB', 'TPAGB', 'postAGB', or
         'WR'. If phase is None, then all stellar evolution phases are included.
         Default: None (all stellar evolution phases).
+    iso_dir : str, default='./'
+        The directory where the isochrone fits file from SPISEA will be generated
+        and/or read from. By default, the current directory is used. Isochrone
+        generation is typically slow, so if existing isochrone file(s) already
+        exist, specify the directory here so they do not have to be computed
+        again.
     """
     
     def __init__(
         self, age=4e6, met=0.0,
         use_atm_func='merged', phase=None,
+        iso_dir="./",
         *args, **kwargs,
     ):
         # Call parent stellar_params_obj to initialize
@@ -107,6 +114,7 @@ class isoc_mist_stellar_params(stellar_params_obj):
             red_law=self.red_law,
             metallicity=self.met,
             filters=self.spisea_filts_list,
+            iso_dir=iso_dir,
         )
         
         # Create another isochrone for calculating absolute mags and
@@ -118,6 +126,7 @@ class isoc_mist_stellar_params(stellar_params_obj):
             red_law=self.red_law,
             metallicity=self.met,
             filters=self.spisea_filts_list,
+            iso_dir=iso_dir,
         )
         
         # Save out the specific stellar parameter columns needed

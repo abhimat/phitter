@@ -84,6 +84,7 @@ class binary_star_model_obs(object):
             mesh_plot_fig=None,
             mesh_plot_subplot_grid=None,
             mesh_plot_subplot_grid_indexes=None,
+            mesh_plot_each=False,
             mesh_temp=False, mesh_temp_cmap=None,
             plot_name=None,
             mesh_plot_kwargs={},
@@ -841,7 +842,7 @@ class binary_star_model_obs(object):
                             overwrite=True,
                         )
                         
-                if mesh_plot_fig is not None:
+                if mesh_plot_fig is not None and mesh_plot_each:
                     additional_kwargs = {}
 
                     # Have to turn off sidebar if making subplots with Teff faces
@@ -857,7 +858,7 @@ class binary_star_model_obs(object):
                         **mesh_plot_kwargs,
                     )
                 
-            if mesh_plot_fig is not None:
+            if mesh_plot_fig is not None and not mesh_plot_each:
                 additional_kwargs = {}
 
                 # Have to turn off sidebar if making subplots with Teff faces
